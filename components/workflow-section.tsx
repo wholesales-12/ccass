@@ -95,8 +95,8 @@ export function WorkflowSection() {
         }
       },
       {
-        // Trigger when step is in the middle 40% of viewport
-        rootMargin: "-40% 0px -40% 0px",
+        // Trigger when step is in the middle 30% of viewport
+        rootMargin: "-35% 0px -35% 0px",
         threshold: [0, 0.25, 0.5, 0.75, 1],
       },
     )
@@ -136,9 +136,9 @@ export function WorkflowSection() {
           </div>
         </div>
 
-        <div className="relative mt-12 lg:flex lg:gap-16">
+        <div className="relative mt-12 lg:flex lg:items-start lg:gap-12">
           {/* LEFT: Step list - this scrolls normally */}
-          <ol className="relative flex flex-1 flex-col gap-8 lg:gap-12">
+          <ol className="relative flex flex-1 flex-col gap-4 lg:gap-6">
             {/* Vertical connector */}
             <div aria-hidden className="absolute left-5 top-6 bottom-6 w-px bg-border lg:left-6 lg:top-7 lg:bottom-7" />
             {/* Animated connector fill */}
@@ -146,7 +146,7 @@ export function WorkflowSection() {
               aria-hidden
               className="absolute left-5 top-6 w-px bg-gradient-to-b from-primary to-accent transition-all duration-700 ease-out lg:left-6 lg:top-7"
               style={{
-                height: `calc(${(active / (STEPS.length - 1)) * 100}% - 48px)`,
+                height: `calc(${(active / (STEPS.length - 1)) * 100}% - 24px)`,
               }}
             />
 
@@ -161,11 +161,11 @@ export function WorkflowSection() {
                   ref={(el) => {
                     stepRefs.current[idx] = el
                   }}
-                  className="scroll-mt-28"
+                  className="scroll-mt-20"
                 >
                   <div
                     className={cn(
-                      "group relative flex items-start gap-4 rounded-2xl border p-6 transition-all duration-500 lg:min-h-[180px]",
+                      "group relative flex items-start gap-4 rounded-2xl border p-4 lg:p-5 transition-all duration-500",
                       isActive
                         ? "border-primary/30 bg-card shadow-[0_12px_40px_-18px_oklch(0.45_0.22_295/0.35)] scale-[1.01]"
                         : "border-transparent bg-transparent",
@@ -255,8 +255,8 @@ export function WorkflowSection() {
           </ol>
 
           {/* RIGHT: Sticky phone - stays fixed in viewport while steps scroll */}
-          <div className="hidden w-[380px] shrink-0 self-start lg:block">
-            <div className="sticky top-24">
+          <div className="hidden w-[340px] shrink-0 lg:block">
+            <div className="sticky top-1/2 -translate-y-1/2" style={{ top: "50vh" }}>
               <PhoneVisualizer active={active} />
             </div>
           </div>
