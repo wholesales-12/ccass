@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "Kedeyo — AI-Powered Cloud Contact Center for India",
+  title: "AI Contact Center Software in India | Kedeyo CCaaS",
   description:
-    "Answer every call, close more deals, and deliver faster resolutions with Kedeyo's AI voice bots, smart IVR, and auto dialers — built for growing Indian businesses.",
+    "Kedeyo is India's AI contact center software with AI Receptionist, voice bots, smart IVR & auto dialers for sales & support teams. TRAI compliant. Free demo.",
   generator: "v0.app",
   icons: {
     icon: [
