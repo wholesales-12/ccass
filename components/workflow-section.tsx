@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useState } from "react"
 import {
   PhoneIncoming,
   Bot,
@@ -79,30 +79,6 @@ const STATS = [
 
 export function WorkflowSection() {
   const [active, setActive] = useState(0)
-  const stepRefs = useRef<Array<HTMLLIElement | null>>([])
-
-  // Scroll-driven active step via IntersectionObserver
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      (entries) => {
-        // Pick the entry closest to the top-center of viewport
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
-        if (visible[0]) {
-          const id = Number((visible[0].target as HTMLElement).dataset.stepId)
-          if (!Number.isNaN(id)) setActive(id)
-        }
-      },
-      {
-        // Trigger when step is in the middle 40% of viewport
-        rootMargin: "-40% 0px -40% 0px",
-        threshold: [0, 0.25, 0.5, 0.75, 1],
-      },
-    )
-    stepRefs.current.forEach((el) => el && obs.observe(el))
-    return () => obs.disconnect()
-  }, [])
 
   return (
     <section id="workflow" className="relative bg-secondary/40">
@@ -134,7 +110,7 @@ export function WorkflowSection() {
           </p>
           <div className="mt-4 inline-flex items-center gap-1.5 text-xs text-muted-foreground/80">
             <span className="h-1 w-1 animate-pulse rounded-full bg-accent" />
-            Scroll through the 5 steps
+            Click any step to preview it on the right
           </div>
         </div>
 
@@ -152,25 +128,22 @@ export function WorkflowSection() {
               }}
             />
 
-            {STEPS.map((s, idx) => {
+            {STEPS.map((s) => {
               const Icon = s.icon
               const isActive = active === s.id
               const isDone = active > s.id
               return (
-                <li
-                  key={s.id}
-                  data-step-id={s.id}
-                  ref={(el) => {
-                    stepRefs.current[idx] = el
-                  }}
-                  className="scroll-mt-28"
-                >
-                  <div
+                <li key={s.id}>
+                  <button
+                    type="button"
+                    onClick={() => setActive(s.id)}
+                    aria-pressed={isActive}
                     className={cn(
-                      "group relative flex items-start gap-4 rounded-2xl border p-5 transition-all duration-500",
+                      "group relative flex w-full items-start gap-4 rounded-2xl border p-5 text-left transition-all duration-500",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                       isActive
                         ? "border-primary/30 bg-card shadow-[0_12px_40px_-18px_oklch(0.45_0.22_295/0.35)] scale-[1.01]"
-                        : "border-transparent bg-transparent",
+                        : "border-transparent bg-transparent hover:border-primary/15 hover:bg-card/60",
                     )}
                   >
                     {/* Icon bubble */}
@@ -250,13 +223,13 @@ export function WorkflowSection() {
                         </div>
                       )}
                     </div>
-                  </div>
+                  </button>
                 </li>
               )
             })}
           </ol>
 
-          {/* RIGHT: Sticky phone - stays fixed in viewport while steps scroll */}
+          {/* RIGHT: Sticky phone — updates when a step is clicked */}
           <div className="hidden w-[380px] shrink-0 lg:block">
             <div className="sticky top-28">
               <PhoneVisualizer active={active} />

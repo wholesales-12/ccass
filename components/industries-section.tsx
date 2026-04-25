@@ -50,9 +50,9 @@ const INDUSTRIES: Industry[] = [
       { value: "24×7", label: "Coverage" },
     ],
     href: "/industries/ecommerce",
-    dot: "bg-fuchsia-500",
-    gradient: "from-fuchsia-600 via-pink-600 to-rose-500",
-    panelGlow: "from-fuchsia-500/12 via-pink-500/8 to-transparent",
+    dot: "bg-purple-500",
+    gradient: "from-purple-600 via-indigo-600 to-blue-600",
+    panelGlow: "from-purple-500/12 via-indigo-500/8 to-transparent",
     preview: "ecommerce",
   },
   {
@@ -205,7 +205,7 @@ const PAUSE = "[animation-play-state:paused] group-hover:[animation-play-state:r
 function EcommercePreview({ gradient }: { gradient: string }) {
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between rounded-lg border border-fuchsia-500/20 bg-fuchsia-500/5 px-3 py-2">
+      <div className="flex items-center justify-between rounded-lg border border-purple-500/20 bg-purple-500/5 px-3 py-2">
         <div>
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Cart recovered today</div>
           <div className={cn("bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent", gradient)}>
@@ -216,7 +216,7 @@ function EcommercePreview({ gradient }: { gradient: string }) {
           {[40, 55, 35, 70, 50, 85, 65].map((h, i) => (
             <span
               key={i}
-              className={cn("block w-1.5 rounded-sm bg-gradient-to-t from-fuchsia-500 to-pink-400", PAUSE)}
+              className={cn("block w-1.5 rounded-sm bg-gradient-to-t from-purple-500 to-indigo-400", PAUSE)}
               style={{ height: `${h}%`, minHeight: "8px", animation: `ind-bar 1.4s ease-in-out ${i * 0.1}s infinite` }}
             />
           ))}
