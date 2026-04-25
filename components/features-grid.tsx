@@ -160,94 +160,96 @@ function DialerVisual() {
 }
 
 function TreeVisual() {
-  const nodes = [
-    { x: 80, y: 10, color: "#8b5cf6", label: "IVR" },
-    { x: 30, y: 55, color: "#06b6d4", label: "Sales" },
-    { x: 80, y: 55, color: "#10b981", label: "Support" },
-    { x: 130, y: 55, color: "#f59e0b", label: "Billing" },
+  const branches = [
+    { key: "1", label: "Sales", queue: "2 free", color: "#06b6d4", bg: "bg-cyan-500/10", text: "text-cyan-700", border: "border-cyan-500/30" },
+    { key: "2", label: "Support", queue: "1 in queue", color: "#10b981", bg: "bg-emerald-500/10", text: "text-emerald-700", border: "border-emerald-500/30" },
+    { key: "3", label: "Billing", queue: "4 in queue", color: "#f59e0b", bg: "bg-amber-500/10", text: "text-amber-700", border: "border-amber-500/30" },
   ]
   return (
-    <svg viewBox="0 0 160 80" className="h-20 w-full">
-      <defs>
-        <linearGradient id="tree-line-1" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#8b5cf6" />
-          <stop offset="100%" stopColor="#06b6d4" />
-        </linearGradient>
-        <linearGradient id="tree-line-2" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#8b5cf6" />
-          <stop offset="100%" stopColor="#10b981" />
-        </linearGradient>
-        <linearGradient id="tree-line-3" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#8b5cf6" />
-          <stop offset="100%" stopColor="#f59e0b" />
-        </linearGradient>
-      </defs>
-      <g strokeWidth="2" fill="none" strokeLinecap="round">
-        <path d="M80 15 L30 50" stroke="url(#tree-line-1)" strokeDasharray="4 2" className="animate-pulse" />
-        <path d="M80 15 L80 50" stroke="url(#tree-line-2)" strokeDasharray="4 2" className="animate-pulse" style={{ animationDelay: "0.3s" }} />
-        <path d="M80 15 L130 50" stroke="url(#tree-line-3)" strokeDasharray="4 2" className="animate-pulse" style={{ animationDelay: "0.6s" }} />
-      </g>
-      {nodes.map((n, i) => (
-        <g key={i}>
-          <circle
-            cx={n.x}
-            cy={n.y}
-            r="12"
-            fill={n.color}
-            opacity={0.15}
-            style={{ animation: `feat-ring 2s ease-in-out ${i * 0.2}s infinite` }}
-          />
-          <circle
-            cx={n.x}
-            cy={n.y}
-            r="7"
-            fill={n.color}
-            style={{ animation: `feat-node 2s ease-in-out ${i * 0.25}s infinite` }}
-          />
-          <text x={n.x} y={n.y + 22} textAnchor="middle" className="fill-muted-foreground text-[8px] font-medium">
-            {n.label}
-          </text>
-        </g>
-      ))}
-      <style>{`@keyframes feat-node { 0%,100% { r: 7; opacity: 0.8 } 50% { r: 8; opacity: 1 } } @keyframes feat-ring { 0%,100% { r: 12; opacity: 0.15 } 50% { r: 16; opacity: 0.25 } }`}</style>
-    </svg>
+    <div className="space-y-2">
+      {/* Top: Incoming + IVR pill */}
+      <div className="flex items-center gap-2">
+        <span className="inline-flex items-center gap-1 rounded-md border border-violet-500/30 bg-violet-500/10 px-1.5 py-0.5 font-mono text-[9px] font-medium text-violet-700">
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-500 opacity-75" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-violet-500" />
+          </span>
+          Incoming
+        </span>
+        <div className="h-px flex-1 bg-gradient-to-r from-violet-500/40 to-transparent" />
+        <span className="rounded-md bg-violet-500 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-white">
+          IVR
+        </span>
+      </div>
+
+      {/* Branches: keypad → queue rows */}
+      <div className="space-y-1">
+        {branches.map((b, i) => (
+          <div
+            key={b.key}
+            className="flex items-center gap-1.5"
+            style={{ animation: `feat-row 3s ease-in-out ${i * 0.4}s infinite` }}
+          >
+            <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${b.border} ${b.bg} font-mono text-[10px] font-bold ${b.text}`}>
+              {b.key}
+            </span>
+            <span className={`text-[11px] font-semibold ${b.text}`}>{b.label}</span>
+            <div className="h-px flex-1 border-t border-dashed border-border" />
+            <span className="font-mono text-[9px] text-muted-foreground">{b.queue}</span>
+          </div>
+        ))}
+      </div>
+      <style>{`@keyframes feat-row { 0%,100% { opacity: 0.7 } 50% { opacity: 1 } }`}</style>
+    </div>
   )
 }
 
 function PulseVisual() {
   const agents = [
-    { id: 1, status: "active", color: "#10b981" },
-    { id: 2, status: "active", color: "#10b981" },
-    { id: 3, status: "busy", color: "#f59e0b" },
-    { id: 4, status: "active", color: "#10b981" },
+    { initial: "A", name: "Anita", duration: "02:14", action: "Listen", color: "bg-emerald-500", actionBg: "bg-emerald-500/10", actionText: "text-emerald-700", actionBorder: "border-emerald-500/30" },
+    { initial: "R", name: "Rohit", duration: "05:42", action: "Whisper", color: "bg-emerald-500", actionBg: "bg-sky-500/10", actionText: "text-sky-700", actionBorder: "border-sky-500/30" },
+    { initial: "P", name: "Priya", duration: "00:38", action: "Barge", color: "bg-amber-500", actionBg: "bg-rose-500/10", actionText: "text-rose-700", actionBorder: "border-rose-500/30" },
   ]
   return (
-    <div className="flex items-center justify-between gap-3">
-      {agents.map((agent, i) => (
-        <div key={agent.id} className="flex flex-col items-center gap-2">
-          <div className="relative">
-            <div
-              className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-white"
-              style={{ backgroundColor: agent.color }}
-            >
-              {agent.id}
+    <div className="space-y-1.5">
+      {agents.map((a, i) => (
+        <div key={a.name} className="flex items-center gap-2">
+          {/* Avatar with live dot */}
+          <div className="relative shrink-0">
+            <div className={`flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold text-white ${a.color}`}>
+              {a.initial}
             </div>
-            <span
-              className="absolute -right-0.5 -top-0.5 flex h-3 w-3 items-center justify-center"
-            >
-              <span
-                className="absolute inset-0 rounded-full"
-                style={{ backgroundColor: agent.color, animation: `feat-ping 1.8s ease-out ${i * 0.25}s infinite` }}
-              />
-              <span className="relative h-2 w-2 rounded-full bg-white" />
+            <span className="absolute -right-0.5 -bottom-0.5 flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full border border-background bg-emerald-500" />
             </span>
           </div>
-          <span className="font-mono text-[9px] text-muted-foreground">
-            {agent.status === "active" ? "On call" : "Wrap-up"}
+
+          {/* Name + duration */}
+          <span className="text-[11px] font-medium text-foreground">{a.name}</span>
+          <span className="font-mono text-[9px] tabular-nums text-muted-foreground">{a.duration}</span>
+
+          {/* Mini live waveform */}
+          <div className="flex flex-1 items-center justify-center gap-[1.5px]">
+            {Array.from({ length: 10 }).map((_, j) => (
+              <span
+                key={j}
+                className="block w-[2px] rounded-full bg-emerald-500/70"
+                style={{
+                  height: `${4 + Math.abs(Math.sin((j + i) * 0.9)) * 10}px`,
+                  animation: `feat-mon-bar 1s ease-in-out ${(j + i) * 0.08}s infinite`,
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Supervisor action */}
+          <span className={`shrink-0 rounded-md border px-1.5 py-0.5 font-mono text-[9px] font-medium ${a.actionBg} ${a.actionText} ${a.actionBorder}`}>
+            {a.action}
           </span>
         </div>
       ))}
-      <style>{`@keyframes feat-ping { 0% { transform: scale(1); opacity: 0.7 } 100% { transform: scale(2.5); opacity: 0 } }`}</style>
+      <style>{`@keyframes feat-mon-bar { 0%,100% { transform: scaleY(0.4); transform-origin: center } 50% { transform: scaleY(1); transform-origin: center } }`}</style>
     </div>
   )
 }
@@ -329,7 +331,7 @@ function LanguagesVisual() {
     "தமிழ்",
     "বাংলা",
     "मराठी",
-    "తెలుగు",
+    "���ెలుగు",
     "ગુજરાતી",
     "ಕನ್ನಡ",
     "ਪੰਜਾਬੀ",
