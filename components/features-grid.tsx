@@ -4,15 +4,11 @@ import {
   PhoneOutgoing,
   GitBranch,
   Activity,
-  FileAudio,
-  ShieldCheck,
   MessageCircle,
-  Languages,
   ArrowUpRight,
   Sparkles,
   CheckCircle2,
   Headphones,
-  PhoneIncoming,
   Cloud,
   BarChart3,
   type LucideIcon,
@@ -28,7 +24,7 @@ type Feature = {
   span: string
   gradient: string
   accent: string
-  visual: "waveform" | "dialer" | "tree" | "pulse" | "shield" | "chat" | "chart" | "languages" | "stack" | "recording" | "outbound"
+  visual: "waveform" | "dialer" | "tree" | "pulse" | "chat" | "chart" | "languages" | "stack"
 }
 
 const FEATURES: Feature[] = [
@@ -89,28 +85,6 @@ const FEATURES: Feature[] = [
     visual: "tree",
   },
   {
-    icon: PhoneIncoming,
-    title: "Inbound Call Center",
-    desc: "Skill-based, language-based and priority-based routing so the right agent picks up the right customer — every time. Built-in callback queues, IVR self-service and overflow rules.",
-    tags: ["Smart ACD", "Callback Queues", "Overflow"],
-    href: "/features/inbound-call-center",
-    span: "lg:col-span-4",
-    gradient: "from-emerald-500/12 via-teal-500/8 to-transparent",
-    accent: "text-emerald-700",
-    visual: "pulse",
-  },
-  {
-    icon: PhoneOutgoing,
-    title: "Outbound Dialer",
-    desc: "Run sales campaigns, collections drives and survey calls with list management, recycle rules, dispositions, AMD (answering machine detection) and full TRAI compliance.",
-    tags: ["Campaigns", "AMD", "TRAI Compliant"],
-    href: "/features/outbound-dialer",
-    span: "lg:col-span-4",
-    gradient: "from-rose-500/12 via-fuchsia-500/8 to-transparent",
-    accent: "text-rose-700",
-    visual: "outbound",
-  },
-  {
     icon: MessageCircle,
     title: "WhatsApp Broadcasting",
     desc: "Send approved templates, run drip campaigns, capture replies in agent desktop and convert WhatsApp into a real revenue channel — all DPDP-compliant.",
@@ -138,23 +112,15 @@ const FEATURES: Feature[] = [
     desc: "Fifty-plus pre-built reports plus a custom report builder. AI-generated call summaries, sentiment scores and topic tags so you stop sampling and start measuring every conversation.",
     tags: ["50+ Reports", "AI Summaries", "Sentiment"],
     href: "/features/reports-analytics",
-    span: "lg:col-span-8",
+    span: "lg:col-span-4",
     gradient: "from-amber-500/15 via-rose-500/10 to-transparent",
     accent: "text-amber-700",
     visual: "chart",
   },
-  {
-    icon: FileAudio,
-    title: "Call Recording & QA",
-    desc: "100% recording with searchable transcripts, AI-driven QA scoring, screen recording and tamper-proof storage that keeps you audit-ready for RBI, IRDAI and ISO reviews.",
-    tags: ["100% Recording", "AI QA", "Audit-Ready"],
-    href: "/features/call-recording",
-    span: "lg:col-span-4",
-    gradient: "from-sky-500/12 via-violet-500/8 to-transparent",
-    accent: "text-sky-700",
-    visual: "recording",
-  },
 ]
+
+/* Animations are paused by default and only run while the parent .group is hovered. */
+const PAUSE = "[animation-play-state:paused] group-hover:[animation-play-state:running]"
 
 /* ---------------- Visual primitives per card ---------------- */
 
@@ -165,7 +131,7 @@ function Waveform() {
       {bars.map((_, i) => (
         <span
           key={i}
-          className="block w-1 rounded-full bg-gradient-to-t from-violet-500 to-fuchsia-400"
+          className={`block w-1 rounded-full bg-gradient-to-t from-violet-500 to-fuchsia-400 ${PAUSE}`}
           style={{
             height: `${20 + Math.abs(Math.sin(i * 0.6)) * 70 + (i % 3) * 6}%`,
             animation: `feat-wave 1.4s ease-in-out ${i * 0.04}s infinite`,
@@ -193,36 +159,13 @@ function DialerVisual() {
           </div>
           <div className="relative h-1.5 overflow-hidden rounded-full bg-fuchsia-500/10">
             <span
-              className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-fuchsia-500 to-rose-500"
+              className={`absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-fuchsia-500 to-rose-500 ${PAUSE}`}
               style={{ width: `${row.w}%`, animation: `feat-grow 2.4s ease-in-out ${i * 0.3}s infinite alternate` }}
             />
           </div>
         </div>
       ))}
       <style>{`@keyframes feat-grow { from { transform: scaleX(0.6); transform-origin: left } to { transform: scaleX(1); transform-origin: left } }`}</style>
-    </div>
-  )
-}
-
-function OutboundVisual() {
-  return (
-    <div className="space-y-1.5">
-      <div className="flex items-center justify-between rounded-lg border border-rose-500/20 bg-rose-500/5 px-2 py-1.5">
-        <span className="text-[10px] font-semibold text-rose-700">Q3 Collections</span>
-        <span className="rounded-md bg-rose-500/15 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-rose-700">RUNNING</span>
-      </div>
-      <div className="grid grid-cols-3 gap-1.5">
-        {[
-          { l: "Lists", v: "12" },
-          { l: "AMD", v: "ON" },
-          { l: "DNC", v: "Clean" },
-        ].map((s) => (
-          <div key={s.l} className="rounded-md border border-border bg-background px-1.5 py-1">
-            <div className="font-mono text-[8px] uppercase tracking-wider text-muted-foreground">{s.l}</div>
-            <div className="font-mono text-[10px] font-semibold text-foreground">{s.v}</div>
-          </div>
-        ))}
-      </div>
     </div>
   )
 }
@@ -238,7 +181,7 @@ function TreeVisual() {
       <div className="flex items-center gap-2">
         <span className="inline-flex items-center gap-1 rounded-md border border-violet-500/30 bg-violet-500/10 px-1.5 py-0.5 font-mono text-[9px] font-medium text-violet-700">
           <span className="relative flex h-1.5 w-1.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-500 opacity-75" />
+            <span className={`absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-500 opacity-75 ${PAUSE}`} />
             <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-violet-500" />
           </span>
           Incoming
@@ -248,7 +191,11 @@ function TreeVisual() {
       </div>
       <div className="space-y-1">
         {branches.map((b, i) => (
-          <div key={b.key} className="flex items-center gap-1.5" style={{ animation: `feat-row 3s ease-in-out ${i * 0.4}s infinite` }}>
+          <div
+            key={b.key}
+            className={`flex items-center gap-1.5 ${PAUSE}`}
+            style={{ animation: `feat-row 3s ease-in-out ${i * 0.4}s infinite` }}
+          >
             <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${b.border} ${b.bg} font-mono text-[10px] font-bold ${b.text}`}>
               {b.key}
             </span>
@@ -278,7 +225,7 @@ function PulseVisual() {
               {a.initial}
             </div>
             <span className="absolute -right-0.5 -bottom-0.5 flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
+              <span className={`absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75 ${PAUSE}`} />
               <span className="relative inline-flex h-2 w-2 rounded-full border border-background bg-emerald-500" />
             </span>
           </div>
@@ -288,7 +235,7 @@ function PulseVisual() {
             {Array.from({ length: 10 }).map((_, j) => (
               <span
                 key={j}
-                className="block w-[2px] rounded-full bg-emerald-500/70"
+                className={`block w-[2px] rounded-full bg-emerald-500/70 ${PAUSE}`}
                 style={{
                   height: `${4 + Math.abs(Math.sin((j + i) * 0.9)) * 10}px`,
                   animation: `feat-mon-bar 1s ease-in-out ${(j + i) * 0.08}s infinite`,
@@ -318,7 +265,7 @@ function StackVisual() {
       {layers.map((l, i) => (
         <div
           key={l.label}
-          className={`flex items-center justify-between rounded-md border px-2 py-1 text-[10px] font-medium ${l.color}`}
+          className={`flex items-center justify-between rounded-md border px-2 py-1 text-[10px] font-medium ${l.color} ${PAUSE}`}
           style={{ animation: `feat-stack 3.5s ease-in-out ${i * 0.25}s infinite` }}
         >
           <span>{l.label}</span>
@@ -330,39 +277,16 @@ function StackVisual() {
   )
 }
 
-function RecordingVisual() {
-  return (
-    <div className="space-y-2">
-      {/* Timeline */}
-      <div className="relative h-6 overflow-hidden rounded-md bg-sky-500/10">
-        {[10, 28, 50, 72, 88].map((p, i) => (
-          <span
-            key={i}
-            className="absolute top-1/2 h-3 w-1 -translate-y-1/2 rounded-full bg-sky-500"
-            style={{ left: `${p}%`, animation: `feat-rec 2s ease-in-out ${i * 0.2}s infinite` }}
-          />
-        ))}
-        <div className="absolute inset-y-0 left-0 w-[60%] bg-gradient-to-r from-sky-500/30 to-sky-500/0" />
-      </div>
-      <div className="flex items-center gap-1.5">
-        <span className="rounded-md border border-sky-500/30 bg-sky-500/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-sky-700">QA · A+</span>
-        <span className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-emerald-700">100%</span>
-        <span className="rounded-md border border-violet-500/30 bg-violet-500/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-violet-700">Audit-ready</span>
-      </div>
-      <style>{`@keyframes feat-rec { 0%,100% { transform: translateY(-50%) scaleY(0.6) } 50% { transform: translateY(-50%) scaleY(1) } }`}</style>
-    </div>
-  )
-}
-
 function ChatVisual() {
   return (
     <div className="space-y-1.5">
-      <div className="inline-block max-w-[80%] rounded-lg rounded-bl-sm bg-emerald-500/10 px-2.5 py-1 text-[11px] text-emerald-900">
+      <div className={`inline-block max-w-[80%] rounded-lg rounded-bl-sm bg-emerald-500/10 px-2.5 py-1 text-[11px] text-emerald-900 ${PAUSE}`} style={{ animation: "feat-chat-in 2.4s ease-in-out infinite" }}>
         Order shipped — track here
       </div>
-      <div className="ml-auto block w-fit max-w-[75%] rounded-lg rounded-br-sm bg-emerald-600 px-2.5 py-1 text-[11px] text-white">
+      <div className={`ml-auto block w-fit max-w-[75%] rounded-lg rounded-br-sm bg-emerald-600 px-2.5 py-1 text-[11px] text-white ${PAUSE}`} style={{ animation: "feat-chat-out 2.4s ease-in-out 0.6s infinite" }}>
         Thanks! Confirmed
       </div>
+      <style>{`@keyframes feat-chat-in { 0%,100% { transform: translateX(0); opacity: 0.85 } 50% { transform: translateX(2px); opacity: 1 } } @keyframes feat-chat-out { 0%,100% { transform: translateX(0); opacity: 0.85 } 50% { transform: translateX(-2px); opacity: 1 } }`}</style>
     </div>
   )
 }
@@ -388,9 +312,14 @@ function ChartVisual() {
         </defs>
         <path d={area} fill="url(#feat-chart-fill)" />
         <path d={path} stroke="oklch(0.6 0.2 30)" strokeWidth="2" fill="none" strokeLinecap="round" />
-        <circle cx={w - 0.5} cy={h - (points[points.length - 1] / max) * (h - 10) - 5} r="4" fill="oklch(0.6 0.2 30)">
-          <animate attributeName="r" values="4;6;4" dur="1.6s" repeatCount="indefinite" />
-        </circle>
+        <circle
+          cx={w - 0.5}
+          cy={h - (points[points.length - 1] / max) * (h - 10) - 5}
+          r="4"
+          fill="oklch(0.6 0.2 30)"
+          className={PAUSE}
+          style={{ animation: "feat-chart-dot 1.6s ease-in-out infinite" }}
+        />
       </svg>
       <div className="mt-1 flex justify-between font-mono text-[9px] text-amber-700/80">
         <span>Mon</span>
@@ -398,6 +327,7 @@ function ChartVisual() {
         <span>Fri</span>
         <span>Sun</span>
       </div>
+      <style>{`@keyframes feat-chart-dot { 0%,100% { r: 4 } 50% { r: 6 } }`}</style>
     </div>
   )
 }
@@ -409,7 +339,7 @@ function LanguagesVisual() {
       {scripts.map((s, i) => (
         <span
           key={s}
-          className="rounded-full border border-fuchsia-500/20 bg-gradient-to-br from-fuchsia-500/10 to-violet-500/10 px-2 py-0.5 text-[10.5px] font-medium text-fuchsia-900"
+          className={`rounded-full border border-fuchsia-500/20 bg-gradient-to-br from-fuchsia-500/10 to-violet-500/10 px-2 py-0.5 text-[10.5px] font-medium text-fuchsia-900 ${PAUSE}`}
           style={{ animation: `feat-pop 3.6s ease-in-out ${i * 0.2}s infinite` }}
         >
           {s}
@@ -420,43 +350,18 @@ function LanguagesVisual() {
   )
 }
 
-function ShieldVisual() {
-  return (
-    <div className="flex items-center gap-3">
-      <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/10 text-sky-700">
-        <ShieldCheck className="h-5 w-5" />
-        <span className="absolute inset-0 rounded-xl ring-2 ring-sky-500/30" style={{ animation: "feat-ring 2.2s ease-in-out infinite" }} />
-      </div>
-      <div className="flex flex-wrap gap-1">
-        {["AES-256", "mTLS", "DPDP"].map((t) => (
-          <span key={t} className="rounded-md border border-sky-500/20 bg-sky-500/5 px-1.5 py-0.5 font-mono text-[9px] text-sky-700">
-            {t}
-          </span>
-        ))}
-      </div>
-      <style>{`@keyframes feat-ring { 0%,100% { transform: scale(1); opacity: 0.5 } 50% { transform: scale(1.1); opacity: 0 } }`}</style>
-    </div>
-  )
-}
-
 function FeatureVisual({ kind }: { kind: Feature["visual"] }) {
   switch (kind) {
     case "waveform":
       return <Waveform />
     case "dialer":
       return <DialerVisual />
-    case "outbound":
-      return <OutboundVisual />
     case "tree":
       return <TreeVisual />
     case "pulse":
       return <PulseVisual />
     case "stack":
       return <StackVisual />
-    case "recording":
-      return <RecordingVisual />
-    case "shield":
-      return <ShieldVisual />
     case "chat":
       return <ChatVisual />
     case "chart":
@@ -483,7 +388,7 @@ export function FeaturesGrid() {
         <div className="mx-auto max-w-3xl text-center">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
             <Sparkles className="h-3 w-3" />
-            Eleven core modules
+            Eight core modules
           </span>
           <h2 className="mt-4 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-[2.75rem] lg:leading-[1.05]">
             Every AI Contact Center Feature Indian Teams Need —{" "}
@@ -503,8 +408,18 @@ export function FeaturesGrid() {
             </span>
           </h2>
           <p className="mt-4 text-pretty text-base leading-relaxed text-muted-foreground">
-            From the very first call to the last QA review, Kedeyo handles the entire conversation lifecycle. Eleven
-            deeply integrated modules, designed to work the moment you log in.
+            <span className="font-medium text-foreground">AI Receptionist</span>,{" "}
+            <span className="font-medium text-foreground">Cloud Contact Center</span>,{" "}
+            <span className="font-medium text-foreground">Voice Bot</span>,{" "}
+            <span className="font-medium text-foreground">Auto Dialer</span>,{" "}
+            <span className="font-medium text-foreground">Smart IVR</span>,{" "}
+            <span className="font-medium text-foreground">WhatsApp Broadcasting</span>,{" "}
+            <span className="font-medium text-foreground">Live Monitor</span> and{" "}
+            <span className="font-medium text-foreground">Reports &amp; AI Analytics</span> — eight deeply integrated
+            modules that handle the entire conversation lifecycle, ready the moment you log in.
+          </p>
+          <p className="mt-2 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+            Hover any card to see it come alive
           </p>
         </div>
 
