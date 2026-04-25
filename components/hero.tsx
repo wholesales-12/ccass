@@ -8,19 +8,15 @@ import {
   ShieldCheck,
   Activity,
   MapPin,
-  Mic,
-  PhoneOff,
-  PhoneIncoming,
-  Sparkles,
+  CheckCircle2,
+  CalendarCheck,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 /**
- * Dark hero — Every Call Answered. By an AI Receptionist.
- * - Dark backdrop with subtle purple grid + radial wash.
- * - "Answered" highlighted with gradient text + gradient underline.
- * - Headline scales fluidly via clamp() so it never balloons.
- * - Right side: refined phone mockup with live AI Voice Bot transcript and floating tiles.
+ * Dark hero — "Every Call Answered. By an AI Receptionist."
+ * - H1 forced to exactly two lines on >= sm.
+ * - Right side simplified: a single "Live Call" card that clearly shows what the AI does.
  */
 
 const STATS = [
@@ -69,24 +65,25 @@ export function Hero() {
               <ArrowRight className="h-3 w-3 text-white/60" />
             </div>
 
-            {/* H1 — fluid */}
+            {/* H1 — exactly two lines */}
             <h1
-              className="mt-6 font-semibold leading-[1.04] tracking-tight text-balance"
-              style={{ fontSize: "clamp(2.25rem, 5.4vw, 4.5rem)" }}
+              className="mt-6 font-semibold leading-[1.05] tracking-tight"
+              style={{ fontSize: "clamp(2.25rem, 5vw, 4.25rem)" }}
             >
-              Every Call{" "}
-              <span className="relative inline-block">
-                <span className="bg-gradient-to-r from-fuchsia-400 via-violet-400 to-pink-400 bg-clip-text text-transparent">
-                  Answered
+              <span className="block">
+                Every Call{" "}
+                <span className="relative inline-block whitespace-nowrap">
+                  <span className="bg-gradient-to-r from-fuchsia-400 via-violet-400 to-pink-400 bg-clip-text text-transparent">
+                    Answered
+                  </span>
+                  <span
+                    aria-hidden
+                    className="absolute left-0 right-0 -bottom-1.5 block h-[6px] rounded-full bg-gradient-to-r from-fuchsia-500 via-violet-500 to-pink-500 opacity-90"
+                  />
                 </span>
-                <span
-                  aria-hidden
-                  className="absolute left-0 right-0 -bottom-1.5 block h-[6px] rounded-full bg-gradient-to-r from-fuchsia-500 via-violet-500 to-pink-500 opacity-90"
-                />
+                .
               </span>
-              .
-              <br className="hidden sm:block" />
-              <span className="text-white/95"> By an AI Receptionist.</span>
+              <span className="block text-white/95">By an AI Receptionist.</span>
             </h1>
 
             {/* Sub */}
@@ -154,9 +151,9 @@ export function Hero() {
             </div>
           </div>
 
-          {/* RIGHT — refined phone visual */}
+          {/* RIGHT — clean Live Call card */}
           <div className="lg:col-span-5">
-            <PhoneVisual />
+            <LiveCallCard />
           </div>
         </div>
       </div>
@@ -164,173 +161,174 @@ export function Hero() {
   )
 }
 
-/* ─────────────────────  Phone visual  ────────────────────── */
+/* ─────────────────────  Live Call Card (clean) ────────────────────── */
 
-const TRANSCRIPT = [
-  { who: "user", lang: "HI", text: "मेरा ऑर्डर कब आएगा?", en: "When will my order arrive?" },
-  { who: "ai", lang: "EN", text: "By 6 PM today.", en: "आज शाम 6 बजे तक।" },
-  { who: "user", lang: "HI", text: "धन्यवाद!", en: "Thank you!" },
-  { who: "ai", lang: "EN", text: "Confirmation sent on WhatsApp.", en: "WhatsApp पर भेज दिया।" },
-] as const
+function LiveCallCard() {
+  const [seconds, setSeconds] = useState(42)
+  const [step, setStep] = useState(0)
 
-function PhoneVisual() {
-  const [tick, setTick] = useState(0)
   useEffect(() => {
-    const t = setInterval(() => setTick((x) => x + 1), 2400)
+    const t = setInterval(() => setSeconds((s) => s + 1), 1000)
     return () => clearInterval(t)
   }, [])
 
-  // show last 2 lines
-  const show = [TRANSCRIPT[tick % TRANSCRIPT.length], TRANSCRIPT[(tick + 1) % TRANSCRIPT.length]] as const
+  // Cycle through the conversation steps (0 = caller, 1 = AI, 2 = booked)
+  useEffect(() => {
+    const t = setInterval(() => setStep((s) => (s + 1) % 3), 2200)
+    return () => clearInterval(t)
+  }, [])
+
+  const mm = String(Math.floor(seconds / 60)).padStart(2, "0")
+  const ss = String(seconds % 60).padStart(2, "0")
+
+  const callerSpeaking = step === 0
+  const aiSpeaking = step === 1
+  const booked = step === 2
 
   return (
-    <div className="relative mx-auto w-full max-w-[400px]">
+    <div className="relative mx-auto w-full max-w-[440px]">
       {/* Glow */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 rounded-[3rem] opacity-70 blur-3xl"
+        className="pointer-events-none absolute -inset-6 -z-10 rounded-[2.5rem] opacity-70 blur-3xl"
         style={{
           background:
             "radial-gradient(50% 50% at 50% 50%, oklch(0.62 0.24 300 / 0.45), transparent 70%)",
         }}
       />
 
-      {/* Phone frame */}
-      <div className="relative aspect-[9/19] overflow-hidden rounded-[2.5rem] border border-white/10 bg-gradient-to-b from-[#1a1126] to-[#0a0612] p-2 shadow-2xl shadow-black/60">
-        {/* Inner screen */}
-        <div className="relative h-full w-full overflow-hidden rounded-[2rem] bg-[#0d0817]">
-          {/* Notch */}
-          <div className="absolute left-1/2 top-2 z-10 h-5 w-24 -translate-x-1/2 rounded-full bg-black/80" />
-
-          {/* Status bar */}
-          <div className="flex items-center justify-between px-5 pt-4 text-[11px] font-medium text-white/60">
-            <span>9:41</span>
-            <span className="inline-flex items-center gap-1 text-emerald-400">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
-              Kedeyo Live
+      {/* Card */}
+      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-[#1a1126] to-[#120b1c] p-6 shadow-2xl shadow-black/60 backdrop-blur">
+        {/* Top status bar */}
+        <div className="flex items-center justify-between">
+          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-300">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
             </span>
+            Live call · {mm}:{ss}
           </div>
+          <span className="text-[11px] font-medium text-white/45">Inbound · +91 98210 ••••</span>
+        </div>
 
-          {/* Caller header */}
-          <div className="mt-6 flex items-center gap-3 px-5">
-            <div className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-fuchsia-500 to-violet-500 text-sm font-semibold text-white shadow-lg shadow-fuchsia-500/30">
-              AI
-            </div>
-            <div className="leading-tight">
-              <div className="text-[15px] font-semibold text-white">AI Voice Bot</div>
-              <div className="flex items-center gap-1 text-[11px] text-white/50">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
-                Active · 00:42
+        {/* Caller / AI */}
+        <div className="mt-6 grid grid-cols-2 gap-3">
+          {/* Caller */}
+          <div
+            className={`rounded-2xl border p-4 transition-all ${
+              callerSpeaking
+                ? "border-fuchsia-400/40 bg-fuchsia-500/10"
+                : "border-white/10 bg-white/[0.03]"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <div className="grid h-8 w-8 place-items-center rounded-lg bg-fuchsia-500/20 text-[12px] font-semibold text-fuchsia-200">
+                R
+              </div>
+              <div className="leading-tight">
+                <div className="text-[12px] font-semibold text-white">Rahul (caller)</div>
+                <div className="text-[10px] text-white/40">Speaking · Hindi</div>
               </div>
             </div>
+            <Wave active={callerSpeaking} color="fuchsia" />
           </div>
 
-          {/* Live waveform */}
-          <div className="mt-4 flex items-end justify-center gap-[3px] px-5">
-            {Array.from({ length: 28 }).map((_, k) => (
-              <span
-                key={k}
-                className="block w-[3px] rounded-full bg-gradient-to-t from-fuchsia-500/40 via-violet-400 to-pink-400"
-                style={{
-                  height: `${10 + ((k * 13 + tick * 7) % 28)}px`,
-                  animation: `phWave ${700 + (k % 5) * 90}ms ease-in-out ${k * 35}ms infinite alternate`,
-                }}
-              />
-            ))}
-          </div>
-
-          {/* Transcript */}
-          <div className="mt-5 px-4">
-            <div className="mb-2 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
-              <Activity className="h-3 w-3" />
-              Live Transcript
+          {/* AI */}
+          <div
+            className={`rounded-2xl border p-4 transition-all ${
+              aiSpeaking
+                ? "border-violet-400/40 bg-violet-500/10"
+                : "border-white/10 bg-white/[0.03]"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 text-[12px] font-semibold text-white">
+                AI
+              </div>
+              <div className="leading-tight">
+                <div className="text-[12px] font-semibold text-white">Kedeyo AI</div>
+                <div className="text-[10px] text-white/40">Replying · English</div>
+              </div>
             </div>
-            <div className="space-y-2">
-              {show.map((m, idx) => (
-                <div
-                  key={`${tick}-${idx}`}
-                  className={`flex ${m.who === "user" ? "justify-end" : "justify-start"}`}
-                  style={{ animation: `phFade 320ms ease-out both` }}
-                >
-                  <div
-                    className={`max-w-[85%] rounded-2xl px-3 py-2 text-[12px] leading-snug ${
-                      m.who === "user"
-                        ? "bg-gradient-to-br from-fuchsia-500 to-violet-500 text-white"
-                        : "border border-white/10 bg-white/[0.05] text-white/85"
-                    }`}
-                  >
-                    <div className="font-medium">{m.text}</div>
-                    <div
-                      className={`text-[10px] ${
-                        m.who === "user" ? "text-white/75" : "text-white/45"
-                      }`}
-                    >
-                      {m.en}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <Wave active={aiSpeaking} color="violet" />
           </div>
+        </div>
 
-          {/* Intent badge */}
-          <div className="absolute inset-x-4 bottom-24 rounded-xl border border-amber-400/30 bg-amber-400/10 px-3 py-2 backdrop-blur">
-            <div className="flex items-center justify-between text-[11px]">
-              <span className="inline-flex items-center gap-1.5 font-semibold text-amber-300">
-                <Sparkles className="h-3 w-3" />
-                Intent: Order tracking
+        {/* Live transcript line */}
+        <div className="mt-5 rounded-xl border border-white/10 bg-black/30 px-4 py-3">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
+            Live transcript
+          </div>
+          <div className="mt-1.5 min-h-[44px] text-[13px] leading-snug text-white/90">
+            {callerSpeaking && (
+              <span>
+                <span className="text-white">मुझे कल 11 बजे appointment book करनी है।</span>{" "}
+                <span className="text-white/45">/ I want to book an appointment for tomorrow at 11.</span>
               </span>
-              <span className="font-mono font-semibold text-amber-200">94%</span>
-            </div>
-          </div>
-
-          {/* Bottom controls */}
-          <div className="absolute inset-x-0 bottom-4 flex items-center justify-center gap-4">
-            <button className="grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/[0.04] text-white/70">
-              <Mic className="h-4 w-4" />
-            </button>
-            <button className="grid h-12 w-12 place-items-center rounded-full bg-rose-500 text-white shadow-lg shadow-rose-500/40">
-              <PhoneOff className="h-5 w-5" />
-            </button>
-            <button className="grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/[0.04] text-white/70">
-              <Phone className="h-4 w-4" />
-            </button>
+            )}
+            {aiSpeaking && (
+              <span>
+                <span className="text-white">Sure Rahul — 11 AM tomorrow with Dr. Sharma is available.</span>{" "}
+                <span className="text-white/45">/ कल 11 बजे डॉ. शर्मा के साथ available है।</span>
+              </span>
+            )}
+            {booked && (
+              <span className="inline-flex items-center gap-2 font-semibold text-emerald-300">
+                <CheckCircle2 className="h-4 w-4" />
+                Appointment booked. SMS + WhatsApp confirmation sent.
+              </span>
+            )}
           </div>
         </div>
-      </div>
 
-      {/* Floating tile — Today's calls */}
-      <div
-        className="absolute -left-6 top-20 hidden rounded-2xl border border-white/10 bg-[#16101f]/90 px-3 py-2.5 shadow-xl shadow-black/40 backdrop-blur sm:block"
-        style={{ animation: "phFloat 5.5s ease-in-out infinite" }}
-      >
-        <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/45">Today&apos;s calls</div>
-        <div className="mt-0.5 font-mono text-lg font-semibold tabular-nums text-white">24,14,850</div>
-      </div>
-
-      {/* Floating tile — Incoming */}
-      <div
-        className="absolute -right-4 top-6 hidden items-center gap-2 rounded-full border border-white/10 bg-[#16101f]/90 px-3 py-1.5 shadow-xl shadow-black/40 backdrop-blur sm:inline-flex"
-        style={{ animation: "phFloat 6s ease-in-out 0.7s infinite" }}
-      >
-        <PhoneIncoming className="h-3.5 w-3.5 text-emerald-400" />
-        <span className="font-mono text-[12px] font-medium text-white">+91 98210 22140</span>
-      </div>
-
-      {/* Floating tile — Connected */}
-      <div
-        className="absolute -right-6 bottom-28 hidden rounded-xl border border-emerald-400/20 bg-[#0f1a14]/90 px-3 py-2 shadow-xl shadow-black/40 backdrop-blur sm:block"
-        style={{ animation: "phFloat 6s ease-in-out 1.4s infinite" }}
-      >
-        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-300">
-          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
-          Connected
+        {/* Outcome row */}
+        <div className="mt-4 grid grid-cols-3 gap-2">
+          <Outcome label="Detected" value="Booking" tone="violet" active />
+          <Outcome label="Language" value="HI · EN" tone="fuchsia" active />
+          <Outcome
+            label="Status"
+            value={booked ? "Booked" : "In progress"}
+            tone="emerald"
+            active={booked}
+          />
         </div>
-        <div className="mt-0.5 text-[10px] text-white/55">Latency: 280ms</div>
-      </div>
 
+        {/* Footer */}
+        <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4">
+          <div className="inline-flex items-center gap-2 text-[11px] text-white/55">
+            <CalendarCheck className="h-3.5 w-3.5 text-emerald-400" />
+            38 appointments booked today
+          </div>
+          <div className="text-[11px] font-medium text-white/45">Latency 280ms</div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function Wave({ active, color }: { active: boolean; color: "fuchsia" | "violet" }) {
+  const palette =
+    color === "fuchsia"
+      ? "from-fuchsia-500/30 via-fuchsia-400 to-pink-400"
+      : "from-violet-500/30 via-violet-400 to-fuchsia-400"
+  return (
+    <div className="mt-3 flex h-7 items-end gap-[2px]">
+      {Array.from({ length: 18 }).map((_, k) => (
+        <span
+          key={k}
+          className={`block w-[3px] rounded-full bg-gradient-to-t ${palette} ${
+            active ? "" : "opacity-25"
+          }`}
+          style={{
+            height: `${active ? 6 + ((k * 11) % 22) : 4 + (k % 4) * 2}px`,
+            animation: active
+              ? `heroWave ${600 + (k % 5) * 80}ms ease-in-out ${k * 35}ms infinite alternate`
+              : undefined,
+          }}
+        />
+      ))}
       <style jsx global>{`
-        @keyframes phWave {
+        @keyframes heroWave {
           from {
             transform: scaleY(0.4);
           }
@@ -338,26 +336,36 @@ function PhoneVisual() {
             transform: scaleY(1);
           }
         }
-        @keyframes phFade {
-          from {
-            opacity: 0;
-            transform: translateY(4px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        @keyframes phFloat {
-          0%,
-          100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-5px);
-          }
-        }
       `}</style>
+    </div>
+  )
+}
+
+function Outcome({
+  label,
+  value,
+  tone,
+  active,
+}: {
+  label: string
+  value: string
+  tone: "fuchsia" | "violet" | "emerald"
+  active?: boolean
+}) {
+  const toneCls =
+    tone === "fuchsia"
+      ? "text-fuchsia-300"
+      : tone === "violet"
+        ? "text-violet-300"
+        : "text-emerald-300"
+  return (
+    <div
+      className={`rounded-xl border px-3 py-2 transition-colors ${
+        active ? "border-white/15 bg-white/[0.04]" : "border-white/10 bg-white/[0.02]"
+      }`}
+    >
+      <div className="text-[9px] font-semibold uppercase tracking-[0.16em] text-white/40">{label}</div>
+      <div className={`mt-0.5 text-[12px] font-semibold ${toneCls}`}>{value}</div>
     </div>
   )
 }
