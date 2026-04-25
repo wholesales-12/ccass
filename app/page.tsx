@@ -1,12 +1,11 @@
 import { SiteNav } from "@/components/site-nav"
 import { Hero } from "@/components/hero"
-import { TrustedByStrip } from "@/components/trusted-by-strip"
 import { ProblemSection } from "@/components/problem-section"
+import { WhatKedeyoIs } from "@/components/what-kedeyo-is"
 import { FeaturesGrid } from "@/components/features-grid"
-import { AiShowcase } from "@/components/ai-showcase"
+import { IndustriesSection } from "@/components/industries-section"
 import { WhyChooseSection } from "@/components/why-choose-section"
 import { WorkflowSection } from "@/components/workflow-section"
-import { IndustriesSection } from "@/components/industries-section"
 import { ComplianceSection } from "@/components/compliance-section"
 import { Testimonials } from "@/components/testimonials"
 import { FaqSection } from "@/components/faq-section"
@@ -18,13 +17,12 @@ export default function HomePage() {
     <main className="relative min-h-screen bg-background">
       <SiteNav />
       <Hero />
-      <TrustedByStrip />
       <ProblemSection />
+      <WhatKedeyoIs />
       <FeaturesGrid />
-      <AiShowcase />
+      <IndustriesSection />
       <WhyChooseSection />
       <WorkflowSection />
-      <IndustriesSection />
       <ComplianceSection />
       <Testimonials />
       <FaqSection />
