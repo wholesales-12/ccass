@@ -2,6 +2,7 @@ import Link from "next/link"
 import {
   Bot,
   PhoneOutgoing,
+  PhoneIncoming,
   GitBranch,
   Activity,
   MessageCircle,
@@ -24,7 +25,7 @@ type Feature = {
   span: string
   gradient: string
   accent: string
-  visual: "waveform" | "dialer" | "tree" | "pulse" | "chat" | "chart" | "languages" | "stack"
+  visual: "waveform" | "stack" | "dialer" | "queue" | "modes" | "tree" | "chat" | "monitor" | "chart"
 }
 
 const FEATURES: Feature[] = [
@@ -32,7 +33,7 @@ const FEATURES: Feature[] = [
     icon: Bot,
     title: "AI Receptionist",
     badge: "NEW",
-    desc: "Always-on AI that picks up every inbound call, asks the right qualifying questions, and routes to the right agent. Handles peak-hour overflow, after-hours and weekends — without ever putting a customer on hold.",
+    desc: "The AI-powered virtual receptionist that handles calls, routes intelligently, and never sleeps. Picks up every inbound call, qualifies the caller and routes to the right agent — even at 2 AM.",
     tags: ["24×7 Pickup", "Hindi · English", "Smart Routing"],
     href: "/features/ai-receptionist",
     span: "lg:col-span-8",
@@ -43,7 +44,7 @@ const FEATURES: Feature[] = [
   {
     icon: Cloud,
     title: "Cloud Contact Center",
-    desc: "The core CCaaS platform — inbound, outbound, blended. Skill-based ACD, multi-level IVR, queue priorities, SLA timers and a unified agent desktop. Run 5 agents or 500 on the same login.",
+    desc: "Full-featured cloud platform for inbound & outbound — skill-based ACD, multi-level IVR, queues, dispositions and a unified agent desktop. Run 5 agents or 500 on the same login.",
     tags: ["Inbound + Outbound", "Skill ACD", "Unified Desktop"],
     href: "/features/cloud-contact-center",
     span: "lg:col-span-4",
@@ -52,21 +53,10 @@ const FEATURES: Feature[] = [
     visual: "stack",
   },
   {
-    icon: Headphones,
-    title: "Voice Bot (Conversational AI)",
-    desc: "Natural Hindi, English and Tamil voice bots that automate FAQs, lead qualification, payment reminders, OTP delivery and appointment confirmations — 24×7 at a fraction of agent cost.",
-    tags: ["Hindi · English · Tamil", "FAQs · OTP · Booking", "Code-Switch"],
-    href: "/features/voice-bot",
-    span: "lg:col-span-4",
-    gradient: "from-fuchsia-500/12 via-violet-500/8 to-transparent",
-    accent: "text-fuchsia-700",
-    visual: "languages",
-  },
-  {
     icon: PhoneOutgoing,
     title: "Auto Dialer",
-    desc: "Reach 3× more leads with a dialer that skips voicemails, busy tones and DNCs, then drops live answers onto agent screens with full lead context.",
-    tags: ["Predictive", "Power", "Preview"],
+    desc: "Maximize sales outreach with dialing automation. Skip voicemails, busy tones and DNCs, and drop only live answers onto agent screens with full lead context.",
+    tags: ["Auto-Skip DND", "CRM Sync", "Live Answers Only"],
     href: "/features/auto-dialer",
     span: "lg:col-span-4",
     gradient: "from-fuchsia-500/15 via-rose-500/8 to-transparent",
@@ -74,9 +64,31 @@ const FEATURES: Feature[] = [
     visual: "dialer",
   },
   {
+    icon: PhoneIncoming,
+    title: "Inbound Call Center",
+    desc: "Smart ACD with skill-based routing & queue management. Match every caller to the best-fit agent based on language, skill and history — no more transfers, no more hold music.",
+    tags: ["Skill ACD", "Queues + SLA", "Smart Transfers"],
+    href: "/features/inbound-call-center",
+    span: "lg:col-span-4",
+    gradient: "from-sky-500/12 via-indigo-500/8 to-transparent",
+    accent: "text-sky-700",
+    visual: "queue",
+  },
+  {
+    icon: Headphones,
+    title: "Outbound Dialer",
+    desc: "Predictive, progressive & preview dialing modes — pick the strategy per campaign. Pace your dials, keep abandonment under 3% and adapt to compliance windows automatically.",
+    tags: ["Predictive", "Progressive", "Preview"],
+    href: "/features/outbound-dialer",
+    span: "lg:col-span-4",
+    gradient: "from-rose-500/12 via-fuchsia-500/8 to-transparent",
+    accent: "text-rose-700",
+    visual: "modes",
+  },
+  {
     icon: GitBranch,
-    title: "Smart IVR & Auto-Attendant",
-    desc: "Drag-and-drop IVR builder with multilingual prompts (Hindi, English, Tamil and more), DTMF, speech recognition, time-of-day routing and dynamic menus that adapt to the caller.",
+    title: "IVR / Auto-Attendant",
+    desc: "Drag-and-drop multilingual IVR builder with DTMF, speech recognition, time-of-day routing and dynamic menus that adapt to the caller — go live without writing a single line of code.",
     tags: ["Drag-and-Drop", "Multilingual", "Dynamic Menus"],
     href: "/features/ivr-auto-attendant",
     span: "lg:col-span-4",
@@ -87,8 +99,8 @@ const FEATURES: Feature[] = [
   {
     icon: MessageCircle,
     title: "WhatsApp Broadcasting",
-    desc: "Send approved templates, run drip campaigns, capture replies in agent desktop and convert WhatsApp into a real revenue channel — all DPDP-compliant.",
-    tags: ["Templates", "Drip", "DPDP"],
+    desc: "Bulk messaging & campaign automation on the channel India actually uses. Send approved templates, run drips, capture replies in agent desktop — all DPDP-compliant.",
+    tags: ["Templates", "Drip Campaigns", "DPDP Ready"],
     href: "/features/whatsapp-broadcasting",
     span: "lg:col-span-4",
     gradient: "from-emerald-500/15 via-green-500/8 to-transparent",
@@ -97,20 +109,20 @@ const FEATURES: Feature[] = [
   },
   {
     icon: Activity,
-    title: "Live Monitor & Dashboards",
-    desc: "Watch every agent, queue, IVR step and SLA in real time. Whisper, barge and coach mid-call. Wallboards for the floor. Mobile dashboards for managers on the move.",
-    tags: ["Whisper · Barge", "Wallboards", "Mobile"],
-    href: "/features/live-monitor-dashboard",
+    title: "Live Monitor",
+    desc: "Real-time dashboards, whisper & barge-in. Watch every agent, queue and SLA in real time. Coach mid-call, jump in when it matters and keep the floor on track.",
+    tags: ["Whisper · Barge", "Wallboards", "Live SLA"],
+    href: "/features/live-monitor",
     span: "lg:col-span-4",
-    gradient: "from-sky-500/12 via-indigo-500/8 to-transparent",
-    accent: "text-sky-700",
-    visual: "pulse",
+    gradient: "from-cyan-500/12 via-sky-500/8 to-transparent",
+    accent: "text-cyan-700",
+    visual: "monitor",
   },
   {
     icon: BarChart3,
-    title: "Reports & AI Analytics",
-    desc: "Fifty-plus pre-built reports plus a custom report builder. AI-generated call summaries, sentiment scores and topic tags so you stop sampling and start measuring every conversation.",
-    tags: ["50+ Reports", "AI Summaries", "Sentiment"],
+    title: "Reports & Analytics",
+    desc: "50+ reports with custom KPIs & exports. AI-generated call summaries, sentiment scores and topic tags so you stop sampling and start measuring every conversation.",
+    tags: ["50+ Reports", "AI Summaries", "Custom Exports"],
     href: "/features/reports-analytics",
     span: "lg:col-span-4",
     gradient: "from-amber-500/15 via-rose-500/10 to-transparent",
@@ -144,6 +156,30 @@ function Waveform() {
   )
 }
 
+function StackVisual() {
+  const layers = [
+    { label: "Inbound · Outbound · Blended", color: "bg-indigo-500/20 text-indigo-700 border-indigo-500/30" },
+    { label: "Skill ACD · Multi-level IVR", color: "bg-violet-500/15 text-violet-700 border-violet-500/30" },
+    { label: "Queues · SLA · Dispositions", color: "bg-fuchsia-500/15 text-fuchsia-700 border-fuchsia-500/30" },
+    { label: "Unified Agent Desktop", color: "bg-rose-500/15 text-rose-700 border-rose-500/30" },
+  ]
+  return (
+    <div className="space-y-1">
+      {layers.map((l, i) => (
+        <div
+          key={l.label}
+          className={`flex items-center justify-between rounded-md border px-2 py-1 text-[10px] font-medium ${l.color} ${PAUSE}`}
+          style={{ animation: `feat-stack 3.5s ease-in-out ${i * 0.25}s infinite` }}
+        >
+          <span>{l.label}</span>
+          <CheckCircle2 className="h-3 w-3 opacity-70" />
+        </div>
+      ))}
+      <style>{`@keyframes feat-stack { 0%,100% { transform: translateX(0); opacity: 0.85 } 50% { transform: translateX(2px); opacity: 1 } }`}</style>
+    </div>
+  )
+}
+
 function DialerVisual() {
   return (
     <div className="space-y-2">
@@ -166,6 +202,74 @@ function DialerVisual() {
         </div>
       ))}
       <style>{`@keyframes feat-grow { from { transform: scaleX(0.6); transform-origin: left } to { transform: scaleX(1); transform-origin: left } }`}</style>
+    </div>
+  )
+}
+
+function QueueVisual() {
+  const slots = [
+    { name: "Sales", queue: 2, agents: 4, color: "text-sky-700", bar: "from-sky-500 to-indigo-500", bg: "bg-sky-500/10" },
+    { name: "Support", queue: 5, agents: 6, color: "text-indigo-700", bar: "from-indigo-500 to-violet-500", bg: "bg-indigo-500/10" },
+    { name: "Billing", queue: 1, agents: 3, color: "text-violet-700", bar: "from-violet-500 to-fuchsia-500", bg: "bg-violet-500/10" },
+  ]
+  return (
+    <div className="space-y-1.5">
+      {slots.map((s, i) => (
+        <div
+          key={s.name}
+          className={`flex items-center gap-2 rounded-md ${s.bg} px-2 py-1 ${PAUSE}`}
+          style={{ animation: `feat-queue 3s ease-in-out ${i * 0.25}s infinite` }}
+        >
+          <span className={`text-[10px] font-semibold ${s.color}`}>{s.name}</span>
+          <div className="relative h-1 flex-1 overflow-hidden rounded-full bg-white/60">
+            <span
+              className={`absolute inset-y-0 left-0 rounded-full bg-gradient-to-r ${s.bar}`}
+              style={{ width: `${(s.queue / 6) * 100}%` }}
+            />
+          </div>
+          <span className="font-mono text-[9px] text-muted-foreground">
+            {s.queue} q · {s.agents} live
+          </span>
+        </div>
+      ))}
+      <style>{`@keyframes feat-queue { 0%,100% { transform: translateX(0); opacity: 0.85 } 50% { transform: translateX(2px); opacity: 1 } }`}</style>
+    </div>
+  )
+}
+
+function ModesVisual() {
+  const modes = [
+    { name: "Predictive", desc: "AI pace", color: "bg-rose-500/12 text-rose-700 border-rose-500/30" },
+    { name: "Progressive", desc: "1:1 pace", color: "bg-fuchsia-500/12 text-fuchsia-700 border-fuchsia-500/30" },
+    { name: "Preview", desc: "Agent decides", color: "bg-violet-500/12 text-violet-700 border-violet-500/30" },
+  ]
+  return (
+    <div className="space-y-1.5">
+      <div className="flex gap-1.5">
+        {modes.map((m, i) => (
+          <div
+            key={m.name}
+            className={`flex flex-1 flex-col items-center rounded-md border px-1.5 py-1.5 ${m.color} ${PAUSE}`}
+            style={{ animation: `feat-mode 3s ease-in-out ${i * 0.4}s infinite` }}
+          >
+            <span className="text-[10px] font-semibold">{m.name}</span>
+            <span className="font-mono text-[8.5px] opacity-70">{m.desc}</span>
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center gap-1.5 rounded-md border border-rose-500/20 bg-rose-500/5 px-2 py-1">
+        <span className="font-mono text-[9px] text-rose-700">Abandon &lt; 3%</span>
+        <div className="ml-auto flex items-center gap-[2px]">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <span
+              key={i}
+              className={`block h-2 w-[3px] rounded-sm bg-rose-500/70 ${PAUSE}`}
+              style={{ animation: `feat-pulse-bar 1s ease-in-out ${i * 0.08}s infinite` }}
+            />
+          ))}
+        </div>
+      </div>
+      <style>{`@keyframes feat-mode { 0%,100% { transform: translateY(0); opacity: 0.85 } 50% { transform: translateY(-2px); opacity: 1 } } @keyframes feat-pulse-bar { 0%,100% { transform: scaleY(0.4) } 50% { transform: scaleY(1) } }`}</style>
     </div>
   )
 }
@@ -210,73 +314,6 @@ function TreeVisual() {
   )
 }
 
-function PulseVisual() {
-  const agents = [
-    { initial: "A", name: "Anita", duration: "02:14", action: "Listen", color: "bg-emerald-500", actionBg: "bg-emerald-500/10", actionText: "text-emerald-700", actionBorder: "border-emerald-500/30" },
-    { initial: "R", name: "Rohit", duration: "05:42", action: "Whisper", color: "bg-emerald-500", actionBg: "bg-sky-500/10", actionText: "text-sky-700", actionBorder: "border-sky-500/30" },
-    { initial: "P", name: "Priya", duration: "00:38", action: "Barge", color: "bg-amber-500", actionBg: "bg-rose-500/10", actionText: "text-rose-700", actionBorder: "border-rose-500/30" },
-  ]
-  return (
-    <div className="space-y-1.5">
-      {agents.map((a, i) => (
-        <div key={a.name} className="flex items-center gap-2">
-          <div className="relative shrink-0">
-            <div className={`flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold text-white ${a.color}`}>
-              {a.initial}
-            </div>
-            <span className="absolute -right-0.5 -bottom-0.5 flex h-2 w-2">
-              <span className={`absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75 ${PAUSE}`} />
-              <span className="relative inline-flex h-2 w-2 rounded-full border border-background bg-emerald-500" />
-            </span>
-          </div>
-          <span className="text-[11px] font-medium text-foreground">{a.name}</span>
-          <span className="font-mono text-[9px] tabular-nums text-muted-foreground">{a.duration}</span>
-          <div className="flex flex-1 items-center justify-center gap-[1.5px]">
-            {Array.from({ length: 10 }).map((_, j) => (
-              <span
-                key={j}
-                className={`block w-[2px] rounded-full bg-emerald-500/70 ${PAUSE}`}
-                style={{
-                  height: `${4 + Math.abs(Math.sin((j + i) * 0.9)) * 10}px`,
-                  animation: `feat-mon-bar 1s ease-in-out ${(j + i) * 0.08}s infinite`,
-                }}
-              />
-            ))}
-          </div>
-          <span className={`shrink-0 rounded-md border px-1.5 py-0.5 font-mono text-[9px] font-medium ${a.actionBg} ${a.actionText} ${a.actionBorder}`}>
-            {a.action}
-          </span>
-        </div>
-      ))}
-      <style>{`@keyframes feat-mon-bar { 0%,100% { transform: scaleY(0.4); transform-origin: center } 50% { transform: scaleY(1); transform-origin: center } }`}</style>
-    </div>
-  )
-}
-
-function StackVisual() {
-  const layers = [
-    { label: "Inbound · Outbound · Blended", color: "bg-indigo-500/20 text-indigo-700 border-indigo-500/30" },
-    { label: "Skill ACD · Multi-level IVR", color: "bg-violet-500/15 text-violet-700 border-violet-500/30" },
-    { label: "Queues · SLA · Dispositions", color: "bg-fuchsia-500/15 text-fuchsia-700 border-fuchsia-500/30" },
-    { label: "Unified Agent Desktop", color: "bg-rose-500/15 text-rose-700 border-rose-500/30" },
-  ]
-  return (
-    <div className="space-y-1">
-      {layers.map((l, i) => (
-        <div
-          key={l.label}
-          className={`flex items-center justify-between rounded-md border px-2 py-1 text-[10px] font-medium ${l.color} ${PAUSE}`}
-          style={{ animation: `feat-stack 3.5s ease-in-out ${i * 0.25}s infinite` }}
-        >
-          <span>{l.label}</span>
-          <CheckCircle2 className="h-3 w-3 opacity-70" />
-        </div>
-      ))}
-      <style>{`@keyframes feat-stack { 0%,100% { transform: translateX(0); opacity: 0.85 } 50% { transform: translateX(2px); opacity: 1 } }`}</style>
-    </div>
-  )
-}
-
 function ChatVisual() {
   return (
     <div className="space-y-1.5">
@@ -287,6 +324,40 @@ function ChatVisual() {
         Thanks! Confirmed
       </div>
       <style>{`@keyframes feat-chat-in { 0%,100% { transform: translateX(0); opacity: 0.85 } 50% { transform: translateX(2px); opacity: 1 } } @keyframes feat-chat-out { 0%,100% { transform: translateX(0); opacity: 0.85 } 50% { transform: translateX(-2px); opacity: 1 } }`}</style>
+    </div>
+  )
+}
+
+function MonitorVisual() {
+  const tiles = [
+    { label: "Live calls", value: "42", color: "from-cyan-500 to-sky-500" },
+    { label: "In queue", value: "08", color: "from-sky-500 to-indigo-500" },
+    { label: "Avg wait", value: "12s", color: "from-indigo-500 to-violet-500" },
+  ]
+  return (
+    <div className="space-y-1.5">
+      <div className="grid grid-cols-3 gap-1.5">
+        {tiles.map((t, i) => (
+          <div
+            key={t.label}
+            className={`rounded-md border border-cyan-500/20 bg-white/70 px-2 py-1 ${PAUSE}`}
+            style={{ animation: `feat-tile 2.4s ease-in-out ${i * 0.2}s infinite` }}
+          >
+            <div className={`bg-gradient-to-br ${t.color} bg-clip-text font-mono text-sm font-bold text-transparent`}>
+              {t.value}
+            </div>
+            <div className="text-[8.5px] uppercase tracking-wider text-muted-foreground">{t.label}</div>
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center gap-1.5 rounded-md border border-cyan-500/20 bg-cyan-500/5 px-2 py-1">
+        <span className="relative flex h-1.5 w-1.5">
+          <span className={`absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-500 opacity-75 ${PAUSE}`} />
+          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-500" />
+        </span>
+        <span className="font-mono text-[9px] text-cyan-700">Whisper · Barge · Listen</span>
+      </div>
+      <style>{`@keyframes feat-tile { 0%,100% { transform: translateY(0); opacity: 0.85 } 50% { transform: translateY(-1.5px); opacity: 1 } }`}</style>
     </div>
   )
 }
@@ -332,42 +403,26 @@ function ChartVisual() {
   )
 }
 
-function LanguagesVisual() {
-  const scripts = ["हिन्दी", "English", "தமிழ்", "বাংলা", "मराठी", "ગુજરાતી", "ಕನ್ನಡ", "ਪੰਜਾਬੀ"]
-  return (
-    <div className="flex flex-wrap gap-1.5">
-      {scripts.map((s, i) => (
-        <span
-          key={s}
-          className={`rounded-full border border-fuchsia-500/20 bg-gradient-to-br from-fuchsia-500/10 to-violet-500/10 px-2 py-0.5 text-[10.5px] font-medium text-fuchsia-900 ${PAUSE}`}
-          style={{ animation: `feat-pop 3.6s ease-in-out ${i * 0.2}s infinite` }}
-        >
-          {s}
-        </span>
-      ))}
-      <style>{`@keyframes feat-pop { 0%,100% { transform: translateY(0); opacity: 0.75 } 50% { transform: translateY(-2px); opacity: 1 } }`}</style>
-    </div>
-  )
-}
-
 function FeatureVisual({ kind }: { kind: Feature["visual"] }) {
   switch (kind) {
     case "waveform":
       return <Waveform />
-    case "dialer":
-      return <DialerVisual />
-    case "tree":
-      return <TreeVisual />
-    case "pulse":
-      return <PulseVisual />
     case "stack":
       return <StackVisual />
+    case "dialer":
+      return <DialerVisual />
+    case "queue":
+      return <QueueVisual />
+    case "modes":
+      return <ModesVisual />
+    case "tree":
+      return <TreeVisual />
     case "chat":
       return <ChatVisual />
+    case "monitor":
+      return <MonitorVisual />
     case "chart":
       return <ChartVisual />
-    case "languages":
-      return <LanguagesVisual />
     default:
       return null
   }
@@ -388,13 +443,13 @@ export function FeaturesGrid() {
         <div className="mx-auto max-w-3xl text-center">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
             <Sparkles className="h-3 w-3" />
-            Eight core modules
+            Nine core modules
           </span>
           <h2 className="mt-4 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-[2.75rem] lg:leading-[1.05]">
-            Every AI Contact Center Feature Indian Teams Need —{" "}
+            Everything your contact center needs —{" "}
             <span className="relative inline-block">
               <span className="bg-gradient-to-r from-violet-600 via-fuchsia-500 to-rose-500 bg-clip-text text-transparent">
-                In One Platform
+                in one platform
               </span>
               <svg aria-hidden viewBox="0 0 300 12" className="absolute -bottom-1 left-0 h-2.5 w-full" preserveAspectRatio="none">
                 <path d="M2 8 Q 80 2 150 6 T 298 7" stroke="url(#feat-underline)" strokeWidth="3" strokeLinecap="round" fill="none" />
@@ -410,13 +465,14 @@ export function FeaturesGrid() {
           <p className="mt-4 text-pretty text-base leading-relaxed text-muted-foreground">
             <span className="font-medium text-foreground">AI Receptionist</span>,{" "}
             <span className="font-medium text-foreground">Cloud Contact Center</span>,{" "}
-            <span className="font-medium text-foreground">Voice Bot</span>,{" "}
             <span className="font-medium text-foreground">Auto Dialer</span>,{" "}
-            <span className="font-medium text-foreground">Smart IVR</span>,{" "}
+            <span className="font-medium text-foreground">Inbound Call Center</span>,{" "}
+            <span className="font-medium text-foreground">Outbound Dialer</span>,{" "}
+            <span className="font-medium text-foreground">IVR / Auto-Attendant</span>,{" "}
             <span className="font-medium text-foreground">WhatsApp Broadcasting</span>,{" "}
             <span className="font-medium text-foreground">Live Monitor</span> and{" "}
-            <span className="font-medium text-foreground">Reports &amp; AI Analytics</span> — eight deeply integrated
-            modules that handle the entire conversation lifecycle, ready the moment you log in.
+            <span className="font-medium text-foreground">Reports &amp; Analytics</span> — from the very first call to
+            the last QA review, Kedeyo handles the entire conversation lifecycle.
           </p>
           <p className="mt-2 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
             Hover any card to see it come alive
