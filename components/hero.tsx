@@ -1,100 +1,45 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import {
   ArrowRight,
   Phone,
   PhoneIncoming,
   ShieldCheck,
-  Sparkles,
   Bot,
   PhoneCall,
   Headphones,
   MessageSquare,
   ListTree,
   Activity,
+  Sparkles,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 /* ------------------------------------------------------------------ */
-/*  Data                                                               */
+/*  Module tab data — these are the actual Kedeyo product modules      */
 /* ------------------------------------------------------------------ */
 
-const LIVE_CALLS = [
-  {
-    id: 1,
-    caller: "Aarav S.",
-    number: "+91 98210 22140",
-    lang: "हिन्दी",
-    intent: "Loan inquiry",
-    confidence: 94,
-    line: "मुझे होम लोन के बारे में जानकारी चाहिए।",
-    lineEn: "I need information about home loans.",
-    action: "Routed to Sales",
-    color: "fuchsia",
-  },
-  {
-    id: 2,
-    caller: "Priya M.",
-    number: "+91 90876 41209",
-    lang: "English",
-    intent: "Order tracking",
-    confidence: 97,
-    line: "Where is my order #4421?",
-    lineEn: "",
-    action: "Self-served by AI",
-    color: "violet",
-  },
-  {
-    id: 3,
-    caller: "Karthik R.",
-    number: "+91 99452 83067",
-    lang: "தமிழ்",
-    intent: "Appointment booking",
-    confidence: 91,
-    line: "நாளை காலை அப்பாயிண்ட்மென்ட் வேண்டும்.",
-    lineEn: "I need an appointment tomorrow morning.",
-    action: "Booked · 10:30 AM",
-    color: "fuchsia",
-  },
-  {
-    id: 4,
-    caller: "Neha T.",
-    number: "+91 88260 71105",
-    lang: "हिन्दी",
-    intent: "Payment reminder",
-    confidence: 96,
-    line: "EMI की तारीख कब है?",
-    lineEn: "When is the EMI date?",
-    action: "Answered by AI",
-    color: "violet",
-  },
-] as const
+type ModuleId = "ai-recep" | "voice-bot" | "dialer" | "ivr" | "whatsapp" | "monitor"
 
-const TRUST = [
-  { label: "Made in India", icon: "🇮🇳" },
-  { label: "TRAI Registered" },
-  { label: "DPDP Compliant" },
-  { label: "ISO 27001" },
-  { label: "RBI / IRDAI Ready" },
+const MODULES: { id: ModuleId; label: string; icon: any; tag: string }[] = [
+  { id: "ai-recep", label: "AI Receptionist", icon: Bot, tag: "NEW" },
+  { id: "voice-bot", label: "Voice Bot", icon: Headphones, tag: "" },
+  { id: "dialer", label: "Auto Dialer", icon: PhoneCall, tag: "" },
+  { id: "ivr", label: "Smart IVR", icon: ListTree, tag: "" },
+  { id: "whatsapp", label: "WhatsApp", icon: MessageSquare, tag: "" },
+  { id: "monitor", label: "Live Monitor", icon: Activity, tag: "" },
 ]
+
+const TRUST = ["Made in India", "TRAI Registered", "DPDP Compliant", "ISO 27001", "RBI / IRDAI Ready"]
 
 const STATS = [
-  { value: "+45%", label: "Higher contact rate", detail: "Predictive dialing skips voicemails & DNCs", tone: "fuchsia" },
-  { value: "-35%", label: "Lower handle time", detail: "AI agent assist + auto-summaries", tone: "violet" },
-  { value: "-60%", label: "Fewer missed calls", detail: "AI Receptionist answers 24×7", tone: "fuchsia" },
-  { value: "5 min", label: "Time to go live", detail: "No PRI lines · No on-prem PBX", tone: "violet" },
-]
-
-const FEATURE_CHIPS = [
-  { id: "ai-recep", icon: Bot, label: "AI Receptionist", hint: "Answers every call, 24×7" },
-  { id: "voice-bot", icon: Headphones, label: "Voice Bot", hint: "Hindi · English · Tamil" },
-  { id: "auto-dial", icon: PhoneCall, label: "Auto Dialer", hint: "Predictive · Power · Preview" },
-  { id: "smart-ivr", icon: ListTree, label: "Smart IVR", hint: "Drag-and-drop builder" },
-  { id: "wa", icon: MessageSquare, label: "WhatsApp", hint: "DPDP-compliant broadcasting" },
-  { id: "live", icon: Activity, label: "Live Monitor", hint: "Whisper · Barge · Coach" },
+  { value: "+45%", label: "Higher contact rate" },
+  { value: "-35%", label: "Lower handle time" },
+  { value: "-60%", label: "Fewer missed calls" },
+  { value: "5 min", label: "Time to go live" },
 ]
 
 /* ------------------------------------------------------------------ */
@@ -102,81 +47,55 @@ const FEATURE_CHIPS = [
 /* ------------------------------------------------------------------ */
 
 export function Hero() {
-  const sectionRef = useRef<HTMLElement | null>(null)
-  const [mouse, setMouse] = useState({ x: 0.5, y: 0.4 })
-  const [activeCall, setActiveCall] = useState<number | null>(2)
+  const [activeModule, setActiveModule] = useState<ModuleId>("ai-recep")
+  const [hovered, setHovered] = useState<ModuleId | null>(null)
 
-  // Auto-cycle the active call when the user is not hovering
+  // Auto-cycle modules when nothing is hovered
   useEffect(() => {
-    if (activeCall !== null) return
+    if (hovered) return
     const id = setInterval(() => {
-      setActiveCall(null)
-    }, 1)
-    return () => clearInterval(id)
-  }, [activeCall])
-
-  useEffect(() => {
-    const t = setInterval(() => {
-      setActiveCall((current) => {
-        // If the user is currently hovering a card (handled via mouseenter), stay.
-        if (current !== null && current !== -1) return current
-        return current
+      setActiveModule((curr) => {
+        const idx = MODULES.findIndex((m) => m.id === curr)
+        return MODULES[(idx + 1) % MODULES.length].id
       })
-    }, 2200)
-    return () => clearInterval(t)
-  }, [])
+    }, 3200)
+    return () => clearInterval(id)
+  }, [hovered])
 
-  const onMove = (e: React.MouseEvent) => {
-    const el = sectionRef.current
-    if (!el) return
-    const rect = el.getBoundingClientRect()
-    setMouse({
-      x: (e.clientX - rect.left) / rect.width,
-      y: (e.clientY - rect.top) / rect.height,
-    })
-  }
+  const focused: ModuleId = hovered ?? activeModule
 
   return (
     <section
-      ref={sectionRef}
-      onMouseMove={onMove}
       id="top"
       className="relative isolate overflow-hidden bg-[#0a0612] pt-20 lg:pt-24"
     >
-      {/* Layered backgrounds: base gradient + cursor spotlight + grid */}
+      {/* Background layers */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{
           backgroundImage:
-            "radial-gradient(ellipse 80% 50% at 50% -10%, oklch(0.45 0.22 295 / 0.45), transparent 60%), radial-gradient(ellipse 60% 40% at 100% 30%, oklch(0.62 0.24 300 / 0.30), transparent 65%)",
+            "radial-gradient(ellipse 70% 45% at 50% -10%, oklch(0.45 0.22 295 / 0.50), transparent 60%), radial-gradient(ellipse 50% 35% at 100% 30%, oklch(0.62 0.24 300 / 0.28), transparent 65%)",
         }}
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 transition-opacity duration-300"
-        style={{
-          background: `radial-gradient(600px circle at ${mouse.x * 100}% ${mouse.y * 100}%, oklch(0.62 0.24 300 / 0.18), transparent 65%)`,
-        }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.10]"
+        className="pointer-events-none absolute inset-0 opacity-[0.08]"
         style={{
           backgroundImage:
-            "linear-gradient(to right, rgba(168,85,247,0.35) 1px, transparent 1px), linear-gradient(to bottom, rgba(168,85,247,0.35) 1px, transparent 1px)",
-          backgroundSize: "56px 56px",
-          maskImage: "radial-gradient(ellipse 75% 65% at 50% 35%, black 40%, transparent 85%)",
+            "linear-gradient(to right, rgba(168,85,247,0.4) 1px, transparent 1px), linear-gradient(to bottom, rgba(168,85,247,0.4) 1px, transparent 1px)",
+          backgroundSize: "48px 48px",
+          maskImage: "radial-gradient(ellipse 70% 60% at 50% 30%, black 35%, transparent 80%)",
         }}
       />
 
-      <div className="relative mx-auto max-w-7xl px-4 pb-16 pt-6 sm:px-6 lg:grid lg:grid-cols-12 lg:gap-12 lg:px-8 lg:pb-24 lg:pt-10">
-        {/* ---------------- LEFT: Copy ---------------- */}
-        <div className="flex flex-col justify-center lg:col-span-7">
+      <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-6 sm:px-6 lg:px-8 lg:pb-14 lg:pt-8">
+        {/* ---------------- Centered headline cluster ---------------- */}
+        <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
           {/* Eyebrow pill */}
           <Link
             href="/features/ai-receptionist"
-            className="group inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium text-white/90 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-fuchsia-400/50 hover:bg-fuchsia-500/10 hover:shadow-[0_8px_30px_-10px_oklch(0.62_0.24_300/0.7)] sm:text-xs"
+            className="group inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium text-white/90 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-fuchsia-400/50 hover:bg-fuchsia-500/10 hover:shadow-[0_8px_30px_-10px_oklch(0.62_0.24_300/0.7)]"
           >
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-fuchsia-400 opacity-75" />
@@ -188,51 +107,27 @@ export function Hero() {
             <ArrowRight className="h-3 w-3 text-fuchsia-300 transition-transform duration-300 group-hover:translate-x-0.5" />
           </Link>
 
-          {/* H1 with hover-highlightable phrases */}
-          <h1 className="mt-5 text-balance text-[2.25rem] font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-[3.4rem]">
-            <HoverHighlight>AI Contact Center</HoverHighlight> Software <span className="text-white/60">in India</span>
+          {/* H1 — compact, two lines, with hover-highlight on key phrases */}
+          <h1 className="mt-4 text-balance text-[2rem] font-semibold leading-[1.08] tracking-tight text-white sm:text-[2.5rem] lg:text-[3rem]">
+            <HoverHighlight>AI Contact Center Software</HoverHighlight>{" "}
+            <span className="text-white/65">in India</span>
             <br />
             <span className="text-white/90">— With </span>
             <HoverHighlight gradient>AI Receptionist</HoverHighlight>
             <span className="text-white/90"> Built In.</span>
           </h1>
 
-          {/* Sub-headline */}
-          <p className="mt-5 max-w-xl text-pretty text-sm leading-relaxed text-white/70 sm:text-base">
-            Pair an always-on <span className="font-semibold text-white">AI Receptionist</span> with voice bots, smart
-            IVR, predictive dialers and live dashboards — on a single cloud platform. Answer every customer call,
-            close more sales, and resolve support faster, without growing your team.
+          {/* Sub-headline (concise, primary keyword in first 30 words) */}
+          <p className="mt-4 max-w-2xl text-pretty text-sm leading-relaxed text-white/70 sm:text-[15px]">
+            One cloud platform with an always-on AI Receptionist, voice bots, smart IVR, predictive dialers and live
+            dashboards — built for Indian sales and support teams. Answer every call. Close more deals. Resolve faster.
           </p>
 
-          {/* Feature chip rail (interactive on hover) */}
-          <ul className="mt-6 flex flex-wrap gap-2">
-            {FEATURE_CHIPS.map((c) => {
-              const Icon = c.icon
-              return (
-                <li key={c.id}>
-                  <button
-                    type="button"
-                    className="group/chip relative flex items-center gap-2 overflow-hidden rounded-full border border-white/10 bg-white/[0.04] py-1.5 pl-2.5 pr-3 text-[11px] font-medium text-white/80 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-fuchsia-400/40 hover:bg-white/[0.09] hover:text-white sm:text-xs"
-                  >
-                    <span className="absolute inset-0 -z-10 bg-gradient-to-r from-fuchsia-500/0 via-fuchsia-500/20 to-violet-500/0 opacity-0 transition-opacity duration-300 group-hover/chip:opacity-100" />
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-fuchsia-300 transition-transform duration-300 group-hover/chip:scale-110 group-hover/chip:bg-fuchsia-500/20">
-                      <Icon className="h-3 w-3" />
-                    </span>
-                    <span>{c.label}</span>
-                    <span className="hidden max-w-0 overflow-hidden whitespace-nowrap text-[10px] text-white/50 transition-all duration-500 group-hover/chip:max-w-[160px] group-hover/chip:pl-1 sm:inline">
-                      {c.hint}
-                    </span>
-                  </button>
-                </li>
-              )
-            })}
-          </ul>
-
           {/* CTAs */}
-          <div className="mt-7 flex flex-wrap items-center gap-3">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <Button
               size="lg"
-              className="group/cta relative h-12 overflow-hidden rounded-full bg-white px-6 text-sm font-semibold text-[#0a0612] shadow-[0_10px_40px_-10px_rgba(232,121,249,0.6)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_16px_50px_-10px_rgba(232,121,249,0.8)]"
+              className="group/cta relative h-11 overflow-hidden rounded-full bg-white px-6 text-sm font-semibold text-[#0a0612] shadow-[0_10px_40px_-10px_rgba(232,121,249,0.55)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_16px_50px_-10px_rgba(232,121,249,0.85)]"
               asChild
             >
               <Link href="#demo">
@@ -246,7 +141,7 @@ export function Hero() {
             <Button
               size="lg"
               variant="outline"
-              className="group/cta2 h-12 rounded-full border-white/20 bg-white/5 px-5 text-sm font-medium text-white backdrop-blur-md transition-all duration-300 hover:border-fuchsia-400/50 hover:bg-white/10 hover:text-white"
+              className="group/cta2 h-11 rounded-full border-white/20 bg-white/5 px-5 text-sm font-medium text-white backdrop-blur-md transition-all duration-300 hover:border-fuchsia-400/50 hover:bg-white/10 hover:text-white"
               asChild
             >
               <Link href="/features/ai-receptionist">
@@ -256,46 +151,156 @@ export function Hero() {
             </Button>
             <a
               href="tel:+917621073586"
-              className="group flex items-center gap-2 rounded-full px-2 py-2 text-xs text-white/60 transition-colors duration-300 hover:text-white"
+              className="group hidden items-center gap-1.5 rounded-full px-2 py-2 text-xs text-white/55 transition-colors duration-300 hover:text-white sm:flex"
             >
               <Phone className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-rotate-12 group-hover:text-fuchsia-300" />
               <span className="font-mono">+91 76210 73586</span>
             </a>
           </div>
-          <p className="mt-3 text-xs text-white/40">
+          <p className="mt-2.5 text-[11px] text-white/40">
             No credit card · No long contracts · AI Receptionist live in 5 minutes.
           </p>
 
-          {/* Trust strip */}
-          <ul className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3 border-t border-white/10 pt-6">
-            {TRUST.map((t) => (
-              <li key={t.label}>
-                <span className="group/trust flex items-center gap-1.5 text-[11px] font-medium text-white/55 transition-colors duration-300 hover:text-white sm:text-xs">
-                  {t.icon ? (
-                    <span className="text-sm transition-transform duration-300 group-hover/trust:scale-110">
-                      {t.icon}
-                    </span>
-                  ) : (
-                    <ShieldCheck className="h-3.5 w-3.5 text-emerald-400/80 transition-all duration-300 group-hover/trust:scale-110 group-hover/trust:text-emerald-300" />
-                  )}
-                  {t.label}
-                </span>
+          {/* Trust strip — single row */}
+          <ul className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 sm:gap-x-5">
+            {TRUST.map((t, i) => (
+              <li
+                key={t}
+                className="flex items-center gap-1.5 text-[10.5px] font-medium text-white/55 transition-colors duration-300 hover:text-white"
+              >
+                {i === 0 ? (
+                  <span className="text-sm" aria-hidden>
+                    🇮🇳
+                  </span>
+                ) : (
+                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-400/80" />
+                )}
+                {t}
               </li>
             ))}
           </ul>
         </div>
 
-        {/* ---------------- RIGHT: Live ops board ---------------- */}
-        <div className="relative mt-12 lg:col-span-5 lg:mt-0">
-          <LiveOpsBoard activeCall={activeCall} setActiveCall={setActiveCall} />
+        {/* ---------------- Product preview frame ---------------- */}
+        <div className="relative mx-auto mt-10 max-w-5xl">
+          {/* Soft glow halo */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -inset-x-10 -inset-y-6 rounded-[40px] opacity-70"
+            style={{
+              background:
+                "radial-gradient(ellipse at center, oklch(0.62 0.24 300 / 0.30), transparent 70%)",
+            }}
+          />
+
+          {/* Browser chrome */}
+          <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.02] backdrop-blur-xl shadow-[0_30px_80px_-30px_oklch(0.62_0.24_300/0.7)]">
+            {/* Top bar */}
+            <div className="flex items-center justify-between gap-3 border-b border-white/10 bg-white/[0.03] px-4 py-2.5">
+              <div className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-rose-400/70" />
+                <span className="h-2.5 w-2.5 rounded-full bg-amber-400/70" />
+                <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/70" />
+              </div>
+              <div className="flex items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-2.5 py-0.5 font-mono text-[10px] text-white/55">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                kedeyo.com / dashboard
+              </div>
+              <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 font-mono text-[10px] text-white/55">
+                Live · 24×7
+              </span>
+            </div>
+
+            {/* Module tabs */}
+            <div className="flex items-center gap-1 overflow-x-auto border-b border-white/10 bg-white/[0.02] px-3 py-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              {MODULES.map((m) => {
+                const isActive = focused === m.id
+                const Icon = m.icon
+                return (
+                  <button
+                    key={m.id}
+                    type="button"
+                    onMouseEnter={() => setHovered(m.id)}
+                    onMouseLeave={() => setHovered(null)}
+                    onClick={() => {
+                      setActiveModule(m.id)
+                      setHovered(m.id)
+                    }}
+                    className={cn(
+                      "group/tab relative flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-medium transition-all duration-300",
+                      isActive
+                        ? "bg-white/10 text-white"
+                        : "text-white/55 hover:bg-white/[0.06] hover:text-white",
+                    )}
+                  >
+                    <Icon
+                      className={cn(
+                        "h-3.5 w-3.5 transition-colors duration-300",
+                        isActive ? "text-fuchsia-300" : "text-white/50 group-hover/tab:text-fuchsia-300",
+                      )}
+                    />
+                    {m.label}
+                    {m.tag && (
+                      <span className="rounded-sm bg-fuchsia-500/20 px-1 py-px font-mono text-[8.5px] font-semibold tracking-wider text-fuchsia-300">
+                        {m.tag}
+                      </span>
+                    )}
+                    {isActive && (
+                      <span
+                        aria-hidden
+                        className="absolute inset-x-2 -bottom-[8.5px] h-[2px] rounded-full bg-gradient-to-r from-fuchsia-400 to-violet-400"
+                      />
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Module preview pane */}
+            <div
+              className="relative min-h-[260px] p-4 sm:min-h-[280px] sm:p-5"
+              onMouseLeave={() => setHovered(null)}
+            >
+              <ModulePreview id={focused} />
+            </div>
+          </div>
+
+          {/* Floating mini KPI pill — top-right of frame */}
+          <div className="absolute -top-3 right-4 hidden items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 backdrop-blur-md sm:flex">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+            </span>
+            <span className="font-mono text-[10px] font-semibold text-emerald-300">100% answered</span>
+          </div>
+
+          {/* Floating mini latency pill — bottom-left of frame */}
+          <div className="absolute -bottom-3 left-4 hidden items-center gap-1.5 rounded-full border border-white/15 bg-[#0a0612] px-3 py-1 shadow-lg sm:flex">
+            <Sparkles className="h-3 w-3 text-fuchsia-300" />
+            <span className="font-mono text-[10px] text-white/80">avg pickup 0.6s</span>
+          </div>
         </div>
       </div>
 
-      {/* ---------------- Bottom: Stat strip ---------------- */}
-      <div className="relative border-t border-white/10 bg-black/20 backdrop-blur-sm">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-px bg-white/[0.06] sm:grid-cols-4">
-          {STATS.map((s, i) => (
-            <StatTile key={i} {...s} />
+      {/* ---------------- Stat strip ---------------- */}
+      <div className="relative border-t border-white/10 bg-black/25 backdrop-blur-sm">
+        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-px bg-white/[0.06] sm:grid-cols-4">
+          {STATS.map((s) => (
+            <div
+              key={s.label}
+              className="group/stat relative overflow-hidden bg-[#0a0612] px-4 py-4 transition-colors duration-300 hover:bg-white/[0.03]"
+            >
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 -translate-y-full bg-gradient-to-b from-fuchsia-500/15 to-transparent opacity-0 transition-all duration-500 group-hover/stat:translate-y-0 group-hover/stat:opacity-100"
+              />
+              <div className="relative flex items-baseline gap-2">
+                <span className="bg-gradient-to-r from-white via-fuchsia-100 to-violet-200 bg-clip-text font-mono text-2xl font-semibold text-transparent sm:text-3xl">
+                  {s.value}
+                </span>
+              </div>
+              <p className="relative mt-1 text-[11px] font-medium text-white/65 sm:text-xs">{s.label}</p>
+            </div>
           ))}
         </div>
       </div>
@@ -304,7 +309,7 @@ export function Hero() {
 }
 
 /* ------------------------------------------------------------------ */
-/*  HoverHighlight — text that gets a gradient underline + glow on hover */
+/*  HoverHighlight — gradient underline reveal on hover                */
 /* ------------------------------------------------------------------ */
 
 function HoverHighlight({
@@ -335,247 +340,359 @@ function HoverHighlight({
 }
 
 /* ------------------------------------------------------------------ */
-/*  Live Ops Board — stacked call cards with hover-to-expand           */
+/*  Module previews — each shows a meaningful slice of that product    */
 /* ------------------------------------------------------------------ */
 
-function LiveOpsBoard({
-  activeCall,
-  setActiveCall,
-}: {
-  activeCall: number | null
-  setActiveCall: (id: number | null) => void
-}) {
-  // Auto rotate when nothing hovered
-  const [auto, setAuto] = useState(2)
-  useEffect(() => {
-    const id = setInterval(() => {
-      setAuto((n) => (n % LIVE_CALLS.length) + 1)
-    }, 2400)
-    return () => clearInterval(id)
-  }, [])
-
-  const focused = activeCall ?? auto
-
+function ModulePreview({ id }: { id: ModuleId }) {
   return (
-    <div className="relative">
-      {/* Glow halo */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -inset-10 rounded-[60px] opacity-70"
-        style={{
-          background:
-            "radial-gradient(ellipse at center, oklch(0.62 0.24 300 / 0.35), transparent 70%)",
-        }}
-      />
+    <div key={id} className="animate-in fade-in duration-300">
+      {id === "ai-recep" && <PreviewAIRecep />}
+      {id === "voice-bot" && <PreviewVoiceBot />}
+      {id === "dialer" && <PreviewDialer />}
+      {id === "ivr" && <PreviewIVR />}
+      {id === "whatsapp" && <PreviewWhatsApp />}
+      {id === "monitor" && <PreviewMonitor />}
+    </div>
+  )
+}
 
-      {/* Header */}
-      <div className="relative mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="relative flex h-2.5 w-2.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
+function PreviewAIRecep() {
+  return (
+    <div className="grid gap-3 sm:grid-cols-3">
+      {/* Incoming call card */}
+      <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3 sm:col-span-2">
+        <div className="mb-2 flex items-center justify-between">
+          <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-300">
+            <PhoneIncoming className="h-3 w-3" />
+            Incoming call
           </span>
-          <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">
-            Live AI Conversations
-          </h2>
+          <span className="font-mono text-[10px] text-white/50">00:04</span>
         </div>
-        <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 font-mono text-[10px] text-white/60">
-          {LIVE_CALLS.length} active
-        </span>
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-fuchsia-500 to-violet-500 text-xs font-semibold text-white">
+            AS
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-white">Aarav Sharma</span>
+              <span className="rounded-full border border-white/10 bg-white/5 px-1.5 py-0.5 font-mono text-[9px] text-white/60">
+                हिन्दी
+              </span>
+            </div>
+            <span className="font-mono text-[10px] text-white/50">+91 98210 22140</span>
+          </div>
+          <div className="flex h-6 items-end gap-[2px]">
+            {Array.from({ length: 7 }).map((_, i) => (
+              <span
+                key={i}
+                className="block w-[2px] animate-wave rounded-full bg-fuchsia-400"
+                style={{
+                  height: `${6 + ((i * 5) % 16)}px`,
+                  animationDelay: `${i * 0.07}s`,
+                }}
+              />
+            ))}
+          </div>
+        </div>
+        <div className="mt-2.5 rounded-lg border border-white/10 bg-black/30 p-2">
+          <p className="text-[11px] text-white/80">"मुझे होम लोन के बारे में जानकारी चाहिए।"</p>
+          <p className="mt-0.5 text-[10px] text-white/40">I need information about home loans.</p>
+        </div>
+        <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+          <span className="rounded-md bg-fuchsia-500/15 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-fuchsia-300">
+            INTENT · Loan inquiry
+          </span>
+          <span className="rounded-md bg-emerald-500/15 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-emerald-300">
+            CONFIDENCE · 94%
+          </span>
+          <span className="rounded-md bg-violet-500/15 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-violet-300">
+            ROUTING → Sales · Mumbai
+          </span>
+        </div>
       </div>
 
-      {/* Cards */}
-      <ul
-        className="relative space-y-2.5"
-        onMouseLeave={() => setActiveCall(null)}
-      >
-        {LIVE_CALLS.map((c) => {
-          const isActive = focused === c.id
-          return (
-            <li
-              key={c.id}
-              onMouseEnter={() => setActiveCall(c.id)}
-              className={cn(
-                "group/card relative cursor-pointer overflow-hidden rounded-2xl border bg-white/[0.04] backdrop-blur-md transition-all duration-500",
-                isActive
-                  ? "border-fuchsia-400/40 bg-white/[0.07] shadow-[0_20px_60px_-20px_oklch(0.62_0.24_300/0.6)]"
-                  : "border-white/10 hover:border-white/20",
-              )}
-              style={{
-                transform: isActive ? "translateX(-6px)" : "translateX(0)",
-              }}
-            >
-              {/* Sweeping gradient on hover */}
-              <span
-                aria-hidden
-                className={cn(
-                  "pointer-events-none absolute inset-0 -z-0 bg-gradient-to-r from-fuchsia-500/0 via-fuchsia-500/15 to-violet-500/0 opacity-0 transition-opacity duration-500",
-                  isActive && "opacity-100",
-                )}
-              />
+      {/* Stats column */}
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-1">
+        <Tile label="Calls today" value="1,248" tone="violet" />
+        <Tile label="Answered" value="100%" tone="emerald" />
+        <Tile label="Avg pickup" value="0.6s" tone="fuchsia" />
+        <Tile label="Booked" value="38" tone="violet" />
+      </div>
+    </div>
+  )
+}
 
-              {/* Compact row */}
-              <div className="relative flex items-center gap-3 p-3">
-                {/* Avatar */}
-                <div
-                  className={cn(
-                    "flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white transition-transform duration-500",
-                    c.color === "fuchsia"
-                      ? "bg-gradient-to-br from-fuchsia-500 to-violet-500"
-                      : "bg-gradient-to-br from-violet-500 to-indigo-500",
-                    isActive && "scale-105",
-                  )}
-                >
-                  {c.caller
-                    .split(" ")
-                    .map((p) => p[0])
-                    .join("")}
-                </div>
-
-                {/* Caller info */}
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="truncate text-sm font-medium text-white">{c.caller}</span>
-                    <span className="rounded-full border border-white/10 bg-white/5 px-1.5 py-0.5 font-mono text-[9px] text-white/60">
-                      {c.lang}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-[10px] text-white/45">
-                    <PhoneIncoming className="h-3 w-3" />
-                    <span className="font-mono">{c.number}</span>
-                  </div>
-                </div>
-
-                {/* Mini waveform - active only when focused */}
-                <div className="flex h-6 items-end gap-[2px]">
-                  {Array.from({ length: 7 }).map((_, i) => (
-                    <span
-                      key={i}
-                      className={cn(
-                        "block w-[2px] rounded-full bg-fuchsia-400 transition-all",
-                        isActive ? "animate-wave" : "opacity-30",
-                      )}
-                      style={{
-                        height: `${6 + ((i * 5) % 16)}px`,
-                        animationDelay: `${i * 0.07}s`,
-                      }}
-                    />
-                  ))}
-                </div>
-
-                {/* Confidence chip */}
+function PreviewVoiceBot() {
+  const turns = [
+    { from: "bot", text: "नमस्ते! मैं Kedeyo से बोल रहा हूँ। मैं आपकी कैसे मदद कर सकता हूँ?", lang: "Hindi" },
+    { from: "user", text: "I want to check my order status.", lang: "English" },
+    { from: "bot", text: "Sure — please share your order ID and I'll fetch it.", lang: "English" },
+    { from: "user", text: "It's 4421.", lang: "English" },
+    { from: "bot", text: "Order #4421 is out for delivery and arrives by 6 PM today.", lang: "English" },
+  ]
+  return (
+    <div className="grid gap-3 sm:grid-cols-5">
+      <div className="space-y-1.5 sm:col-span-3">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-fuchsia-300">
+          Conversation transcript
+        </span>
+        <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+          <ul className="space-y-1.5">
+            {turns.map((t, i) => (
+              <li key={i} className={cn("flex gap-2", t.from === "user" ? "justify-end" : "justify-start")}>
                 <span
                   className={cn(
-                    "shrink-0 rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold transition-colors duration-300",
-                    isActive
-                      ? "bg-emerald-500/20 text-emerald-300"
-                      : "bg-white/5 text-white/50",
+                    "max-w-[85%] rounded-lg px-2.5 py-1.5 text-[11px] leading-snug",
+                    t.from === "bot"
+                      ? "bg-fuchsia-500/15 text-fuchsia-50"
+                      : "bg-white/10 text-white/85",
                   )}
                 >
-                  {c.confidence}%
+                  {t.text}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+      <div className="space-y-2 sm:col-span-2">
+        <Tile label="FAQs deflected" value="68%" tone="emerald" />
+        <Tile label="Languages" value="Hi · En · Ta" tone="violet" />
+        <Tile label="Avg cost / call" value="₹2.40" tone="fuchsia" />
+      </div>
+    </div>
+  )
+}
+
+function PreviewDialer() {
+  return (
+    <div className="grid gap-3 sm:grid-cols-3">
+      <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3 sm:col-span-2">
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-fuchsia-300">
+            Campaign · Mumbai Q3 Outreach
+          </span>
+          <span className="rounded-md bg-emerald-500/15 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-emerald-300">
+            PREDICTIVE
+          </span>
+        </div>
+        <div className="space-y-2">
+          <ProgressRow label="Dialed" value={4820} max={6000} pct={80} color="fuchsia" />
+          <ProgressRow label="Connected" value={1640} max={6000} pct={27} color="violet" />
+          <ProgressRow label="Qualified" value={412} max={6000} pct={7} color="emerald" />
+        </div>
+        <div className="mt-2.5 flex items-center gap-2">
+          <span className="rounded-md bg-white/5 px-1.5 py-0.5 font-mono text-[9px] text-white/60">
+            AMD ON
+          </span>
+          <span className="rounded-md bg-white/5 px-1.5 py-0.5 font-mono text-[9px] text-white/60">
+            DNC scrubbed
+          </span>
+          <span className="rounded-md bg-white/5 px-1.5 py-0.5 font-mono text-[9px] text-white/60">
+            TRAI compliant
+          </span>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-1">
+        <Tile label="Contact rate" value="34%" tone="emerald" />
+        <Tile label="Dials / agent" value="3×" tone="violet" />
+        <Tile label="Active agents" value="24" tone="fuchsia" />
+      </div>
+    </div>
+  )
+}
+
+function PreviewIVR() {
+  const branches = [
+    { key: "1", label: "Sales", queue: "2 free", color: "text-cyan-300", bg: "bg-cyan-500/10", bd: "border-cyan-500/30" },
+    { key: "2", label: "Support", queue: "1 in queue", color: "text-emerald-300", bg: "bg-emerald-500/10", bd: "border-emerald-500/30" },
+    { key: "3", label: "Billing", queue: "4 in queue", color: "text-amber-300", bg: "bg-amber-500/10", bd: "border-amber-500/30" },
+    { key: "0", label: "Operator", queue: "Live", color: "text-fuchsia-300", bg: "bg-fuchsia-500/10", bd: "border-fuchsia-500/30" },
+  ]
+  return (
+    <div className="grid gap-3 sm:grid-cols-3">
+      <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3 sm:col-span-2">
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-fuchsia-300">
+            Drag-and-drop IVR
+          </span>
+          <span className="font-mono text-[9px] text-white/50">Hindi · English · Tamil</span>
+        </div>
+        <div className="mb-2 flex items-center gap-2">
+          <span className="inline-flex items-center gap-1 rounded-md border border-violet-500/30 bg-violet-500/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-violet-300">
+            Welcome message
+          </span>
+          <span className="h-px flex-1 bg-gradient-to-r from-violet-500/40 to-transparent" />
+          <span className="rounded-md bg-violet-500 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-white">
+            Menu
+          </span>
+        </div>
+        <div className="space-y-1">
+          {branches.map((b) => (
+            <div key={b.key} className="flex items-center gap-2">
+              <span className={cn("flex h-5 w-5 shrink-0 items-center justify-center rounded-md border font-mono text-[10px] font-bold", b.bd, b.bg, b.color)}>
+                {b.key}
+              </span>
+              <span className={cn("text-[11px] font-semibold", b.color)}>{b.label}</span>
+              <div className="h-px flex-1 border-t border-dashed border-white/15" />
+              <span className="font-mono text-[9px] text-white/50">{b.queue}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-1">
+        <Tile label="Self-served" value="42%" tone="emerald" />
+        <Tile label="Avg wait" value="18s" tone="violet" />
+        <Tile label="Languages" value="3" tone="fuchsia" />
+      </div>
+    </div>
+  )
+}
+
+function PreviewWhatsApp() {
+  return (
+    <div className="grid gap-3 sm:grid-cols-5">
+      <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3 sm:col-span-3">
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-fuchsia-300">
+            Campaign · Diwali offer
+          </span>
+          <span className="rounded-md bg-emerald-500/15 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-emerald-300">
+            DPDP · Approved template
+          </span>
+        </div>
+        <div className="space-y-1.5">
+          <div className="flex w-fit max-w-[85%] flex-col gap-0.5 rounded-lg rounded-tl-none bg-emerald-500/15 px-2.5 py-1.5">
+            <span className="text-[11px] text-emerald-50">Hi Priya — flat 25% off on your wishlist this Diwali. Use code DIWALI25.</span>
+            <span className="font-mono text-[9px] text-emerald-300/70">delivered · 11:42</span>
+          </div>
+          <div className="ml-auto flex w-fit max-w-[85%] flex-col gap-0.5 rounded-lg rounded-tr-none bg-white/10 px-2.5 py-1.5">
+            <span className="text-[11px] text-white/85">Send the link?</span>
+            <span className="font-mono text-[9px] text-white/50">read · 11:43</span>
+          </div>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-2 sm:col-span-2 sm:grid-cols-1">
+        <Tile label="Sent" value="48,210" tone="violet" />
+        <Tile label="Read rate" value="92%" tone="emerald" />
+        <Tile label="Replies" value="6,140" tone="fuchsia" />
+      </div>
+    </div>
+  )
+}
+
+function PreviewMonitor() {
+  const agents = [
+    { name: "Anita", duration: "02:14", action: "Listen", actionColor: "text-emerald-300 bg-emerald-500/10 border-emerald-500/30" },
+    { name: "Rohit", duration: "05:42", action: "Whisper", actionColor: "text-sky-300 bg-sky-500/10 border-sky-500/30" },
+    { name: "Priya", duration: "00:38", action: "Barge", actionColor: "text-rose-300 bg-rose-500/10 border-rose-500/30" },
+  ]
+  return (
+    <div className="grid gap-3 sm:grid-cols-5">
+      <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3 sm:col-span-3">
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-fuchsia-300">
+            Live agents
+          </span>
+          <span className="font-mono text-[9px] text-white/50">3 active · 1 wrap-up</span>
+        </div>
+        <div className="space-y-1.5">
+          {agents.map((a, i) => (
+            <div key={a.name} className="flex items-center gap-2">
+              <div className="relative shrink-0">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-semibold text-white">
+                  {a.name[0]}
+                </div>
+                <span className="absolute -bottom-0.5 -right-0.5 flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full border border-[#0a0612] bg-emerald-400" />
                 </span>
               </div>
-
-              {/* Expanded panel — reveals on hover/active */}
-              <div
-                className={cn(
-                  "grid transition-[grid-template-rows] duration-500 ease-out",
-                  isActive ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
-                )}
-              >
-                <div className="overflow-hidden">
-                  <div className="space-y-2 border-t border-white/10 bg-black/20 px-3 py-2.5">
-                    {/* Transcript */}
-                    <div className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5">
-                      <div className="flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-wider text-white/50">
-                        <Sparkles className="h-3 w-3 text-fuchsia-300" />
-                        Live transcript
-                      </div>
-                      <div className="mt-1 text-[12px] text-white">{c.line}</div>
-                      {c.lineEn && (
-                        <div className="mt-0.5 text-[10px] text-white/50">{c.lineEn}</div>
-                      )}
-                    </div>
-
-                    {/* Intent + action */}
-                    <div className="flex items-center justify-between gap-2 text-[11px]">
-                      <span className="flex items-center gap-1.5 text-white/70">
-                        <span className="text-white/40">Intent</span>
-                        <span className="font-medium text-white">{c.intent}</span>
-                      </span>
-                      <span className="rounded-full bg-fuchsia-500/15 px-2 py-0.5 text-[10px] font-medium text-fuchsia-200">
-                        {c.action}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+              <span className="text-[11px] font-medium text-white">{a.name}</span>
+              <span className="font-mono text-[9px] text-white/50">{a.duration}</span>
+              <div className="flex flex-1 items-center justify-center gap-[1.5px]">
+                {Array.from({ length: 12 }).map((_, j) => (
+                  <span
+                    key={j}
+                    className="block w-[2px] animate-wave rounded-full bg-emerald-400/70"
+                    style={{
+                      height: `${4 + Math.abs(Math.sin((j + i) * 0.9)) * 10}px`,
+                      animationDelay: `${(j + i) * 0.07}s`,
+                    }}
+                  />
+                ))}
               </div>
-            </li>
-          )
-        })}
-      </ul>
-
-      {/* Footer hint */}
-      <div className="relative mt-3 flex items-center justify-between text-[10px] text-white/40">
-        <span className="flex items-center gap-1.5">
-          <span className="inline-block h-1 w-1 animate-pulse rounded-full bg-fuchsia-400" />
-          Hover any call to inspect
-        </span>
-        <span className="font-mono">Latency · 280 ms</span>
+              <span className={cn("shrink-0 rounded-md border px-1.5 py-0.5 font-mono text-[9px] font-medium", a.actionColor)}>
+                {a.action}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-2 sm:col-span-2 sm:grid-cols-1">
+        <Tile label="Service level" value="98%" tone="emerald" />
+        <Tile label="In queue" value="4" tone="violet" />
+        <Tile label="QA score" value="A+" tone="fuchsia" />
       </div>
     </div>
   )
 }
 
 /* ------------------------------------------------------------------ */
-/*  StatTile — hover lifts, animates accent border, reveals detail     */
+/*  Reusable helpers                                                   */
 /* ------------------------------------------------------------------ */
 
-function StatTile({
-  value,
-  label,
-  detail,
-  tone,
-}: {
-  value: string
-  label: string
-  detail: string
-  tone: "fuchsia" | "violet"
-}) {
+function Tile({ label, value, tone }: { label: string; value: string; tone: "fuchsia" | "violet" | "emerald" }) {
+  const toneMap = {
+    fuchsia: "from-fuchsia-500/15 to-fuchsia-500/0 text-fuchsia-100",
+    violet: "from-violet-500/15 to-violet-500/0 text-violet-100",
+    emerald: "from-emerald-500/15 to-emerald-500/0 text-emerald-100",
+  }
   return (
-    <div className="group/stat relative isolate overflow-hidden bg-[#0a0612] px-5 py-6 transition-colors duration-300 hover:bg-white/[0.03] sm:px-6 sm:py-7">
-      {/* Top accent line that fills on hover */}
-      <span
-        aria-hidden
-        className={cn(
-          "pointer-events-none absolute inset-x-0 top-0 h-px origin-left scale-x-0 transition-transform duration-500 ease-out group-hover/stat:scale-x-100",
-          tone === "fuchsia"
-            ? "bg-gradient-to-r from-fuchsia-400 via-fuchsia-300 to-transparent"
-            : "bg-gradient-to-r from-violet-400 via-violet-300 to-transparent",
-        )}
-      />
-      {/* Glow on hover */}
-      <span
-        aria-hidden
-        className={cn(
-          "pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-500 group-hover/stat:opacity-100",
-          tone === "fuchsia"
-            ? "bg-[radial-gradient(ellipse_at_top_left,oklch(0.7_0.25_320/0.25),transparent_70%)]"
-            : "bg-[radial-gradient(ellipse_at_top_left,oklch(0.62_0.24_300/0.25),transparent_70%)]",
-        )}
-      />
+    <div
+      className={cn(
+        "group/tile relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br p-2.5 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/20",
+        toneMap[tone],
+      )}
+    >
+      <span className="block font-mono text-[9px] uppercase tracking-wider text-white/45">{label}</span>
+      <span className="mt-0.5 block font-mono text-base font-semibold tabular-nums">{value}</span>
+    </div>
+  )
+}
 
-      <div className="font-mono text-3xl font-semibold tracking-tight text-white transition-transform duration-500 group-hover/stat:-translate-y-0.5 sm:text-4xl">
-        {value}
+function ProgressRow({
+  label,
+  value,
+  max,
+  pct,
+  color,
+}: {
+  label: string
+  value: number
+  max: number
+  pct: number
+  color: "fuchsia" | "violet" | "emerald"
+}) {
+  const colorMap = {
+    fuchsia: "from-fuchsia-500 to-fuchsia-400",
+    violet: "from-violet-500 to-violet-400",
+    emerald: "from-emerald-500 to-emerald-400",
+  }
+  return (
+    <div>
+      <div className="mb-1 flex items-baseline justify-between">
+        <span className="text-[10px] text-white/65">{label}</span>
+        <span className="font-mono text-[10px] text-white/85">
+          {value.toLocaleString()}{" "}
+          <span className="text-white/40">/ {max.toLocaleString()}</span>
+        </span>
       </div>
-      <div className="mt-1 text-[11px] uppercase tracking-[0.14em] text-white/55 sm:text-xs">
-        {label}
-      </div>
-      {/* Detail – reveals on hover */}
-      <div className="mt-2 grid grid-rows-[0fr] transition-[grid-template-rows] duration-500 ease-out group-hover/stat:grid-rows-[1fr]">
-        <div className="overflow-hidden">
-          <div className="text-[11px] leading-snug text-white/65">{detail}</div>
-        </div>
+      <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
+        <div
+          className={cn("h-full rounded-full bg-gradient-to-r transition-[width] duration-700", colorMap[color])}
+          style={{ width: `${pct}%` }}
+        />
       </div>
     </div>
   )

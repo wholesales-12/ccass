@@ -31,42 +31,42 @@ const STEPS = [
   {
     id: 0,
     icon: PhoneIncoming,
-    tag: "Step 01",
-    title: "Customer Calls",
-    desc: "Inbound call lands on Kedeyo via SIP with end-to-end encryption. Zero missed calls, 24×7.",
-    highlights: ["SIP/PSTN ingress", "Auto-answer", "TRAI compliant"],
+    tag: "Step 01 · 5 minutes",
+    title: "Sign Up & Choose Your Number",
+    desc: "Create your workspace, pick a virtual number (any city code in India or 100+ countries) or port your existing one. SMS DLT registration is handled inside the platform.",
+    highlights: ["Indian + global numbers", "Port existing number", "DLT inside platform"],
   },
   {
     id: 1,
-    icon: Bot,
-    tag: "Step 02",
-    title: "AI Voice Bot",
-    desc: "Bot greets the caller in Hindi, English or Tamil, detects intent, and resolves simple queries instantly.",
-    highlights: ["12+ languages", "Intent engine", "Barge-in"],
+    icon: Split,
+    tag: "Step 02 · 15 minutes",
+    title: "Build Your IVR & Add Agents",
+    desc: "Drag-and-drop your IVR menu, upload greetings or generate them with AI text-to-speech in Hindi, English or Tamil, and add agents with role-based permissions.",
+    highlights: ["Drag-and-drop IVR", "AI text-to-speech", "Role-based access"],
   },
   {
     id: 2,
-    icon: Split,
-    tag: "Step 03",
-    title: "Smart Routing",
-    desc: "Skill-based IVR selects the best-matched, available agent using priority, language and past context.",
-    highlights: ["Skill match", "Queue priority", "CRM lookup"],
+    icon: Headphones,
+    tag: "Step 03 · Day 1",
+    title: "Go Live & Start Conversations",
+    desc: "Inbound calls land. Outbound campaigns dial. WhatsApp campaigns send. Recording is on. Live dashboards show what's happening — all from the first hour.",
+    highlights: ["Inbound + outbound", "Recording on", "Live dashboards"],
   },
   {
     id: 3,
-    icon: Headphones,
-    tag: "Step 04",
-    title: "Agent Connects",
-    desc: "Agent gets full context, transcript and CRM data on screen — no repeat questions, faster closure.",
-    highlights: ["Live transcript", "AI assist", "Whisper + barge"],
+    icon: Bot,
+    tag: "Step 04 · Week 1",
+    title: "Add AI in Layers",
+    desc: "Switch on the Voice Bot for high-volume FAQs. Turn on AI summaries. Set up agent assist scripts. Each switch you flip removes hours of repetitive work from your team.",
+    highlights: ["Voice Bot", "AI summaries", "Agent assist"],
   },
   {
     id: 4,
     icon: CheckCircle2,
-    tag: "Step 05",
-    title: "Resolution",
-    desc: "Call wrap-up, auto-tagging, CSAT capture and AI summary pushed straight to your CRM.",
-    highlights: ["AI summary", "CSAT capture", "CRM sync"],
+    tag: "Step 05 · Ongoing",
+    title: "Optimise with Reports",
+    desc: "Use the 50+ reports and AI analytics to find the queues that bleed, the agents that excel, the campaigns that convert and the IVR steps that lose people. Improve. Repeat.",
+    highlights: ["50+ reports", "AI analytics", "Continuous improvement"],
   },
 ] as const
 
@@ -120,19 +120,21 @@ export function WorkflowSection() {
         <div className="mx-auto max-w-3xl text-center">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-primary/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
             <Sparkles className="h-3 w-3" />
-            How CCaaS works
+            How Kedeyo works
           </span>
           <h2 className="mt-4 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-            From first ring to resolution — in{" "}
-            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">seconds</span>
+            Live in 5 minutes. Scale in 5 hours.{" "}
+            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              Optimised in 5 days.
+            </span>
           </h2>
           <p className="mt-4 text-pretty text-base leading-relaxed text-muted-foreground">
-            Scroll to watch a real call flow through Kedeyo. Every conversation is orchestrated across voice bot, IVR,
-            dialer and live agent — with full context, analytics and AI at every step.
+            Most contact center go-lives take six weeks. Kedeyo takes a working morning. Here is the exact path most
+            Indian teams follow from sign-up to first revenue call.
           </p>
           <div className="mt-4 inline-flex items-center gap-1.5 text-xs text-muted-foreground/80">
             <span className="h-1 w-1 animate-pulse rounded-full bg-accent" />
-            Scroll down — the phone follows the steps
+            Scroll through the 5 steps
           </div>
         </div>
 
