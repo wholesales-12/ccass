@@ -12,6 +12,10 @@ import {
   ArrowRight,
   Play,
   CheckCircle2,
+  Truck,
+  Briefcase,
+  Megaphone,
+  Wifi,
   type LucideIcon,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -28,58 +32,104 @@ type Industry = {
 
 const INDUSTRIES: Industry[] = [
   {
-    icon: ShoppingBag,
-    name: "E-commerce",
-    tagline: "Order updates, COD confirmation & returns automation",
-    useCases: ["COD confirmation", "Delivery reminders", "Return pickups"],
-    href: "/industries/ecommerce",
-    gradient: "from-fuchsia-500 to-pink-500",
-    stat: { value: "45%", label: "COD success lift" },
+    icon: Landmark,
+    name: "BFSI",
+    tagline:
+      "Banking, lending, insurance and fintech teams use Kedeyo for collections, lead qualification, IRDAI-compliant tele-verification and RBI-compliant call recording with full audit trails.",
+    useCases: ["Collections", "Tele-verification", "Audit-ready recording"],
+    href: "/industries/bfsi",
+    gradient: "from-amber-500 to-orange-500",
+    stat: { value: "100%", label: "Audit-ready" },
   },
   {
-    icon: GraduationCap,
-    name: "EdTech",
-    tagline: "Lead qualification, demo booking & fee collection",
-    useCases: ["Lead nurturing", "Demo scheduling", "Fee reminders"],
-    href: "/industries/edtech",
-    gradient: "from-violet-500 to-purple-500",
-    stat: { value: "3x", label: "Lead conversion" },
+    icon: Briefcase,
+    name: "Finance & BPO",
+    tagline:
+      "Outsourcers run multi-client campaigns on Kedeyo with strict RBAC, per-client compliance, dialing modes and reports — all under one platform.",
+    useCases: ["Multi-client campaigns", "Strict RBAC", "Per-client reports"],
+    href: "/industries/bpo",
+    gradient: "from-violet-500 to-indigo-500",
+    stat: { value: "3×", label: "More dials / agent" },
+  },
+  {
+    icon: ShoppingBag,
+    name: "E-Commerce & D2C",
+    tagline:
+      "Recover abandoned carts, run COD verification calls, handle order inquiries and broadcast offers on WhatsApp — without growing your team.",
+    useCases: ["Cart recovery", "COD verification", "WhatsApp offers"],
+    href: "/industries/ecommerce",
+    gradient: "from-fuchsia-500 to-pink-500",
+    stat: { value: "+67%", label: "Cart recovery" },
   },
   {
     icon: HeartPulse,
-    name: "Healthcare",
-    tagline: "Appointment booking, reminders & follow-up calls",
-    useCases: ["Appointments", "Rx reminders", "Teleconsult"],
+    name: "Healthcare & Hospitals",
+    tagline:
+      "Manage appointment booking, reminders, no-show recovery and patient support across multiple specialties with HIPAA-aware workflows.",
+    useCases: ["Appointments", "No-show recovery", "Patient support"],
     href: "/industries/healthcare",
     gradient: "from-emerald-500 to-teal-500",
-    stat: { value: "68%", label: "No-show reduction" },
+    stat: { value: "-30%", label: "No-shows" },
   },
   {
-    icon: Landmark,
-    name: "BFSI",
-    tagline: "Loan collections, KYC verification & fraud alerts",
-    useCases: ["Collections", "KYC calls", "Fraud alerts"],
-    href: "/industries/bfsi",
-    gradient: "from-amber-500 to-orange-500",
-    stat: { value: "92%", label: "Collection rate" },
+    icon: GraduationCap,
+    name: "EdTech & Coaching",
+    tagline:
+      "Scale admissions outreach, counselor follow-ups, EMI reminders and parent communications in Hindi, English and regional languages.",
+    useCases: ["Admissions", "Counselor follow-ups", "Fee reminders"],
+    href: "/industries/edtech",
+    gradient: "from-violet-500 to-purple-500",
+    stat: { value: "+85%", label: "Applications" },
   },
   {
     icon: Building2,
-    name: "Real Estate",
-    tagline: "Site visit booking, inquiry routing & lead scoring",
-    useCases: ["Site visits", "Inquiry routing", "Lead scoring"],
+    name: "Real Estate & Property",
+    tagline:
+      "Capture every property inquiry, route by location, run site-visit reminders and broadcast new launches on WhatsApp.",
+    useCases: ["Inquiry capture", "Site-visit reminders", "New launches"],
     href: "/industries/real-estate",
     gradient: "from-sky-500 to-blue-500",
-    stat: { value: "2.5x", label: "Site visit rate" },
+    stat: { value: "+30%", label: "Site visits" },
+  },
+  {
+    icon: Truck,
+    name: "Logistics & Delivery",
+    tagline:
+      "Cut driver-customer coordination chaos with masked calling, delivery confirmations, RTO recovery and live SLA dashboards.",
+    useCases: ["Masked calling", "RTO recovery", "Live SLA"],
+    href: "/industries/logistics",
+    gradient: "from-rose-500 to-red-500",
+    stat: { value: "-50%", label: "Wait times" },
   },
   {
     icon: Plane,
-    name: "Travel",
-    tagline: "Booking confirmations, itinerary support & CSAT",
-    useCases: ["Bookings", "Itinerary help", "CSAT surveys"],
+    name: "Travel & Hospitality",
+    tagline:
+      "Manage booking, modification and refund calls in multiple languages with seasonal scaling that does not require new hardware.",
+    useCases: ["Bookings", "Modifications", "Seasonal scaling"],
     href: "/industries/travel",
-    gradient: "from-rose-500 to-red-500",
-    stat: { value: "4.8/5", label: "CSAT score" },
+    gradient: "from-orange-500 to-amber-500",
+    stat: { value: "24×7", label: "Coverage" },
+  },
+  {
+    icon: Megaphone,
+    name: "Government & Citizen",
+    tagline:
+      "Run citizen helplines, grievance redressal and outbound awareness campaigns with multilingual IVR and full audit logging.",
+    useCases: ["Helplines", "Grievance redressal", "Awareness drives"],
+    href: "/industries/government",
+    gradient: "from-indigo-500 to-violet-500",
+    stat: { value: "Multi", label: "Lingual" },
+  },
+  {
+    icon: Wifi,
+    name: "Telecom & ISP",
+    tagline:
+      "Handle service activation, complaint resolution, retention and upsell at scale — with carrier-grade voice quality.",
+    useCases: ["Activations", "Complaints", "Retention"],
+    href: "/industries/telecom",
+    gradient: "from-cyan-500 to-sky-500",
+    stat: { value: "+45%", label: "Retention" },
   },
 ]
 
@@ -127,13 +177,14 @@ export function IndustriesSection() {
             Industries
           </span>
           <h2 className="mt-4 text-balance text-2xl font-semibold tracking-tight text-foreground sm:text-3xl lg:text-4xl">
-            Built for every Indian{" "}
+            AI Contact Center Software for{" "}
             <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              business vertical
+              Every Indian Industry
             </span>
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Pre-tuned AI voice bots, IVR flows and dashboards ready in minutes
+            Each industry gets a tuned setup — workflows, integrations, scripts, IVR flows and compliance settings
+            designed for the way that industry actually operates.
           </p>
         </div>
 

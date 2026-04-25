@@ -3,24 +3,31 @@ import { Quote, Star } from "lucide-react"
 const TESTIMONIALS = [
   {
     quote:
-      "We went from missing 30% of inbound calls to zero in two weeks. The voice bot handles 70% of queries without any agent involvement.",
-    name: "Rahul Mehta",
-    role: "Head of Support, ShopKart",
-    initials: "RM",
+      "We replaced three tools with Kedeyo and cut our cost per conversation by 40%. The Voice Bot now handles 60% of our inbound calls. Setup took five minutes, not five weeks.",
+    name: "QuickServ",
+    role: "Mumbai · E-Commerce",
+    initials: "QS",
   },
   {
     quote:
-      "Our outbound team dials 3x faster with the predictive dialer. Contact rates jumped from 42% to 81% in the first month.",
-    name: "Anita Kulkarni",
-    role: "VP Sales, FinServe India",
-    initials: "AK",
+      "Our collections team is dialing 3× more accounts since we moved to Kedeyo's predictive dialer. The TRAI compliance and AI QA stack means we sleep better at audit time.",
+    name: "LendFast",
+    role: "Bengaluru · NBFC",
+    initials: "LF",
   },
   {
     quote:
-      "The TRAI-compliant IVR and DNC filtering gave us peace of mind. Setup was genuinely 5 minutes — our IT team was shocked.",
-    name: "Vikram Iyer",
-    role: "COO, EduPrime",
-    initials: "VI",
+      "Appointment no-shows dropped by 30% in two months. Patients get reminders on WhatsApp, confirm with one tap, and our front desk is finally not on the phone all day.",
+    name: "HealthBridge",
+    role: "Delhi · Healthcare",
+    initials: "HB",
+  },
+  {
+    quote:
+      "Counselor productivity went up 85%. The AI receptionist qualifies inbound applicants in Hindi and English, and only the warm ones reach a human counselor.",
+    name: "EduReach",
+    role: "Hyderabad · EdTech",
+    initials: "ER",
   },
 ]
 
@@ -29,13 +36,16 @@ export function Testimonials() {
     <section className="relative bg-secondary/40 py-20 lg:py-28">
       <div className="mx-auto max-w-7xl px-4 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-accent">Trusted by India</span>
+          <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-accent">Real results</span>
           <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            Teams across India ship better conversations with Kedeyo
+            Trusted by India&apos;s fastest-growing teams
           </h2>
+          <p className="mt-3 text-base text-muted-foreground">
+            Real results from real Indian teams running their conversations on Kedeyo.
+          </p>
         </div>
 
-        <div className="mt-12 grid gap-5 lg:grid-cols-3">
+        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {TESTIMONIALS.map((t) => (
             <figure
               key={t.name}

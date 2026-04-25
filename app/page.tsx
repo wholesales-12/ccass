@@ -1,11 +1,13 @@
 import { SiteNav } from "@/components/site-nav"
 import { Hero } from "@/components/hero"
 import { TrustedByStrip } from "@/components/trusted-by-strip"
-import { PlatformExplorer } from "@/components/platform-explorer"
-import { WorkflowSection } from "@/components/workflow-section"
-import { AiShowcase } from "@/components/ai-showcase"
+import { ProblemSection } from "@/components/problem-section"
 import { FeaturesGrid } from "@/components/features-grid"
+import { AiShowcase } from "@/components/ai-showcase"
+import { WhyChooseSection } from "@/components/why-choose-section"
+import { WorkflowSection } from "@/components/workflow-section"
 import { IndustriesSection } from "@/components/industries-section"
+import { ComplianceSection } from "@/components/compliance-section"
 import { Testimonials } from "@/components/testimonials"
 import { FaqSection } from "@/components/faq-section"
 import { CtaSection } from "@/components/cta-section"
@@ -17,11 +19,13 @@ export default function HomePage() {
       <SiteNav />
       <Hero />
       <TrustedByStrip />
+      <ProblemSection />
       <FeaturesGrid />
-      <PlatformExplorer />
-      <WorkflowSection />
       <AiShowcase />
+      <WhyChooseSection />
+      <WorkflowSection />
       <IndustriesSection />
+      <ComplianceSection />
       <Testimonials />
       <FaqSection />
       <CtaSection />
