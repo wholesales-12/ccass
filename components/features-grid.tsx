@@ -25,7 +25,7 @@ type Feature = {
   span: string
   gradient: string
   accent: string
-  visual: "waveform" | "stack" | "dialer" | "queue" | "modes" | "tree" | "chat" | "monitor" | "chart"
+  visual: "receptionist" | "stack" | "dialer" | "queue" | "modes" | "tree" | "chat" | "monitor" | "chart"
 }
 
 const FEATURES: Feature[] = [
@@ -39,7 +39,7 @@ const FEATURES: Feature[] = [
     span: "lg:col-span-8",
     gradient: "from-violet-500/15 via-fuchsia-500/10 to-transparent",
     accent: "text-violet-600",
-    visual: "waveform",
+    visual: "receptionist",
   },
   {
     icon: Cloud,
@@ -136,22 +136,71 @@ const PAUSE = "[animation-play-state:paused] group-hover:[animation-play-state:r
 
 /* ---------------- Visual primitives per card ---------------- */
 
-function Waveform() {
-  const bars = Array.from({ length: 28 })
+function ReceptionistVisual() {
+  const steps = [
+    {
+      label: "Incoming call",
+      meta: "+91 98210 22140",
+      icon: "phone",
+      tone: "bg-fuchsia-500/12 text-fuchsia-700 border-fuchsia-500/30",
+      dot: "bg-fuchsia-500",
+    },
+    {
+      label: "AI answers",
+      meta: "0.6s · Hindi",
+      icon: "bot",
+      tone: "bg-violet-500/12 text-violet-700 border-violet-500/30",
+      dot: "bg-violet-500",
+    },
+    {
+      label: "Qualify caller",
+      meta: "Intent: Booking",
+      icon: "spark",
+      tone: "bg-indigo-500/12 text-indigo-700 border-indigo-500/30",
+      dot: "bg-indigo-500",
+    },
+    {
+      label: "Route to Sales",
+      meta: "Anita · Connected",
+      icon: "check",
+      tone: "bg-emerald-500/12 text-emerald-700 border-emerald-500/30",
+      dot: "bg-emerald-500",
+    },
+  ]
   return (
-    <div className="flex h-20 items-end gap-[3px]">
-      {bars.map((_, i) => (
-        <span
-          key={i}
-          className={`block w-1 rounded-full bg-gradient-to-t from-violet-500 to-fuchsia-400 ${PAUSE}`}
+    <div className="relative space-y-1.5">
+      {/* Vertical connector */}
+      <span aria-hidden className="absolute left-[14px] top-3 bottom-3 w-px bg-gradient-to-b from-fuchsia-500/30 via-violet-500/30 to-emerald-500/30" />
+      {steps.map((s, i) => (
+        <div
+          key={s.label}
+          className={`relative flex items-center gap-2.5 rounded-lg border px-2 py-1.5 text-[10px] ${s.tone} ${PAUSE}`}
           style={{
-            height: `${20 + Math.abs(Math.sin(i * 0.6)) * 70 + (i % 3) * 6}%`,
-            animation: `feat-wave 1.4s ease-in-out ${i * 0.04}s infinite`,
-            transformOrigin: "bottom",
+            animation: `feat-recep-row 4s ease-out ${i * 0.45}s infinite`,
+            opacity: 0.5,
           }}
-        />
+        >
+          <span className={`relative z-10 flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full ${s.dot} text-white`}>
+            <span
+              className={`absolute inset-0 rounded-full ${s.dot} ${PAUSE}`}
+              style={{ animation: `feat-recep-ping 1.6s ease-out ${i * 0.45}s infinite` }}
+            />
+            <span className="relative h-1.5 w-1.5 rounded-full bg-white" />
+          </span>
+          <span className="font-semibold tracking-tight">{s.label}</span>
+          <span className="ml-auto font-mono text-[9px] tabular-nums opacity-80">{s.meta}</span>
+        </div>
       ))}
-      <style>{`@keyframes feat-wave { 0%,100% { transform: scaleY(0.4) } 50% { transform: scaleY(1) } }`}</style>
+      <style>{`
+        @keyframes feat-recep-row {
+          0%, 100% { opacity: 0.5; transform: translateX(0) }
+          ${`${10 + 0 * 18}%, ${28 + 0 * 18}%`} { opacity: 1; transform: translateX(2px) }
+        }
+        @keyframes feat-recep-ping {
+          0% { transform: scale(1); opacity: 0.7 }
+          80%, 100% { transform: scale(2.4); opacity: 0 }
+        }
+      `}</style>
     </div>
   )
 }
@@ -405,8 +454,8 @@ function ChartVisual() {
 
 function FeatureVisual({ kind }: { kind: Feature["visual"] }) {
   switch (kind) {
-    case "waveform":
-      return <Waveform />
+    case "receptionist":
+      return <ReceptionistVisual />
     case "stack":
       return <StackVisual />
     case "dialer":
@@ -443,7 +492,7 @@ export function FeaturesGrid() {
         <div className="mx-auto max-w-3xl text-center">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
             <Sparkles className="h-3 w-3" />
-            Nine core modules
+            Nine core features
           </span>
           <h2 className="mt-4 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-[2.75rem] lg:leading-[1.05]">
             Everything your contact center needs —{" "}
@@ -497,7 +546,7 @@ export function FeaturesGrid() {
                   <div className={`flex h-11 w-11 items-center justify-center rounded-xl bg-white/70 shadow-sm ring-1 ring-border/60 backdrop-blur ${f.accent} transition-transform duration-300 group-hover:scale-105`}>
                     <Icon className="h-5 w-5" />
                   </div>
-                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Module</span>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Feature</span>
                   {f.badge && (
                     <span className="ml-auto mr-12 rounded-md bg-fuchsia-500/15 px-1.5 py-0.5 font-mono text-[9px] font-semibold tracking-wider text-fuchsia-700">
                       {f.badge}
