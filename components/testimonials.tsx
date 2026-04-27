@@ -225,16 +225,6 @@ export function Testimonials() {
           onMouseEnter={() => (pausedRef.current = true)}
           onMouseLeave={() => (pausedRef.current = false)}
         >
-          {/* Cross hairlines forming a + */}
-          <span
-            aria-hidden
-            className="pointer-events-none absolute left-0 right-0 top-1/2 hidden h-px -translate-y-1/2 bg-border md:block"
-          />
-          <span
-            aria-hidden
-            className="pointer-events-none absolute bottom-0 left-1/2 top-0 hidden w-px -translate-x-1/2 bg-border md:block"
-          />
-
           {slides.map((slide, sIdx) => (
             <div
               key={sIdx}
@@ -247,7 +237,7 @@ export function Testimonials() {
                 inset: sIdx === active ? "auto" : 0,
               }}
             >
-              <div className="grid gap-y-10 md:grid-cols-2 md:gap-x-12 md:gap-y-12">
+              <div className="grid gap-x-16 gap-y-14 md:grid-cols-2">
                 {slide.map((t, idx) => (
                   <Item key={t.id} t={t} index={idx} animate={sIdx === active} />
                 ))}
@@ -306,47 +296,45 @@ function Item({
 }) {
   return (
     <figure
-      className="md:px-6"
+      className="group flex items-start gap-5"
       style={{
         animation: animate
           ? `test-item-in 600ms cubic-bezier(.2,.7,.2,1) ${index * 80}ms both`
           : undefined,
       }}
     >
-      {/* Top row: quote glyph + metric */}
-      <div className="flex items-start justify-between gap-4">
-        <Quote
-          aria-hidden
-          className="h-5 w-5 -scale-x-100 text-fuchsia-500/70"
-          strokeWidth={2}
-        />
-        <div className="text-right">
-          <div className="bg-gradient-to-r from-fuchsia-600 via-violet-600 to-pink-600 bg-clip-text text-2xl font-semibold leading-none tracking-tight text-transparent">
-            {t.metric}
-          </div>
-          <div className="mt-1 font-mono text-[9.5px] uppercase tracking-[0.18em] text-muted-foreground">
-            {t.metricLabel}
-          </div>
+      {/* Oversized metric — visual anchor on the left */}
+      <div className="shrink-0 pt-1">
+        <div
+          className="bg-gradient-to-br from-fuchsia-600 via-violet-600 to-pink-600 bg-clip-text font-semibold leading-[0.95] tracking-tight text-transparent transition-transform duration-500 group-hover:-translate-y-0.5"
+          style={{ fontSize: "clamp(2.25rem, 4vw, 3.25rem)" }}
+        >
+          {t.metric}
+        </div>
+        <div className="mt-1.5 font-mono text-[9.5px] uppercase tracking-[0.18em] text-muted-foreground">
+          {t.metricLabel}
         </div>
       </div>
 
-      {/* Quote */}
-      <blockquote
-        className="mt-3 text-pretty text-[15.5px] font-medium leading-relaxed text-foreground"
-      >
-        &ldquo;{t.quote}&rdquo;
-      </blockquote>
-
-      {/* Attribution */}
-      <figcaption className="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-        <span className="text-[14px] font-semibold tracking-tight text-foreground">
-          {t.brand}
-        </span>
-        <span className="h-2.5 w-px bg-border" />
-        <span className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-muted-foreground">
-          {t.industry} · {t.city}
-        </span>
-      </figcaption>
+      {/* Quote + attribution — flowing prose */}
+      <div className="min-w-0 flex-1">
+        <Quote
+          aria-hidden
+          className="h-4 w-4 -scale-x-100 text-fuchsia-500/60"
+          strokeWidth={2}
+        />
+        <blockquote className="mt-2 text-pretty text-[15px] font-medium leading-relaxed text-foreground">
+          {t.quote}
+        </blockquote>
+        <figcaption className="mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+          <span className="text-[13.5px] font-semibold tracking-tight text-foreground">
+            {t.brand}
+          </span>
+          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+            {t.industry} · {t.city}
+          </span>
+        </figcaption>
+      </div>
     </figure>
   )
 }

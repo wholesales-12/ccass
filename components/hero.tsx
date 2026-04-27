@@ -189,6 +189,16 @@ export function Hero() {
           0%   { opacity: 0; transform: translateY(6px) }
           100% { opacity: 1; transform: translateY(0)   }
         }
+        @keyframes hero-msg-pop {
+          0%   { opacity: 0; transform: translateY(10px) scale(0.97) }
+          60%  { opacity: 1; transform: translateY(-2px) scale(1.015) }
+          100% { opacity: 1; transform: translateY(0) scale(1) }
+        }
+        @keyframes hero-msg-sweep {
+          0%   { transform: translateX(-100%); opacity: 0   }
+          30%  {                                opacity: 0.9 }
+          100% { transform: translateX(100%);  opacity: 0   }
+        }
       `}</style>
     </section>
   )
@@ -489,9 +499,10 @@ function ReceptionistStage() {
         </div>
       </div>
 
-      {/* Live caption — single rotating line, pure typography */}
-      <div className="mt-2 min-h-[88px]">
-        <div className="mb-1.5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em]">
+      {/* Live caption — inverts to white when a new message arrives */}
+      <div className="mt-3 min-h-[120px]">
+        {/* Header (stays on dark background) */}
+        <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em]">
           <span
             className={`inline-block h-1.5 w-1.5 rounded-full ${
               callerSpeaking ? "bg-fuchsia-400" : "bg-violet-400"
@@ -502,25 +513,49 @@ function ReceptionistStage() {
           </span>
           <span className="text-white/30">·</span>
           <span className="text-white/45">{turn.langTag}</span>
+          <span className="text-white/30">·</span>
+          <span className="font-semibold text-white/60">
+            {callerSpeaking ? "Speaking" : aiSpeaking ? "Replying" : "Resolved"}
+          </span>
         </div>
+
+        {/* White inverted message — re-flashes on every turn change */}
         <div
           key={turnIdx}
-          className="text-[15px] font-medium leading-snug text-white"
-          style={{ animation: "hero-caption-in 320ms ease-out both" }}
+          className="relative mt-2 overflow-hidden rounded-2xl bg-white px-5 py-4 text-[#0a0612] shadow-[0_18px_40px_-12px_rgba(217,70,239,0.45)]"
+          style={{ animation: "hero-msg-pop 520ms cubic-bezier(.22,.9,.28,1.2) both" }}
         >
-          {turn.primary}
+          {/* Reveal sweep — fuchsia flash that wipes across when message lands */}
           <span
             aria-hidden
-            className="ml-0.5 inline-block h-[1em] w-[2px] translate-y-[2px] bg-white/80 align-baseline"
-            style={{ animation: "hero-caret 0.9s steps(1) infinite" }}
+            className="pointer-events-none absolute inset-y-0 left-0 w-full"
+            style={{
+              background:
+                "linear-gradient(90deg, transparent 0%, rgba(244,114,182,0.45) 45%, rgba(167,139,250,0.45) 55%, transparent 100%)",
+              animation: "hero-msg-sweep 720ms ease-out both",
+            }}
           />
-        </div>
-        <div
-          key={`s-${turnIdx}`}
-          className="mt-1 text-[12px] italic leading-snug text-white/45"
-          style={{ animation: "hero-caption-in 320ms ease-out 60ms both" }}
-        >
-          {turn.secondary}
+          {/* Accent bar on the left edge */}
+          <span
+            aria-hidden
+            className={`absolute inset-y-0 left-0 w-1 ${
+              callerSpeaking
+                ? "bg-gradient-to-b from-fuchsia-500 to-pink-500"
+                : "bg-gradient-to-b from-violet-500 to-fuchsia-500"
+            }`}
+          />
+
+          <p className="relative text-[15.5px] font-semibold leading-snug">
+            {turn.primary}
+            <span
+              aria-hidden
+              className="ml-0.5 inline-block h-[1em] w-[2px] translate-y-[2px] bg-[#0a0612] align-baseline"
+              style={{ animation: "hero-caret 0.9s steps(1) infinite" }}
+            />
+          </p>
+          <p className="relative mt-1 text-[12px] italic leading-snug text-[#0a0612]/55">
+            {turn.secondary}
+          </p>
         </div>
       </div>
 
