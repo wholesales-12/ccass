@@ -86,81 +86,119 @@ const CAPS: Capability[] = [
 
 export function CapabilitiesGrid() {
   return (
-    <section className="relative bg-background py-16 lg:py-20">
+    <section
+      className="relative isolate overflow-hidden bg-[#0a0612] py-20 lg:py-24"
+      style={{
+        backgroundImage:
+          "radial-gradient(ellipse 65% 55% at 100% 0%, oklch(0.45 0.22 305 / 0.55), transparent 65%), radial-gradient(ellipse 60% 50% at 0% 100%, oklch(0.55 0.24 320 / 0.40), transparent 70%)",
+      }}
+    >
+      {/* Ambient dot pattern */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10"
+        className="pointer-events-none absolute inset-0 opacity-[0.10]"
         style={{
           backgroundImage:
-            "radial-gradient(ellipse 50% 40% at 0% 100%, oklch(0.94 0.06 295 / 0.5), transparent 60%)",
+            "radial-gradient(rgba(217,70,239,0.5) 1px, transparent 1px)",
+          backgroundSize: "30px 30px",
+          maskImage:
+            "radial-gradient(ellipse 80% 70% at 50% 50%, black 25%, transparent 80%)",
         }}
       />
 
-      <div className="mx-auto max-w-6xl px-4 lg:px-6">
-        {/* Header */}
-        <div className="grid gap-8 lg:grid-cols-12 lg:gap-12">
-          <div className="lg:col-span-7">
-            <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
-              <Sparkles className="h-3.5 w-3.5" />
-              What it handles for you
+      <div className="relative mx-auto max-w-6xl px-4 lg:px-6">
+        {/* Header — centered */}
+        <div className="mx-auto max-w-3xl text-center">
+          <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-fuchsia-300">
+            <Sparkles className="h-3.5 w-3.5" />
+            What it handles for you
+          </span>
+          <h2 className="mt-5 text-balance text-[2rem] font-semibold leading-[1.05] tracking-tight text-white sm:text-[2.4rem] lg:text-[2.85rem]">
+            Everything a great receptionist does &mdash;{" "}
+            <span className="bg-gradient-to-r from-fuchsia-400 via-violet-300 to-pink-300 bg-clip-text text-transparent">
+              only always on.
             </span>
-            <h2 className="mt-4 text-balance text-[2rem] font-semibold leading-[1.05] tracking-tight text-foreground sm:text-[2.4rem] lg:text-[2.75rem]">
-              Everything a great receptionist does &mdash;{" "}
-              <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-                only always on.
-              </span>
-            </h2>
-          </div>
-          <div className="lg:col-span-5 lg:pt-3">
-            <p className="text-pretty text-[15.5px] leading-relaxed text-muted-foreground">
-              Built for clinics, salons, consultants, retailers and service businesses. Set it up once and the AI
-              handles every inbound call, 24/7/365.
-            </p>
-          </div>
+          </h2>
+          <p className="mx-auto mt-5 max-w-2xl text-pretty text-[15.5px] leading-relaxed text-white/55">
+            Built for clinics, salons, consultants, retailers and service businesses. Set it up once and the AI
+            handles every inbound call, 24/7/365.
+          </p>
         </div>
 
-        {/* 2-column staggered typographic flow */}
-        <div className="mt-14 grid gap-x-12 gap-y-10 sm:grid-cols-2 lg:mt-16 lg:gap-x-16 lg:gap-y-12">
-          {CAPS.map((c, i) => (
-            <Item key={c.title} cap={c} flip={i % 2 === 1} />
-          ))}
+        {/* Decorative connecting rail */}
+        <div className="relative mt-16 lg:mt-20">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 top-1/2 hidden h-px -translate-y-1/2 lg:block"
+            style={{
+              background:
+                "linear-gradient(90deg, transparent 0%, rgba(217,70,239,0.25) 20%, rgba(167,139,250,0.25) 50%, rgba(244,114,182,0.25) 80%, transparent 100%)",
+            }}
+          />
+
+          {/* 4-column constellation grid (no boxes, only typography + glow) */}
+          <div className="grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-4 lg:gap-x-10 lg:gap-y-16">
+            {CAPS.map((c, i) => (
+              <Item key={c.title} cap={c} index={i} />
+            ))}
+          </div>
         </div>
       </div>
     </section>
   )
 }
 
-function Item({ cap, flip }: { cap: Capability; flip: boolean }) {
+function Item({ cap, index }: { cap: Capability; index: number }) {
   const Icon = cap.icon
   return (
-    <div
-      className={`group flex items-start gap-5 ${
-        flip ? "sm:translate-y-10" : ""
-      }`}
-    >
-      {/* Oversized metric — visual anchor */}
-      <div className="shrink-0">
-        <div
-          className="bg-gradient-to-br from-primary via-accent to-primary bg-clip-text font-semibold leading-[0.95] tracking-tight text-transparent transition-transform duration-500 group-hover:-translate-y-0.5"
-          style={{ fontSize: "clamp(2.5rem, 4.5vw, 3.5rem)" }}
-        >
-          {cap.metric}
-        </div>
-        <div className="mt-1.5 flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[0.18em] text-muted-foreground">
-          <Icon className="h-3 w-3 text-primary/70" />
-          {cap.metricLabel}
-        </div>
+    <div className="group relative">
+      {/* Soft glow that lights up on hover — replaces a card surface */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -inset-3 -z-10 rounded-2xl opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100"
+        style={{
+          background:
+            "radial-gradient(ellipse at center, rgba(217,70,239,0.18), transparent 70%)",
+        }}
+      />
+
+      {/* Icon chip — small, ring-only, no fill */}
+      <div className="flex items-center gap-2.5">
+        <span className="inline-flex h-8 w-8 items-center justify-center rounded-full ring-1 ring-fuchsia-400/30 transition-all duration-300 group-hover:ring-fuchsia-300/70 group-hover:ring-2">
+          <Icon className="h-3.5 w-3.5 text-fuchsia-300 transition-colors duration-300 group-hover:text-fuchsia-200" />
+        </span>
+        <span className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.22em] text-white/40">
+          {String(index + 1).padStart(2, "0")} / {cap.metricLabel}
+        </span>
       </div>
 
-      {/* Title + body */}
-      <div className="min-w-0 flex-1 pt-2">
-        <h3 className="text-[16.5px] font-semibold tracking-tight text-foreground">
-          {cap.title}
-        </h3>
-        <p className="mt-1.5 text-[14px] leading-relaxed text-muted-foreground">
-          {cap.description}
-        </p>
+      {/* Oversized gradient metric */}
+      <div
+        className="mt-5 bg-gradient-to-br from-fuchsia-300 via-violet-300 to-pink-200 bg-clip-text font-semibold leading-[0.95] tracking-tight text-transparent transition-transform duration-500 group-hover:-translate-y-0.5"
+        style={{ fontSize: "clamp(2.75rem, 4.5vw, 3.5rem)" }}
+      >
+        {cap.metric}
       </div>
+
+      {/* Hairline accent under metric — fills on hover */}
+      <span
+        aria-hidden
+        className="mt-2 block h-px w-10 bg-white/15 transition-all duration-500 group-hover:w-24"
+        style={{
+          background:
+            "linear-gradient(90deg, rgba(217,70,239,0.7), rgba(167,139,250,0.5), transparent)",
+        }}
+      />
+
+      {/* Title */}
+      <h3 className="mt-4 text-pretty text-[16.5px] font-semibold leading-snug tracking-tight text-white">
+        {cap.title}
+      </h3>
+
+      {/* Description */}
+      <p className="mt-2 text-[13.5px] leading-relaxed text-white/55">
+        {cap.description}
+      </p>
     </div>
   )
 }
