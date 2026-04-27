@@ -8,22 +8,15 @@ import {
   ShieldCheck,
   Activity,
   MapPin,
-  Ear,
-  Brain,
   Sparkles,
-  Send,
-  CheckCircle2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 /**
  * Dark hero — "Every Call Answered. By an AI Receptionist."
- * Right side: a dense, no-box visualization of the AI Receptionist —
- *  - Bold "AI RECEPTIONIST" identity
- *  - Animated capability pipeline (Listen → Understand → Decide → Act → Confirm)
- *  - Live bilingual exchange with twin waveforms
- *  - Real-time intelligence readouts
- *  - Today's impact ticker
+ * Right side: a focused, breathing live-call visualization. No boxes.
+ * Just an identity wordmark + a single rolling 2-turn conversation window
+ * with an animated spotlight waveform on the active speaker.
  */
 
 const STATS = [
@@ -59,7 +52,7 @@ export function Hero() {
       />
 
       <div className="relative mx-auto max-w-7xl px-4 pb-16 pt-8 sm:px-6 sm:pb-20 lg:px-8 lg:pb-24 lg:pt-12">
-        <div className="grid items-start gap-12 lg:grid-cols-12 lg:gap-12">
+        <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-12">
           {/* LEFT */}
           <div className="lg:col-span-7">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[12px] font-medium text-white/85 backdrop-blur-sm">
@@ -152,7 +145,7 @@ export function Hero() {
             </div>
           </div>
 
-          {/* RIGHT — AI Receptionist visualization (no boxes) */}
+          {/* RIGHT — focused live call visualization */}
           <div className="lg:col-span-5">
             <AIReceptionistConsole />
           </div>
@@ -163,18 +156,9 @@ export function Hero() {
 }
 
 /* ─────────────────────  AI Receptionist Console  ─────────────────────
- * A dense, layered visualization that surfaces the AI Receptionist identity
- * and explains capabilities through a live capability pipeline + transcript.
- * No card backgrounds, no borders, no bubbles — pure typography + lines.
+ * Identity wordmark + rolling 2-turn conversation spotlight.
+ * No card chrome. Plenty of breathing room.
  */
-
-const PIPELINE = [
-  { id: "listen", label: "Listen", Icon: Ear },
-  { id: "understand", label: "Understand", Icon: Brain },
-  { id: "decide", label: "Decide", Icon: Sparkles },
-  { id: "act", label: "Act", Icon: Send },
-  { id: "confirm", label: "Confirm", Icon: CheckCircle2 },
-] as const
 
 type Turn = {
   id: string
@@ -183,22 +167,10 @@ type Turn = {
   langTag: string
   primary: string
   secondary: string
-  // pipeline stage that this turn corresponds to
-  stage: number
-  intel?: { tag: string; value: string; conf?: string }
+  intel: { tag: string; value: string; conf?: string }
 }
 
 const TURNS: Turn[] = [
-  {
-    id: "ring",
-    side: "caller",
-    speaker: "Inbound",
-    langTag: "HI",
-    primary: "📞 Ringing · +91 98210 ••••",
-    secondary: "Mumbai · 2:14 PM",
-    stage: 0,
-    intel: { tag: "Pickup", value: "0.4s" },
-  },
   {
     id: "caller-1",
     side: "caller",
@@ -206,7 +178,6 @@ const TURNS: Turn[] = [
     langTag: "HI",
     primary: "मुझे कल 11 बजे appointment book करनी है।",
     secondary: "I want to book an appointment for tomorrow at 11.",
-    stage: 1,
     intel: { tag: "Intent", value: "Booking", conf: "98%" },
   },
   {
@@ -216,7 +187,6 @@ const TURNS: Turn[] = [
     langTag: "EN",
     primary: "11 AM tomorrow with Dr. Sharma is available — shall I confirm?",
     secondary: "कल 11 बजे डॉ. शर्मा के साथ available है।",
-    stage: 2,
     intel: { tag: "Calendar", value: "Slot found" },
   },
   {
@@ -226,27 +196,24 @@ const TURNS: Turn[] = [
     langTag: "HI",
     primary: "हाँ, confirm कर दीजिए।",
     secondary: "Yes, please confirm.",
-    stage: 3,
-    intel: { tag: "Action", value: "book_appointment(11:00)" },
+    intel: { tag: "Action", value: "book(11:00)" },
   },
   {
-    id: "resolved",
+    id: "ai-2",
     side: "ai",
     speaker: "Kedeyo AI",
     langTag: "EN",
     primary: "Booked. SMS + WhatsApp confirmation sent.",
     secondary: "Resolved in 23s.",
-    stage: 4,
-    intel: { tag: "Outcome", value: "Resolved", conf: "23s" },
+    intel: { tag: "Outcome", value: "Resolved" },
   },
 ]
 
-const TICK = 1300
-const HOLD = 2000
+const TICK = 2400
 
 function AIReceptionistConsole() {
-  const [seconds, setSeconds] = useState(0)
-  const [activeTurn, setActiveTurn] = useState(-1) // -1 = idle, 0..n-1 = which turn is current
+  const [seconds, setSeconds] = useState(14)
+  const [active, setActive] = useState(0)
 
   useEffect(() => {
     const t = setInterval(() => setSeconds((s) => s + 1), 1000)
@@ -254,44 +221,35 @@ function AIReceptionistConsole() {
   }, [])
 
   useEffect(() => {
-    let cancelled = false
-    const timeouts: ReturnType<typeof setTimeout>[] = []
-    const run = () => {
-      setActiveTurn(-1)
-      TURNS.forEach((_, i) => {
-        timeouts.push(
-          setTimeout(() => {
-            if (!cancelled) setActiveTurn(i)
-          }, (i + 1) * TICK),
-        )
-      })
-      timeouts.push(setTimeout(run, TURNS.length * TICK + HOLD))
-    }
-    run()
-    return () => {
-      cancelled = true
-      timeouts.forEach(clearTimeout)
-    }
+    const t = setInterval(() => {
+      setActive((a) => (a + 1) % TURNS.length)
+    }, TICK)
+    return () => clearInterval(t)
   }, [])
 
   const mm = String(Math.floor(seconds / 60)).padStart(2, "0")
   const ss = String(seconds % 60).padStart(2, "0")
-  const currentStage = activeTurn >= 0 ? TURNS[activeTurn].stage : -1
+
+  const previous = (active - 1 + TURNS.length) % TURNS.length
+  const next = (active + 1) % TURNS.length
+  const current = TURNS[active]
+  const prevTurn = TURNS[previous]
+  const nextTurn = TURNS[next]
 
   return (
-    <div className="relative mx-auto w-full max-w-[500px]">
+    <div className="relative mx-auto w-full max-w-[480px]">
       {/* Ambient backdrop only */}
       <div
         aria-hidden
         className="pointer-events-none absolute -inset-12 -z-10"
         style={{
           background:
-            "radial-gradient(60% 50% at 50% 0%, oklch(0.55 0.24 300 / 0.35), transparent 75%), radial-gradient(50% 50% at 80% 100%, oklch(0.55 0.24 320 / 0.22), transparent 75%)",
+            "radial-gradient(60% 50% at 50% 0%, oklch(0.55 0.24 300 / 0.35), transparent 75%), radial-gradient(50% 60% at 80% 100%, oklch(0.55 0.24 320 / 0.22), transparent 75%)",
           filter: "blur(12px)",
         }}
       />
 
-      {/* ─── 1. Identity wordmark ─── */}
+      {/* ── Identity wordmark ── */}
       <div className="flex items-end justify-between">
         <div>
           <div className="inline-flex items-center gap-2">
@@ -299,85 +257,36 @@ function AIReceptionistConsole() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
             </span>
-            <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-emerald-300">
+            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-emerald-300">
               Live · {mm}:{ss}
             </span>
           </div>
           <h2
-            className="mt-1.5 font-semibold leading-none tracking-tight"
+            className="mt-2 font-semibold leading-none tracking-tight"
             style={{ fontSize: "clamp(1.625rem, 2.6vw, 2.125rem)" }}
           >
             <span className="bg-gradient-to-r from-white via-fuchsia-200 to-violet-300 bg-clip-text text-transparent">
               AI Receptionist
             </span>
           </h2>
-          <p className="mt-1 text-[12px] text-white/45">
-            Picking up call <span className="font-mono text-white/70">#2,341</span> today
+          <p className="mt-1.5 inline-flex items-center gap-2 text-[11.5px] text-white/55">
+            <Sparkles className="h-3 w-3 text-fuchsia-300" />
+            Picking up call <span className="font-mono text-white/80">#2,341</span> · Mumbai · HI ⇄ EN
           </p>
         </div>
-        <div className="text-right text-[10px] font-semibold uppercase tracking-[0.2em] text-white/45">
-          <div>v2.4 · Mumbai</div>
-          <div className="mt-1 text-fuchsia-300">HI ⇄ EN</div>
-        </div>
       </div>
 
-      {/* ─── 2. Capability pipeline ─── */}
-      <div className="mt-5">
-        <div className="mb-2 flex items-baseline justify-between">
-          <span className="font-mono text-[9.5px] font-bold uppercase tracking-[0.22em] text-white/40">
-            Capabilities running
-          </span>
-          <span className="font-mono text-[9.5px] uppercase tracking-[0.18em] text-white/30">
-            real-time
-          </span>
-        </div>
-        <Pipeline currentStage={currentStage} />
-      </div>
+      {/* ── Spotlight: previous (small, dim) ── */}
+      <div className="mt-10">
+        <MiniTurn turn={prevTurn} />
 
-      {/* ─── 3. Live exchange (fixed height — all turns pre-rendered) ─── */}
-      <div className="mt-5">
-        <div className="mb-2 flex items-baseline justify-between">
-          <span className="font-mono text-[9.5px] font-bold uppercase tracking-[0.22em] text-white/40">
-            Live exchange
-          </span>
-          <span className="font-mono text-[9.5px] uppercase tracking-[0.18em] text-emerald-300/80">
-            Streaming
-          </span>
+        {/* Active turn — large, bright */}
+        <div className="my-5">
+          <ActiveTurn turn={current} />
         </div>
-        <ol className="space-y-2.5">
-          {TURNS.map((t, i) => {
-            const revealed = activeTurn >= i
-            const isCurrent = activeTurn === i
-            return (
-              <TurnRow key={t.id} turn={t} revealed={revealed} active={isCurrent} />
-            )
-          })}
-        </ol>
-      </div>
 
-      {/* ─── 4. Today's impact ticker ─── */}
-      <div className="mt-5 border-t border-white/10 pt-3">
-        <div className="mb-1.5 font-mono text-[9.5px] font-bold uppercase tracking-[0.22em] text-white/40">
-          Today
-        </div>
-        <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1.5 text-[12px]">
-          <span className="text-white/85">
-            <span className="font-mono font-semibold text-fuchsia-300">2,341</span>{" "}
-            <span className="text-white/50">answered</span>
-          </span>
-          <span className="text-white/85">
-            <span className="font-mono font-semibold text-violet-300">412</span>{" "}
-            <span className="text-white/50">booked</span>
-          </span>
-          <span className="text-white/85">
-            <span className="font-mono font-semibold text-pink-300">196</span>{" "}
-            <span className="text-white/50">qualified</span>
-          </span>
-          <span className="text-white/85">
-            <span className="font-mono font-semibold text-emerald-300">0</span>{" "}
-            <span className="text-white/50">missed</span>
-          </span>
-        </div>
+        {/* Next turn (small, dim, italic preview) */}
+        <MiniTurn turn={nextTurn} dimmer />
       </div>
 
       <style jsx global>{`
@@ -393,149 +302,108 @@ function AIReceptionistConsole() {
           0%, 49% { opacity: 1 }
           50%, 100% { opacity: 0 }
         }
-        @keyframes hero-line-flow {
-          0% { background-position: 0% 50% }
-          100% { background-position: 200% 50% }
+        @keyframes hero-spotlight-fade {
+          from { opacity: 0; transform: translateY(6px) }
+          to   { opacity: 1; transform: translateY(0) }
         }
       `}</style>
     </div>
   )
 }
 
-/* ─── Capability pipeline ─── */
-
-function Pipeline({ currentStage }: { currentStage: number }) {
-  return (
-    <div className="relative">
-      {/* Track */}
-      <div className="absolute left-3 right-3 top-[15px] h-px bg-white/10" />
-      {/* Active fill */}
-      <div
-        aria-hidden
-        className="absolute left-3 top-[15px] h-px transition-all duration-700 ease-out"
-        style={{
-          width:
-            currentStage < 0
-              ? "0%"
-              : `calc(${(currentStage / (PIPELINE.length - 1)) * 100}% * (100% - 24px) / 100%)`,
-          background:
-            "linear-gradient(90deg, oklch(0.65 0.25 320), oklch(0.7 0.22 295), oklch(0.75 0.2 200))",
-          backgroundSize: "200% 100%",
-          animation: "hero-line-flow 3s linear infinite",
-        }}
-      />
-      <ol className="relative grid grid-cols-5 gap-1">
-        {PIPELINE.map((p, i) => {
-          const Icon = p.Icon
-          const reached = currentStage >= i
-          const isActive = currentStage === i
-          return (
-            <li key={p.id} className="flex flex-col items-center text-center">
-              <span
-                className={`relative grid h-[30px] w-[30px] place-items-center rounded-full border transition-all ${
-                  reached
-                    ? "border-fuchsia-400/60 bg-fuchsia-500/15 text-fuchsia-200"
-                    : "border-white/10 bg-white/[0.02] text-white/35"
-                }`}
-              >
-                {isActive && (
-                  <span
-                    aria-hidden
-                    className="absolute inset-0 rounded-full bg-fuchsia-500/20"
-                    style={{ animation: "hero-marker-ping 1.6s ease-out infinite" }}
-                  />
-                )}
-                <Icon className="relative h-3.5 w-3.5" strokeWidth={2.4} />
-              </span>
-              <span
-                className={`mt-2 text-[10px] font-semibold tracking-wide transition-colors ${
-                  reached ? "text-white/85" : "text-white/30"
-                }`}
-              >
-                {p.label}
-              </span>
-            </li>
-          )
-        })}
-      </ol>
-    </div>
-  )
-}
-
-/* ─── Single turn row ─── */
-
-function TurnRow({
-  turn,
-  active,
-  revealed,
-}: {
-  turn: Turn
-  active: boolean
-  revealed: boolean
-}) {
+/* ── Active turn (spotlight) ── */
+function ActiveTurn({ turn }: { turn: Turn }) {
   const isAi = turn.side === "ai"
-  const accent = isAi ? "text-violet-300" : "text-fuchsia-300"
   const langPill = isAi
-    ? "bg-violet-500/12 text-violet-200 border-violet-400/25"
-    : "bg-fuchsia-500/12 text-fuchsia-200 border-fuchsia-400/25"
+    ? "bg-violet-500/15 text-violet-200 border-violet-400/30"
+    : "bg-fuchsia-500/15 text-fuchsia-200 border-fuchsia-400/30"
   const monogramCls = isAi
     ? "bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white"
     : "border border-fuchsia-400/40 bg-fuchsia-500/10 text-fuchsia-200"
+  const accent = isAi ? "text-violet-300" : "text-fuchsia-300"
+  const eqTone = isAi ? "violet" : "fuchsia"
 
   return (
-    <li
-      className="relative pl-9 transition-opacity duration-500"
-      style={{ opacity: revealed ? 1 : 0.18 }}
+    <div
+      key={turn.id}
+      className="relative pl-12"
+      style={{ animation: "hero-spotlight-fade 500ms ease-out" }}
     >
+      {/* Left accent rail */}
+      <span
+        aria-hidden
+        className="absolute left-[14px] top-1.5 bottom-1.5 w-px"
+        style={{
+          background: isAi
+            ? "linear-gradient(to bottom, transparent, oklch(0.7 0.22 295), transparent)"
+            : "linear-gradient(to bottom, transparent, oklch(0.7 0.22 320), transparent)",
+        }}
+      />
+
       {/* Avatar marker */}
-      <span className="absolute left-0 top-0 grid h-[26px] w-[26px] place-items-center">
-        {active && (
-          <span
-            aria-hidden
-            className={`absolute inset-0 rounded-full ${
-              isAi ? "bg-violet-500/15" : "bg-fuchsia-500/15"
-            }`}
-            style={{ animation: "hero-marker-ping 1.6s ease-out infinite" }}
-          />
-        )}
+      <span className="absolute left-0 top-0 grid h-[30px] w-[30px] place-items-center">
         <span
-          className={`relative grid h-[26px] w-[26px] place-items-center rounded-full text-[10px] font-bold ${monogramCls}`}
+          aria-hidden
+          className={`absolute inset-0 rounded-full ${
+            isAi ? "bg-violet-500/15" : "bg-fuchsia-500/15"
+          }`}
+          style={{ animation: "hero-marker-ping 1.6s ease-out infinite" }}
+        />
+        <span
+          className={`relative grid h-[30px] w-[30px] place-items-center rounded-full text-[11px] font-bold ${monogramCls}`}
         >
           {isAi ? "AI" : turn.speaker.slice(0, 1)}
         </span>
       </span>
 
-      {/* Header line */}
-      <div className="flex items-baseline gap-2">
-        <span className={`text-[12px] font-semibold ${accent}`}>{turn.speaker}</span>
+      {/* Header */}
+      <div className="flex items-center gap-2">
+        <span className={`text-[13px] font-semibold ${accent}`}>{turn.speaker}</span>
         <span
           className={`rounded-sm border px-1 py-px font-mono text-[9px] font-bold tracking-wider ${langPill}`}
         >
           {turn.langTag}
         </span>
-        {active && <SpeakingDots tone={isAi ? "violet" : "fuchsia"} />}
-        {turn.intel && (
-          <span className="ml-auto inline-flex items-baseline gap-1.5 font-mono text-[9.5px] uppercase tracking-[0.16em] text-white/45">
-            <span className="text-white/35">{turn.intel.tag}</span>
-            <span className="text-pink-200">{turn.intel.value}</span>
-            {turn.intel.conf && <span className="text-emerald-300/85">· {turn.intel.conf}</span>}
-          </span>
-        )}
+        <SpeakingDots tone={eqTone} />
+        <span className="ml-auto inline-flex items-baseline gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-white/55">
+          <span className="text-white/35">{turn.intel.tag}</span>
+          <span className="text-pink-200">{turn.intel.value}</span>
+          {turn.intel.conf && <span className="text-emerald-300/85">· {turn.intel.conf}</span>}
+        </span>
       </div>
 
-      {/* Speech */}
-      <p className="mt-0.5 text-[12.5px] font-medium leading-snug text-white/95">
+      {/* Speech — oversized */}
+      <p className="mt-1.5 text-[16.5px] font-semibold leading-snug tracking-tight text-white">
         {turn.primary}
-        {active && (
-          <span
-            aria-hidden
-            className="ml-0.5 inline-block h-[1em] w-[2px] translate-y-[2px] bg-white/80 align-baseline"
-            style={{ animation: "hero-caret 0.9s steps(1) infinite" }}
-          />
-        )}
+        <span
+          aria-hidden
+          className="ml-0.5 inline-block h-[1em] w-[2px] translate-y-[2px] bg-white/85 align-baseline"
+          style={{ animation: "hero-caret 0.9s steps(1) infinite" }}
+        />
       </p>
-      <p className="text-[10.5px] italic leading-snug text-white/45">{turn.secondary}</p>
-    </li>
+      <p className="mt-1 text-[12px] italic leading-snug text-white/55">{turn.secondary}</p>
+    </div>
+  )
+}
+
+/* ── Compressed previous/next preview ── */
+function MiniTurn({ turn, dimmer }: { turn: Turn; dimmer?: boolean }) {
+  const isAi = turn.side === "ai"
+  const accent = isAi ? "text-violet-300/70" : "text-fuchsia-300/70"
+  return (
+    <div
+      className={`flex items-center gap-3 pl-12 ${dimmer ? "opacity-40" : "opacity-55"}`}
+    >
+      <span
+        className={`text-[10.5px] font-semibold uppercase tracking-[0.16em] ${accent}`}
+      >
+        {turn.speaker}
+      </span>
+      <span aria-hidden className="h-px flex-1 bg-white/10" />
+      <p className="max-w-[60%] truncate text-[11.5px] text-white/55">
+        {dimmer ? `→ ${turn.primary}` : turn.primary}
+      </p>
+    </div>
   )
 }
 
