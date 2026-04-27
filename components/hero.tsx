@@ -277,7 +277,6 @@ function AIReceptionistConsole() {
   const mm = String(Math.floor(seconds / 60)).padStart(2, "0")
   const ss = String(seconds % 60).padStart(2, "0")
   const currentStage = activeTurn >= 0 ? TURNS[activeTurn].stage : -1
-  const visibleTurns = TURNS.slice(0, Math.max(activeTurn + 1, 0))
 
   return (
     <div className="relative mx-auto w-full max-w-[500px]">
@@ -323,7 +322,7 @@ function AIReceptionistConsole() {
       </div>
 
       {/* ─── 2. Capability pipeline ─── */}
-      <div className="mt-7">
+      <div className="mt-5">
         <div className="mb-2 flex items-baseline justify-between">
           <span className="font-mono text-[9.5px] font-bold uppercase tracking-[0.22em] text-white/40">
             Capabilities running
@@ -335,8 +334,8 @@ function AIReceptionistConsole() {
         <Pipeline currentStage={currentStage} />
       </div>
 
-      {/* ─── 3. Live exchange ─── */}
-      <div className="mt-7">
+      {/* ─── 3. Live exchange (fixed height — all turns pre-rendered) ─── */}
+      <div className="mt-5">
         <div className="mb-2 flex items-baseline justify-between">
           <span className="font-mono text-[9.5px] font-bold uppercase tracking-[0.22em] text-white/40">
             Live exchange
@@ -345,18 +344,19 @@ function AIReceptionistConsole() {
             Streaming
           </span>
         </div>
-        <ol className="space-y-3.5">
-          {visibleTurns.map((t, i) => (
-            <TurnRow key={t.id} turn={t} active={i === visibleTurns.length - 1} />
-          ))}
-          {visibleTurns.length === 0 && (
-            <li className="text-[12px] text-white/40">Waiting for inbound call…</li>
-          )}
+        <ol className="space-y-2.5">
+          {TURNS.map((t, i) => {
+            const revealed = activeTurn >= i
+            const isCurrent = activeTurn === i
+            return (
+              <TurnRow key={t.id} turn={t} revealed={revealed} active={isCurrent} />
+            )
+          })}
         </ol>
       </div>
 
       {/* ─── 4. Today's impact ticker ─── */}
-      <div className="mt-7 border-t border-white/10 pt-4">
+      <div className="mt-5 border-t border-white/10 pt-3">
         <div className="mb-1.5 font-mono text-[9.5px] font-bold uppercase tracking-[0.22em] text-white/40">
           Today
         </div>
@@ -464,7 +464,15 @@ function Pipeline({ currentStage }: { currentStage: number }) {
 
 /* ─── Single turn row ─── */
 
-function TurnRow({ turn, active }: { turn: Turn; active: boolean }) {
+function TurnRow({
+  turn,
+  active,
+  revealed,
+}: {
+  turn: Turn
+  active: boolean
+  revealed: boolean
+}) {
   const isAi = turn.side === "ai"
   const accent = isAi ? "text-violet-300" : "text-fuchsia-300"
   const langPill = isAi
@@ -475,7 +483,10 @@ function TurnRow({ turn, active }: { turn: Turn; active: boolean }) {
     : "border border-fuchsia-400/40 bg-fuchsia-500/10 text-fuchsia-200"
 
   return (
-    <li className="relative pl-9">
+    <li
+      className="relative pl-9 transition-opacity duration-500"
+      style={{ opacity: revealed ? 1 : 0.18 }}
+    >
       {/* Avatar marker */}
       <span className="absolute left-0 top-0 grid h-[26px] w-[26px] place-items-center">
         {active && (
@@ -513,7 +524,7 @@ function TurnRow({ turn, active }: { turn: Turn; active: boolean }) {
       </div>
 
       {/* Speech */}
-      <p className="mt-1 text-[13.5px] font-medium leading-snug text-white/95">
+      <p className="mt-0.5 text-[12.5px] font-medium leading-snug text-white/95">
         {turn.primary}
         {active && (
           <span
@@ -523,7 +534,7 @@ function TurnRow({ turn, active }: { turn: Turn; active: boolean }) {
           />
         )}
       </p>
-      <p className="mt-0.5 text-[11px] italic leading-snug text-white/45">{turn.secondary}</p>
+      <p className="text-[10.5px] italic leading-snug text-white/45">{turn.secondary}</p>
     </li>
   )
 }
