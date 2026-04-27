@@ -1,170 +1,179 @@
-"use client"
-
-import { useState } from "react"
-import { Star, ArrowLeft, ArrowRight } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { Star } from "lucide-react"
 
 const TESTIMONIALS = [
   {
-    quote:
-      "We replaced three tools with Kedeyo and cut our cost per conversation by 40%. The Voice Bot now handles 60% of our inbound calls. Setup took five minutes, not five weeks.",
-    metric: { value: "−40%", label: "Cost / conversation" },
+    pull: "Cut cost per conversation by 40% and replaced three tools with one.",
+    metric: "−40% cost",
     name: "QuickServ",
     role: "E-Commerce · Mumbai",
-    initials: "QS",
   },
   {
-    quote:
-      "Our collections team is dialing 3× more accounts since we moved to Kedeyo's predictive dialer. The TRAI compliance and AI QA stack means we sleep better at audit time.",
-    metric: { value: "3×", label: "Accounts dialed" },
+    pull: "Our collections team is dialing 3× more accounts since moving to Kedeyo.",
+    metric: "3× dials",
     name: "LendFast",
     role: "NBFC · Bengaluru",
-    initials: "LF",
   },
   {
-    quote:
-      "Appointment no-shows dropped by 30% in two months. Patients get reminders on WhatsApp, confirm with one tap, and our front desk is finally not on the phone all day.",
-    metric: { value: "−30%", label: "No-shows" },
+    pull: "No-shows dropped 30% in two months. The front desk isn't on the phone all day.",
+    metric: "−30% no-shows",
     name: "HealthBridge",
     role: "Healthcare · Delhi",
-    initials: "HB",
   },
   {
-    quote:
-      "Counselor productivity went up 85%. The AI receptionist qualifies inbound applicants in Hindi and English, and only the warm ones reach a human counselor.",
-    metric: { value: "+85%", label: "Counselor output" },
+    pull: "Counselor productivity went up 85%. Only the warm leads reach a human.",
+    metric: "+85% output",
     name: "EduReach",
     role: "EdTech · Hyderabad",
-    initials: "ER",
+  },
+  {
+    pull: "Setup took five minutes, not five weeks. The Voice Bot now handles 60% of inbound calls.",
+    metric: "60% deflected",
+    name: "QuickServ",
+    role: "E-Commerce · Mumbai",
+  },
+  {
+    pull: "TRAI compliance and AI QA built in — we sleep better at audit time.",
+    metric: "0 audit issues",
+    name: "LendFast",
+    role: "NBFC · Bengaluru",
   },
 ]
 
-export function Testimonials() {
-  const [active, setActive] = useState(0)
-  const t = TESTIMONIALS[active]
-  const next = () => setActive((i) => (i + 1) % TESTIMONIALS.length)
-  const prev = () => setActive((i) => (i - 1 + TESTIMONIALS.length) % TESTIMONIALS.length)
+// Two interleaved rows so the marquees feel naturally varied
+const ROW_A = [TESTIMONIALS[0], TESTIMONIALS[2], TESTIMONIALS[4]]
+const ROW_B = [TESTIMONIALS[1], TESTIMONIALS[3], TESTIMONIALS[5]]
 
+export function Testimonials() {
   return (
-    <section className="relative overflow-hidden bg-secondary/40 py-20 lg:py-28">
-      {/* Soft background glow */}
+    <section className="relative overflow-hidden py-20 lg:py-28">
+      {/* Soft top-and-bottom edge fades for the marquee */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -top-32 left-1/2 h-[420px] w-[820px] -translate-x-1/2 rounded-full opacity-50 blur-3xl"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border to-transparent"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-24 left-1/2 h-[320px] w-[760px] -translate-x-1/2 rounded-full opacity-40 blur-3xl"
         style={{
           background:
-            "radial-gradient(50% 50% at 50% 50%, oklch(0.62 0.24 300 / 0.18), transparent 70%)",
+            "radial-gradient(50% 50% at 50% 50%, oklch(0.62 0.24 300 / 0.15), transparent 70%)",
         }}
       />
 
       <div className="relative mx-auto max-w-7xl px-4 lg:px-8">
-        {/* Header */}
-        <div className="mx-auto max-w-3xl text-center">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-accent">
-            Real results
-          </span>
-          <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            Trusted by India&apos;s fastest-growing teams
-          </h2>
-        </div>
+        {/* Header — left-aligned, editorial */}
+        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <div className="max-w-2xl">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-accent">
+              Real results
+            </span>
+            <h2 className="mt-3 text-balance text-3xl font-semibold leading-[1.1] tracking-tight text-foreground sm:text-5xl">
+              What teams say after they{" "}
+              <span className="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
+                make the switch
+              </span>
+            </h2>
+          </div>
 
-        {/* Featured quote — no card chrome */}
-        <div className="relative mx-auto mt-14 max-w-5xl">
-          {/* Massive watermark quote glyph */}
-          <span
-            aria-hidden
-            className="pointer-events-none absolute -left-2 -top-10 select-none font-serif text-[12rem] leading-none text-primary/10 sm:text-[16rem]"
-          >
-            &ldquo;
-          </span>
-
-          {/* Stars + metric pill */}
-          <div className="relative flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-1">
+          {/* Star rating + count, no card */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-0.5">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star key={i} className="h-4 w-4 fill-accent text-accent" />
               ))}
             </div>
-            <div className="inline-flex items-center gap-2 text-sm">
-              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-2xl font-semibold tracking-tight text-transparent">
-                {t.metric.value}
-              </span>
-              <span className="text-muted-foreground">{t.metric.label}</span>
+            <div className="text-sm leading-tight">
+              <div className="font-semibold text-foreground">4.9 / 5</div>
+              <div className="text-xs text-muted-foreground">across 500+ teams</div>
             </div>
-          </div>
-
-          {/* The quote itself — typography-led, no border */}
-          <blockquote
-            key={t.name}
-            className="relative mt-6 text-balance text-2xl font-medium leading-snug tracking-tight text-foreground sm:text-3xl lg:text-4xl"
-          >
-            <span className="bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent">
-              {t.quote}
-            </span>
-          </blockquote>
-
-          {/* Author + nav */}
-          <div className="mt-10 flex flex-wrap items-center justify-between gap-6">
-            <figcaption className="flex items-center gap-4">
-              <div className="grid h-12 w-12 place-items-center rounded-full bg-gradient-to-br from-primary to-accent text-sm font-semibold text-primary-foreground shadow-[0_8px_24px_-8px_oklch(0.62_0.24_300_/_0.6)]">
-                {t.initials}
-              </div>
-              <div className="leading-tight">
-                <div className="text-base font-semibold text-foreground">{t.name}</div>
-                <div className="text-sm text-muted-foreground">{t.role}</div>
-              </div>
-            </figcaption>
-
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={prev}
-                aria-label="Previous testimonial"
-                className="grid h-10 w-10 place-items-center rounded-full border border-border text-muted-foreground transition-all hover:border-primary/40 hover:text-foreground"
-              >
-                <ArrowLeft className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={next}
-                aria-label="Next testimonial"
-                className="grid h-10 w-10 place-items-center rounded-full border border-border bg-foreground text-background transition-all hover:scale-[1.04]"
-              >
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* Brand strip — subtle dot rail */}
-          <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 border-t border-border/60 pt-8">
-            {TESTIMONIALS.map((item, idx) => {
-              const isActive = idx === active
-              return (
-                <button
-                  key={item.name}
-                  type="button"
-                  onClick={() => setActive(idx)}
-                  className={cn(
-                    "group inline-flex items-center gap-2 text-sm font-medium tracking-tight transition-colors",
-                    isActive ? "text-foreground" : "text-muted-foreground/70 hover:text-foreground",
-                  )}
-                  aria-current={isActive ? "true" : undefined}
-                >
-                  <span
-                    className={cn(
-                      "h-1.5 w-1.5 rounded-full transition-all",
-                      isActive
-                        ? "scale-110 bg-gradient-to-r from-primary to-accent"
-                        : "bg-muted-foreground/30 group-hover:bg-foreground",
-                    )}
-                  />
-                  {item.name}
-                </button>
-              )
-            })}
           </div>
         </div>
       </div>
+
+      {/* Marquee rows — full-width, edge-to-edge with side fades */}
+      <div className="relative mt-16 space-y-10">
+        {/* Side fade masks */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-background via-background to-transparent sm:w-40"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-background via-background to-transparent sm:w-40"
+        />
+
+        <MarqueeRow items={ROW_A} duration="48s" />
+        <MarqueeRow items={ROW_B} duration="56s" reverse />
+      </div>
+
+      <style>{`
+        @keyframes testimonials-scroll-left {
+          from { transform: translate3d(0,0,0); }
+          to   { transform: translate3d(-50%,0,0); }
+        }
+        @keyframes testimonials-scroll-right {
+          from { transform: translate3d(-50%,0,0); }
+          to   { transform: translate3d(0,0,0); }
+        }
+        .testimonials-track:hover > .testimonials-inner {
+          animation-play-state: paused;
+        }
+      `}</style>
     </section>
+  )
+}
+
+function MarqueeRow({
+  items,
+  duration,
+  reverse,
+}: {
+  items: typeof TESTIMONIALS
+  duration: string
+  reverse?: boolean
+}) {
+  // Duplicate the items so the loop is seamless
+  const loop = [...items, ...items]
+  return (
+    <div className="testimonials-track group relative w-full overflow-hidden">
+      <ul
+        className="testimonials-inner flex w-max items-center gap-12 whitespace-nowrap pl-12 pr-12"
+        style={{
+          animation: `${reverse ? "testimonials-scroll-right" : "testimonials-scroll-left"} ${duration} linear infinite`,
+        }}
+      >
+        {loop.map((item, idx) => (
+          <li key={`${item.name}-${idx}`} className="flex items-center gap-12">
+            {/* Quote — pure typography, no card */}
+            <div className="flex max-w-[640px] items-center gap-5">
+              <span
+                aria-hidden
+                className="select-none font-serif text-5xl leading-none text-primary/30"
+              >
+                &ldquo;
+              </span>
+              <div className="min-w-0">
+                <p className="overflow-hidden text-ellipsis whitespace-normal text-base font-medium leading-snug tracking-tight text-foreground sm:text-lg">
+                  {item.pull}
+                </p>
+                <div className="mt-2 flex items-center gap-3 text-xs">
+                  <span className="bg-gradient-to-r from-primary to-accent bg-clip-text font-semibold tracking-tight text-transparent">
+                    {item.metric}
+                  </span>
+                  <span aria-hidden className="h-3 w-px bg-border" />
+                  <span className="font-semibold uppercase tracking-[0.14em] text-foreground">
+                    {item.name}
+                  </span>
+                  <span className="text-muted-foreground">{item.role}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Vertical hairline divider between items */}
+            <span aria-hidden className="h-16 w-px shrink-0 bg-border/60" />
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }
