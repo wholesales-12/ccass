@@ -2,320 +2,502 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import dynamic from "next/dynamic"
 import {
   ArrowRight,
-  Phone,
-  PhoneIncoming,
-  Calendar,
-  ShieldCheck,
-  Globe2,
-  Sparkles,
-  Activity,
   PlayCircle,
+  Phone,
+  Activity,
+  Globe2,
+  ShieldCheck,
+  Sparkles,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
 
-// Three.js scene loaded client-side only (avoids SSR issues with WebGL)
-const Hero3DScene = dynamic(() => import("./hero-3d-scene").then((m) => m.Hero3DScene), {
-  ssr: false,
-  loading: () => <div className="h-full w-full" />,
-})
+/**
+ * AI Receptionist hero.
+ * - LEFT: headline, subhead, KPIs (no boxes — typographic + hairlines).
+ * - RIGHT: live call lifecycle demo that mirrors the left copy
+ *   (pickup time, language switching, intent, booking, confirmation).
+ *   No card surfaces — everything floats on the gradient background,
+ *   separated by hairlines and typography.
+ */
 
-const LANGS = [
-  "हिन्दी",
-  "English",
-  "தமிழ்",
-  "తెలుగు",
-  "বাংলা",
-  "मराठी",
-  "ગુજરાતી",
-  "ಕನ್ನಡ",
-  "ਪੰਜਾਬੀ",
-  "മലയാളം",
+type StageKey = "ring" | "pickup" | "listen" | "decide" | "speak" | "confirm" | "done"
+
+type Event =
+  | {
+      kind: "system"
+      ts: string
+      stage: StageKey
+      icon: "phone" | "lightning" | "check"
+      text: string
+      detail?: string
+    }
+  | {
+      kind: "speech"
+      ts: string
+      stage: StageKey
+      side: "caller" | "ai"
+      lang: "HI" | "EN"
+      primary: string
+      translation: string
+    }
+  | {
+      kind: "action"
+      ts: string
+      stage: StageKey
+      lines: string[]
+    }
+
+const TIMELINE: Event[] = [
+  {
+    kind: "system",
+    ts: "00:00",
+    stage: "ring",
+    icon: "phone",
+    text: "Inbound · Mumbai",
+    detail: "+91 98210 ••••",
+  },
+  {
+    kind: "system",
+    ts: "00:01",
+    stage: "pickup",
+    icon: "lightning",
+    text: "Picked up in 0.4s",
+    detail: "Greeted in Hindi",
+  },
+  {
+    kind: "speech",
+    ts: "00:02",
+    stage: "listen",
+    side: "caller",
+    lang: "HI",
+    primary: "मुझे कल 11 बजे appointment book करनी है।",
+    translation: "I want to book an appointment for tomorrow at 11.",
+  },
+  {
+    kind: "action",
+    ts: "00:04",
+    stage: "decide",
+    lines: [
+      "Language detected · Hindi",
+      "Intent · Book appointment · 96%",
+      "Calendar · 11:00 with Dr. Sharma is open",
+    ],
+  },
+  {
+    kind: "speech",
+    ts: "00:06",
+    stage: "speak",
+    side: "ai",
+    lang: "EN",
+    primary: "Got it — 11 AM tomorrow with Dr. Sharma. Confirming on +91 98210 22140?",
+    translation: "कल सुबह 11 बजे डॉ. शर्मा के साथ — confirm करूं?",
+  },
+  {
+    kind: "speech",
+    ts: "00:09",
+    stage: "confirm",
+    side: "caller",
+    lang: "HI",
+    primary: "हाँ, confirm कर दीजिए।",
+    translation: "Yes, please confirm.",
+  },
+  {
+    kind: "system",
+    ts: "00:11",
+    stage: "done",
+    icon: "check",
+    text: "Booked · Tue 11:00 · Dr. Sharma",
+    detail: "SMS + WhatsApp sent · Lead tagged returning",
+  },
 ]
 
+const STAGES: { key: StageKey; label: string }[] = [
+  { key: "ring", label: "Ring" },
+  { key: "pickup", label: "Pickup" },
+  { key: "listen", label: "Listen" },
+  { key: "decide", label: "Decide" },
+  { key: "speak", label: "Reply" },
+  { key: "confirm", label: "Confirm" },
+  { key: "done", label: "Done" },
+]
+
+const STEP_MS = 1500
+
 export function ReceptionistHero() {
-  const [lang, setLang] = useState(0)
+  const [step, setStep] = useState(0)
+  const [seconds, setSeconds] = useState(18)
   const [bookings, setBookings] = useState(38)
 
+  // Reveal timeline events one at a time, then loop.
   useEffect(() => {
-    const a = setInterval(() => setLang((i) => (i + 1) % LANGS.length), 1500)
-    const b = setInterval(() => setBookings((n) => n + 1), 4200)
-    return () => {
-      clearInterval(a)
-      clearInterval(b)
-    }
+    const t = setInterval(() => {
+      setStep((s) => (s + 1) % (TIMELINE.length + 2)) // pause at end before loop
+    }, STEP_MS)
+    return () => clearInterval(t)
   }, [])
+
+  // Live call timer.
+  useEffect(() => {
+    const t = setInterval(() => setSeconds((s) => s + 1), 1000)
+    return () => clearInterval(t)
+  }, [])
+
+  // Bookings ticker.
+  useEffect(() => {
+    const t = setInterval(() => setBookings((n) => n + 1), 6800)
+    return () => clearInterval(t)
+  }, [])
+
+  const mm = String(Math.floor(seconds / 60)).padStart(2, "0")
+  const ss = String(seconds % 60).padStart(2, "0")
+  const visibleEvents = TIMELINE.slice(0, Math.min(step + 1, TIMELINE.length))
+  const currentStage =
+    step < TIMELINE.length ? TIMELINE[step].stage : TIMELINE[TIMELINE.length - 1].stage
 
   return (
     <section
       id="top"
-      className="relative isolate overflow-hidden bg-[#0a0612] pb-12 pt-24 lg:pb-20 lg:pt-28"
+      className="relative isolate overflow-hidden bg-[#0a0612] pb-16 pt-24 lg:pb-24 lg:pt-28"
       style={{
         backgroundImage:
-          "radial-gradient(ellipse 80% 60% at 50% 0%, oklch(0.45 0.22 295 / 0.45), transparent 65%), radial-gradient(ellipse 60% 50% at 80% 90%, oklch(0.62 0.24 300 / 0.3), transparent 70%), radial-gradient(ellipse 60% 50% at 10% 80%, oklch(0.55 0.2 280 / 0.25), transparent 70%)",
+          "radial-gradient(ellipse 80% 60% at 0% 0%, oklch(0.45 0.22 295 / 0.55), transparent 65%), radial-gradient(ellipse 60% 50% at 100% 100%, oklch(0.62 0.24 300 / 0.35), transparent 70%)",
       }}
     >
       {/* Ambient grid */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.1]"
+        className="pointer-events-none absolute inset-0 opacity-[0.08]"
         style={{
           backgroundImage:
-            "linear-gradient(to right, rgba(168,85,247,0.35) 1px, transparent 1px), linear-gradient(to bottom, rgba(168,85,247,0.35) 1px, transparent 1px)",
+            "linear-gradient(to right, rgba(168,85,247,0.4) 1px, transparent 1px), linear-gradient(to bottom, rgba(168,85,247,0.4) 1px, transparent 1px)",
           backgroundSize: "56px 56px",
-          maskImage: "radial-gradient(ellipse 75% 70% at 50% 50%, black 30%, transparent 80%)",
+          maskImage: "radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 80%)",
         }}
       />
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* TOP: Centered headline */}
-        <div className="mx-auto max-w-4xl text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-fuchsia-400/20 bg-fuchsia-500/[0.06] px-3 py-1 text-[11px] font-medium text-fuchsia-200 backdrop-blur sm:text-xs">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-fuchsia-400 opacity-75" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-fuchsia-400" />
-            </span>
-            AI Receptionist · Live in 5 minutes
-          </div>
+        <div className="grid items-center gap-16 lg:grid-cols-12 lg:gap-12">
+          {/* ───────── LEFT ───────── */}
+          <div className="lg:col-span-6">
+            {/* Eyebrow */}
+            <div className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-fuchsia-300/85">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-fuchsia-400 opacity-75" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-fuchsia-400" />
+              </span>
+              <span>Live · 5-minute setup</span>
+            </div>
 
-          <h1 className="mt-5 text-balance text-[2.25rem] font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-[4rem]">
-            The voice that{" "}
-            <span className="bg-gradient-to-r from-fuchsia-300 via-violet-300 to-fuchsia-200 bg-clip-text text-transparent">
-              never sleeps.
-            </span>
-          </h1>
+            {/* Headline */}
+            <h1 className="mt-5 text-balance text-[2.5rem] font-semibold leading-[1.02] tracking-tight text-white sm:text-[3.25rem] lg:text-[3.75rem]">
+              Every call answered.
+              <br />
+              <span className="bg-gradient-to-r from-fuchsia-300 via-violet-300 to-pink-300 bg-clip-text text-transparent">
+                In a voice that sounds human.
+              </span>
+            </h1>
 
-          <p className="mx-auto mt-4 max-w-2xl text-pretty text-sm leading-relaxed text-white/70 sm:text-base">
-            An AI receptionist that picks up every call in under a second, books appointments, qualifies leads
-            and speaks{" "}
-            <span className="font-semibold text-white">12+ Indian languages</span> &mdash; 24&times;7.
-          </p>
+            {/* Subhead */}
+            <p className="mt-5 max-w-xl text-pretty text-base leading-relaxed text-white/70 sm:text-[17px]">
+              An AI Receptionist that picks up in under a second, books appointments,
+              qualifies leads and speaks{" "}
+              <span className="font-semibold text-white">12+ Indian languages</span> &mdash; 24&times;7,
+              every day of the year.
+            </p>
 
-          <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-            <Button
-              size="lg"
-              className="h-11 rounded-full bg-white px-6 text-sm font-semibold text-[#0a0612] shadow-[0_10px_40px_-10px_rgba(232,121,249,0.6)] hover:bg-white/90 sm:h-12"
-              asChild
-            >
-              <Link href="#demo">
-                Start free trial
-                <ArrowRight className="ml-1 h-4 w-4" />
-              </Link>
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="h-11 rounded-full border-white/20 bg-white/5 px-6 text-sm font-medium text-white backdrop-blur hover:bg-white/10 hover:text-white sm:h-12"
-              asChild
-            >
-              <Link href="#how-it-works">
-                <PlayCircle className="mr-1.5 h-4 w-4" />
+            {/* CTAs */}
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <Button
+                size="lg"
+                className="h-12 rounded-full bg-white px-6 text-sm font-semibold text-[#0a0612] shadow-[0_10px_40px_-10px_rgba(232,121,249,0.6)] hover:bg-white/90"
+                asChild
+              >
+                <Link href="#demo">
+                  Start free trial
+                  <ArrowRight className="ml-1 h-4 w-4" />
+                </Link>
+              </Button>
+              <Link
+                href="#how-it-works"
+                className="group inline-flex items-center gap-2 text-sm font-semibold text-white/85 hover:text-white"
+              >
+                <PlayCircle className="h-4 w-4 transition-transform group-hover:scale-110" />
                 Hear a sample call
+                <span className="text-white/40 transition-transform group-hover:translate-x-0.5">→</span>
               </Link>
-            </Button>
-          </div>
-        </div>
+            </div>
 
-        {/* MIDDLE: 3D scene with floating UI cards */}
-        <div className="relative mt-10 lg:mt-14">
-          <div className="relative mx-auto h-[420px] w-full max-w-5xl sm:h-[480px] lg:h-[560px]">
-            {/* Bottom radial glow under orb */}
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3"
-              style={{
-                background:
-                  "radial-gradient(ellipse 60% 50% at 50% 100%, oklch(0.62 0.24 300 / 0.45), transparent 70%)",
-              }}
-            />
-
-            <Hero3DScene />
-
-            {/* Floating UI cards positioned around the orb */}
-            <FloatingCard
-              className="left-2 top-6 sm:left-6 lg:left-10"
-              animationDelay="0s"
-              accent="fuchsia"
-            >
-              <div className="flex items-center gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-300">
-                  <PhoneIncoming className="h-3.5 w-3.5" />
-                </span>
-                <div>
-                  <div className="text-[9px] font-semibold uppercase tracking-wider text-white/50">
-                    Incoming &middot; Mumbai
-                  </div>
-                  <div className="font-mono text-[11px] text-white">+91 98210 22140</div>
-                </div>
-              </div>
-            </FloatingCard>
-
-            <FloatingCard
-              className="right-2 top-10 sm:right-6 lg:right-10"
-              animationDelay="0.6s"
-              accent="violet"
-            >
-              <div className="flex items-center gap-2">
-                <Globe2 className="h-3.5 w-3.5 text-violet-300" />
-                <div>
-                  <div className="text-[9px] font-semibold uppercase tracking-wider text-white/50">
-                    Detected
-                  </div>
-                  <div className="relative h-4 w-[80px] overflow-hidden text-[12px] font-semibold">
-                    {LANGS.map((l, i) => (
-                      <span
-                        key={l}
-                        className={cn(
-                          "absolute inset-0 flex items-center text-white transition-all duration-500",
-                          i === lang ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0",
-                        )}
-                      >
-                        {l}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </FloatingCard>
-
-            <FloatingCard
-              className="bottom-24 left-2 sm:bottom-28 sm:left-6 lg:bottom-32 lg:left-12"
-              animationDelay="1.2s"
-              accent="fuchsia"
-            >
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-                <div>
-                  <div className="text-[9px] font-semibold uppercase tracking-wider text-white/50">
-                    Intent
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[11px] font-medium text-white">Book appointment</span>
-                    <span className="rounded-full bg-emerald-500/20 px-1.5 py-px text-[9px] font-semibold text-emerald-300">
-                      96%
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </FloatingCard>
-
-            <FloatingCard
-              className="bottom-20 right-2 sm:bottom-24 sm:right-6 lg:bottom-28 lg:right-12"
-              animationDelay="1.8s"
-              accent="violet"
-            >
-              <div className="flex items-center gap-2">
-                <Calendar className="h-3.5 w-3.5 text-violet-300" />
-                <div>
-                  <div className="text-[9px] font-semibold uppercase tracking-wider text-white/50">
-                    Booked today
-                  </div>
-                  <div className="font-mono text-[14px] font-semibold tabular-nums text-white">
-                    {bookings}
-                  </div>
-                </div>
-              </div>
-            </FloatingCard>
-
-            {/* Bottom-center latency pill */}
-            <div
-              className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full border border-emerald-400/25 bg-emerald-500/[0.08] px-3 py-1.5 backdrop-blur-xl"
-              style={{ animation: "rec-latency 6s ease-in-out infinite" }}
-            >
-              <div className="flex items-center gap-2 text-[11px]">
-                <Activity className="h-3 w-3 text-emerald-300" />
-                <span className="font-mono font-semibold text-emerald-300">280ms</span>
-                <span className="text-white/50">avg pickup</span>
-              </div>
+            {/* KPI rail — typographic, no boxes, separated by hairlines */}
+            <div className="mt-12 flex flex-wrap items-end gap-x-8 gap-y-5 border-t border-white/10 pt-6">
+              <Kpi value="<1s" label="Pickup" icon={<Activity className="h-3 w-3" />} />
+              <Kpi value="12+" label="Languages" icon={<Globe2 className="h-3 w-3" />} />
+              <Kpi value="100%" label="Calls answered" icon={<Phone className="h-3 w-3" />} />
+              <Kpi value="68%" label="AI resolved" icon={<Sparkles className="h-3 w-3" />} />
+              <Kpi value="DPDP" label="Compliant" icon={<ShieldCheck className="h-3 w-3" />} />
             </div>
           </div>
-        </div>
 
-        {/* BOTTOM: Trust strip */}
-        <div className="mt-2 lg:mt-6">
-          <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-x-6 gap-y-3 rounded-2xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 backdrop-blur">
-            <TrustItem icon={<Phone className="h-3.5 w-3.5" />} value="100%" label="Calls answered" />
-            <Divider />
-            <TrustItem icon={<Activity className="h-3.5 w-3.5" />} value="<1s" label="Pickup time" />
-            <Divider />
-            <TrustItem icon={<Globe2 className="h-3.5 w-3.5" />} value="12+" label="Languages" />
-            <Divider />
-            <TrustItem icon={<ShieldCheck className="h-3.5 w-3.5" />} value="DPDP" label="Compliant" />
-            <Divider />
-            <TrustItem icon={<Sparkles className="h-3.5 w-3.5" />} value="68%" label="AI resolved" />
+          {/* ───────── RIGHT — live call lifecycle ───────── */}
+          <div className="lg:col-span-6">
+            <div className="relative mx-auto w-full max-w-[560px]">
+              {/* Glow backdrop */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute -inset-x-6 -inset-y-10 -z-10"
+                style={{
+                  background:
+                    "radial-gradient(ellipse 70% 60% at 50% 50%, oklch(0.55 0.25 295 / 0.35), transparent 70%)",
+                }}
+              />
+
+              {/* ── Header ── */}
+              <div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-[0.18em]">
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                  </span>
+                  <span className="font-semibold text-emerald-300">Live</span>
+                  <span className="text-white/30">·</span>
+                  <span className="text-white/60 tabular-nums">{mm}:{ss}</span>
+                </div>
+                <div className="text-right text-white/45">
+                  <span className="text-white/70">AI Receptionist</span>{" "}
+                  <span className="text-white/30">·</span>{" "}
+                  <span>Inbound</span>
+                </div>
+              </div>
+
+              {/* ── Stage rail — animated 7-stage progress ── */}
+              <ol className="mt-5 grid grid-cols-7 items-center gap-1">
+                {STAGES.map((s, i) => {
+                  const stageIdx = STAGES.findIndex((x) => x.key === currentStage)
+                  const reached = i <= stageIdx
+                  const isCurrent = i === stageIdx
+                  return (
+                    <li key={s.key} className="flex flex-col items-center gap-1.5">
+                      <span
+                        className={`h-[3px] w-full rounded-full transition-all duration-500 ${
+                          reached
+                            ? "bg-gradient-to-r from-fuchsia-500 via-violet-400 to-fuchsia-400"
+                            : "bg-white/10"
+                        }`}
+                        style={{
+                          boxShadow: isCurrent
+                            ? "0 0 14px 1px rgba(232,121,249,0.6)"
+                            : undefined,
+                        }}
+                      />
+                      <span
+                        className={`text-[9px] font-semibold uppercase tracking-[0.18em] transition-colors ${
+                          isCurrent
+                            ? "text-fuchsia-200"
+                            : reached
+                              ? "text-white/60"
+                              : "text-white/30"
+                        }`}
+                      >
+                        {s.label}
+                      </span>
+                    </li>
+                  )
+                })}
+              </ol>
+
+              {/* ── Conversation feed ── */}
+              <div className="mt-7">
+                <ol className="space-y-4">
+                  {TIMELINE.map((ev, i) => {
+                    const revealed = i < visibleEvents.length
+                    const isLatest = i === visibleEvents.length - 1
+                    return (
+                      <li
+                        key={i}
+                        className="transition-all duration-500"
+                        style={{
+                          opacity: revealed ? 1 : 0.18,
+                          transform: revealed ? "translateY(0)" : "translateY(4px)",
+                        }}
+                      >
+                        <FeedRow event={ev} active={isLatest} />
+                      </li>
+                    )
+                  })}
+                </ol>
+              </div>
+
+              {/* ── Footer outcome rail ── */}
+              <div className="mt-7 flex flex-wrap items-baseline gap-x-6 gap-y-2 border-t border-white/10 pt-4 font-mono text-[10.5px] uppercase tracking-[0.18em]">
+                <span className="font-semibold text-emerald-300">Resolved · 23s</span>
+                <span className="text-white/30">·</span>
+                <span className="text-white/55">
+                  <span className="font-semibold tabular-nums text-white">{bookings}</span> booked today
+                </span>
+                <span className="text-white/30">·</span>
+                <span className="text-white/55">
+                  <span className="font-semibold text-white">&lt;1s</span> avg pickup
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       <style>{`
-        @keyframes rec-latency {
-          0%, 100% { transform: translate(-50%, 0) }
-          50% { transform: translate(-50%, -8px) }
+        @keyframes hero-row-in {
+          from { opacity: 0; transform: translateY(6px) }
+          to   { opacity: 1; transform: translateY(0)  }
         }
-        @keyframes rec-card-float {
-          0%, 100% { transform: translateY(0) }
-          50% { transform: translateY(-10px) }
+        @keyframes hero-caret-blink {
+          0%, 50%   { opacity: 1 }
+          51%, 100% { opacity: 0 }
         }
       `}</style>
     </section>
   )
 }
 
-function FloatingCard({
-  children,
-  className,
-  animationDelay,
-  accent,
+/* ─────────── Sub-components ─────────── */
+
+function Kpi({
+  value,
+  label,
+  icon,
 }: {
-  children: React.ReactNode
-  className?: string
-  animationDelay?: string
-  accent: "fuchsia" | "violet"
+  value: string
+  label: string
+  icon: React.ReactNode
 }) {
   return (
-    <div
-      className={cn(
-        "absolute z-10 rounded-xl border bg-[#120a1f]/80 px-3 py-2 shadow-2xl backdrop-blur-xl",
-        accent === "fuchsia"
-          ? "border-fuchsia-400/20 shadow-[0_10px_40px_-15px_rgba(232,121,249,0.4)]"
-          : "border-violet-400/20 shadow-[0_10px_40px_-15px_rgba(167,139,250,0.4)]",
-        className,
-      )}
-      style={{
-        animation: "rec-card-float 5s ease-in-out infinite",
-        animationDelay,
-      }}
-    >
-      {children}
+    <div className="flex items-baseline gap-2">
+      <span className="font-mono text-2xl font-semibold leading-none text-white">{value}</span>
+      <span className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/45">
+        <span className="text-fuchsia-300/80">{icon}</span>
+        {label}
+      </span>
     </div>
   )
 }
 
-function TrustItem({
-  icon,
-  value,
-  label,
-}: {
-  icon: React.ReactNode
-  value: string
-  label: string
-}) {
+function FeedRow({ event, active }: { event: Event; active: boolean }) {
+  if (event.kind === "system") {
+    const Icon = event.icon
+    return (
+      <div className="flex items-start gap-3">
+        <Stamp ts={event.ts} />
+        <span
+          className="mt-1 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-fuchsia-400/40 bg-fuchsia-500/10 text-fuchsia-300"
+          aria-hidden
+        >
+          {Icon === "phone" && <Phone className="h-2.5 w-2.5" />}
+          {Icon === "lightning" && (
+            <span className="text-[10px] font-bold leading-none">⚡</span>
+          )}
+          {Icon === "check" && (
+            <span className="text-[10px] font-bold leading-none text-emerald-300">✓</span>
+          )}
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-[13px] font-semibold leading-snug text-white">{event.text}</p>
+          {event.detail && (
+            <p className="mt-0.5 font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/45">
+              {event.detail}
+            </p>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  if (event.kind === "action") {
+    return (
+      <div className="flex items-start gap-3">
+        <Stamp ts={event.ts} />
+        <span
+          aria-hidden
+          className="mt-1 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-violet-400/40 bg-violet-500/15 text-violet-200"
+        >
+          <span className="text-[10px] font-bold leading-none">⚡</span>
+        </span>
+        <ul className="min-w-0 flex-1 space-y-1">
+          {event.lines.map((line) => (
+            <li
+              key={line}
+              className="font-mono text-[11.5px] leading-snug tracking-tight text-white/75"
+            >
+              <span className="text-violet-300/80">AI ·</span>{" "}
+              {/* Highlight the value tail (after last separator " · ") */}
+              {(() => {
+                const parts = line.split(" · ")
+                const head = parts.slice(0, -1).join(" · ")
+                const tail = parts[parts.length - 1]
+                return (
+                  <>
+                    <span className="text-white/55">{head}</span>
+                    {head && <span className="text-white/30"> · </span>}
+                    <span className="font-semibold text-white">{tail}</span>
+                  </>
+                )
+              })()}
+            </li>
+          ))}
+        </ul>
+      </div>
+    )
+  }
+
+  // speech
+  const isAi = event.side === "ai"
+  const accent = isAi ? "text-violet-300" : "text-fuchsia-300"
+  const monogramCls = isAi
+    ? "bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white"
+    : "border border-fuchsia-400/40 bg-fuchsia-500/10 text-fuchsia-200"
+  const langCls = isAi
+    ? "border-violet-400/30 bg-violet-500/10 text-violet-200"
+    : "border-fuchsia-400/30 bg-fuchsia-500/10 text-fuchsia-200"
+
   return (
-    <div className="flex items-center gap-2">
-      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/[0.06] text-fuchsia-300">
-        {icon}
+    <div className="flex items-start gap-3">
+      <Stamp ts={event.ts} />
+      <span
+        aria-hidden
+        className={`mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[9.5px] font-bold leading-none ${monogramCls}`}
+      >
+        {isAi ? "AI" : "R"}
       </span>
-      <div className="leading-tight">
-        <div className="font-mono text-sm font-semibold text-white">{value}</div>
-        <div className="text-[10px] text-white/50">{label}</div>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span className={`text-[10px] font-semibold uppercase tracking-[0.2em] ${accent}`}>
+            {isAi ? "Kedeyo" : "Caller"}
+          </span>
+          <span
+            className={`rounded-full border px-1.5 py-px font-mono text-[9px] font-semibold ${langCls}`}
+          >
+            {event.lang}
+          </span>
+        </div>
+        <p className="mt-1 text-[13.5px] font-medium leading-snug text-white">
+          {event.primary}
+          {active && (
+            <span
+              aria-hidden
+              className="ml-0.5 inline-block h-[0.95em] w-[2px] translate-y-[2px] bg-white align-baseline"
+              style={{ animation: "hero-caret-blink 0.9s steps(1) infinite" }}
+            />
+          )}
+        </p>
+        <p className="mt-0.5 text-[11px] italic leading-snug text-white/45">{event.translation}</p>
       </div>
     </div>
   )
 }
 
-function Divider() {
-  return <span className="hidden h-6 w-px bg-white/10 sm:block" />
+function Stamp({ ts }: { ts: string }) {
+  return (
+    <span className="mt-1 w-10 shrink-0 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-white/35">
+      {ts}
+    </span>
+  )
 }

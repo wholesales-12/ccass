@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { ArrowRight, Brain, CheckCircle2, PhoneIncoming, Workflow, Zap } from "lucide-react"
+import { Brain, PhoneIncoming, Workflow, Zap } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const STEPS = [
@@ -12,8 +12,7 @@ const STEPS = [
     description:
       "Your existing business number rings into Kedeyo. The AI picks up in under a second with a greeting you scripted.",
     sample: "&ldquo;Thanks for calling Sharma Dental — how can I help?&rdquo;",
-    tag: "00:01",
-    tagLabel: "Pickup time",
+    tag: "0.4s · pickup",
   },
   {
     n: "02",
@@ -21,9 +20,9 @@ const STEPS = [
     title: "Intent detected",
     description:
       "Real-time NLU understands whether the caller wants to book, cancel, ask a question, or reach a person — and responds naturally.",
-    sample: "Intent: <span class='text-foreground font-semibold'>Book appointment</span> · Confidence 96%",
-    tag: "NLU",
-    tagLabel: "Real-time",
+    sample:
+      "Intent: <span class='font-semibold text-foreground'>Book appointment</span> &middot; Confidence 96%",
+    tag: "Real-time NLU",
   },
   {
     n: "03",
@@ -31,9 +30,9 @@ const STEPS = [
     title: "Action taken",
     description:
       "The AI books, answers, routes or takes a message — and logs everything with transcript, sentiment and lead tag in your dashboard.",
-    sample: "Action: <span class='text-foreground font-semibold'>Calendar event created</span> · SMS sent · Logged",
-    tag: "Done",
-    tagLabel: "Auto-completed",
+    sample:
+      "Action: <span class='font-semibold text-foreground'>Calendar event created</span> &middot; SMS sent &middot; Logged",
+    tag: "Auto-completed",
   },
 ]
 
@@ -46,109 +45,121 @@ export function HowItWorks() {
   }, [])
 
   return (
-    <section className="relative border-y bg-muted/40 py-16 lg:py-24">
+    <section
+      id="how-it-works"
+      className="relative border-y border-border/60 bg-muted/30 py-20 lg:py-28"
+    >
       <div className="mx-auto max-w-7xl px-4 lg:px-6">
-        <div className="mx-auto max-w-2xl text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold text-primary">
-            <Workflow className="h-3.5 w-3.5" />
-            How it works
-          </span>
-          <h2 className="mt-4 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            Three simple steps. Zero engineering.
-          </h2>
-          <p className="mt-4 text-pretty text-base leading-relaxed text-muted-foreground">
-            From the moment your phone rings to a booked appointment in your calendar — fully automated.
-          </p>
+        <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
+          <div className="lg:col-span-5">
+            <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
+              <Workflow className="h-3.5 w-3.5" />
+              How it works
+            </span>
+            <h2 className="mt-4 text-balance text-[2rem] font-semibold leading-[1.05] tracking-tight text-foreground sm:text-[2.5rem] lg:text-[3rem]">
+              Three steps.{" "}
+              <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+                Zero engineering.
+              </span>
+            </h2>
+          </div>
+          <div className="lg:col-span-7 lg:pt-3">
+            <p className="text-pretty text-[17px] leading-relaxed text-muted-foreground">
+              From the moment your phone rings to a booked appointment in your calendar &mdash; fully automated.
+              Hover any step to walk through what happens on a real inbound call.
+            </p>
+          </div>
         </div>
 
-        <div className="mt-12 grid gap-4 lg:grid-cols-3">
+        {/* Steps — vertical flow on the left, animated rail on the right (no cards) */}
+        <div className="mt-16 grid grid-cols-1 gap-x-12 gap-y-2 lg:mt-20 lg:grid-cols-12">
           {STEPS.map((s, i) => {
             const isActive = i === active
             return (
-              <div
+              <article
                 key={s.n}
                 onMouseEnter={() => setActive(i)}
                 className={cn(
-                  "group relative cursor-pointer overflow-hidden rounded-2xl border bg-card p-6 transition-all duration-500",
-                  isActive
-                    ? "border-primary/30 shadow-[0_20px_60px_-20px_oklch(0.45_0.22_295/0.35)]"
-                    : "shadow-sm hover:border-primary/20",
+                  "group relative grid cursor-pointer grid-cols-12 items-start gap-x-4 border-t border-border py-8 transition-colors lg:col-span-12",
+                  i === STEPS.length - 1 && "border-b",
+                  isActive && "bg-background/40",
                 )}
               >
-                {/* Connector arrow (desktop) */}
-                {i < STEPS.length - 1 && (
-                  <div className="absolute right-0 top-1/2 hidden -translate-y-1/2 translate-x-1/2 lg:block">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full border bg-background shadow-sm">
-                      <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                  </div>
-                )}
+                {/* Animated left progress rail */}
+                <span
+                  aria-hidden
+                  className={cn(
+                    "absolute left-0 top-0 h-px transition-all duration-700",
+                    isActive
+                      ? "w-full bg-gradient-to-r from-primary via-accent to-transparent"
+                      : "w-12 bg-border",
+                  )}
+                />
 
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={cn(
-                        "flex h-11 w-11 items-center justify-center rounded-xl transition-all",
-                        isActive
-                          ? "bg-gradient-to-br from-primary to-accent text-white shadow-md"
-                          : "bg-muted text-foreground/70",
-                      )}
-                    >
-                      <s.icon className="h-5 w-5" />
-                    </div>
-                    <span
-                      className={cn(
-                        "font-mono text-xs font-semibold tracking-wider",
-                        isActive ? "text-primary" : "text-muted-foreground/60",
-                      )}
-                    >
-                      STEP {s.n}
-                    </span>
+                {/* Step number */}
+                <div className="col-span-2 sm:col-span-1">
+                  <div
+                    className={cn(
+                      "font-mono font-semibold leading-none tabular-nums tracking-tight transition-colors",
+                      isActive ? "text-primary" : "text-muted-foreground/40",
+                    )}
+                    style={{ fontSize: "clamp(2.25rem, 4vw, 3rem)" }}
+                  >
+                    {s.n}
                   </div>
+                </div>
 
-                  <div className="text-right">
-                    <div
+                {/* Icon + title */}
+                <div className="col-span-10 flex items-start gap-4 sm:col-span-4">
+                  <span
+                    className={cn(
+                      "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition-all",
+                      isActive
+                        ? "border-primary/40 bg-gradient-to-br from-primary/15 to-accent/10 text-primary shadow-[0_8px_30px_-12px_rgba(168,85,247,0.6)]"
+                        : "border-border bg-background text-muted-foreground",
+                    )}
+                  >
+                    <s.icon className="h-4 w-4" />
+                  </span>
+                  <div className="min-w-0 pt-1">
+                    <h3 className="text-[17px] font-semibold tracking-tight text-foreground sm:text-lg">
+                      {s.title}
+                    </h3>
+                    <p
                       className={cn(
-                        "rounded-full px-2.5 py-1 font-mono text-[10px] font-semibold",
-                        isActive
-                          ? "bg-emerald-500/10 text-emerald-600"
-                          : "bg-muted text-muted-foreground",
+                        "mt-1 font-mono text-[10.5px] uppercase tracking-[0.18em] transition-colors",
+                        isActive ? "text-emerald-600" : "text-muted-foreground/70",
                       )}
                     >
                       {s.tag}
-                    </div>
-                    <div className="mt-1 text-[10px] text-muted-foreground">{s.tagLabel}</div>
+                    </p>
                   </div>
                 </div>
 
-                <h3 className="mt-5 text-lg font-semibold text-foreground">{s.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{s.description}</p>
+                {/* Description */}
+                <p className="col-span-12 mt-2 text-[15px] leading-relaxed text-muted-foreground sm:col-span-7 sm:mt-0">
+                  {s.description}
+                </p>
 
-                {/* Sample line */}
-                <div
+                {/* Sample line — full width, no card */}
+                <p
                   className={cn(
-                    "mt-5 rounded-xl border bg-background/60 p-3 transition-all",
-                    isActive && "border-primary/20 bg-primary/[0.03]",
+                    "col-span-12 mt-4 max-w-3xl border-l-2 pl-4 text-[13.5px] leading-relaxed transition-all sm:col-start-2",
+                    isActive
+                      ? "border-primary text-foreground"
+                      : "border-border text-muted-foreground",
                   )}
-                >
-                  <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                    <CheckCircle2 className="h-3 w-3 text-emerald-500" />
-                    Example
-                  </div>
-                  <p
-                    className="mt-1.5 text-xs leading-relaxed text-muted-foreground"
-                    dangerouslySetInnerHTML={{ __html: s.sample }}
-                  />
-                </div>
+                  dangerouslySetInnerHTML={{ __html: s.sample }}
+                />
 
-                {/* Active indicator pulse */}
+                {/* Active indicator pulse on the right */}
                 {isActive && (
-                  <span className="absolute right-3 top-3 flex h-2 w-2">
+                  <span className="absolute right-0 top-7 flex h-2 w-2">
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
                   </span>
                 )}
-              </div>
+              </article>
             )
           })}
         </div>
