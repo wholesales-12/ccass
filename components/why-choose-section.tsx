@@ -7,7 +7,7 @@ type Reason = {
   metric: string
   metricLabel: string
   accent: string
-  bar: string
+  glow: string
 }
 
 const REASONS: Reason[] = [
@@ -18,7 +18,7 @@ const REASONS: Reason[] = [
     metric: "12+",
     metricLabel: "Languages",
     accent: "text-violet-600",
-    bar: "from-violet-500 to-fuchsia-500",
+    glow: "bg-violet-500/15",
   },
   {
     icon: Zap,
@@ -27,25 +27,25 @@ const REASONS: Reason[] = [
     metric: "5 min",
     metricLabel: "To go live",
     accent: "text-amber-600",
-    bar: "from-amber-500 to-orange-500",
+    glow: "bg-amber-500/15",
   },
   {
     icon: Sparkles,
     title: "AI Pays For Itself",
     desc: "Voice bots deflect 40-70% of calls. AI summaries cut after-call work by 60%. ROI in 90 days.",
     metric: "40-70%",
-    metricLabel: "Calls deflected",
+    metricLabel: "Deflected",
     accent: "text-fuchsia-600",
-    bar: "from-fuchsia-500 to-pink-500",
+    glow: "bg-fuchsia-500/15",
   },
   {
     icon: ShieldCheck,
     title: "Compliance Built-In",
-    desc: "TRAI, DPDP, ISO 27001, RBI / IRDAI ready. Encrypted SIP and India-only data residency by default.",
+    desc: "TRAI, DPDP, ISO 27001, RBI / IRDAI ready. Encrypted SIP and India-only data residency.",
     metric: "4×",
     metricLabel: "Frameworks",
     accent: "text-emerald-600",
-    bar: "from-emerald-500 to-teal-500",
+    glow: "bg-emerald-500/15",
   },
 ]
 
@@ -57,95 +57,93 @@ export function WhyChooseSection() {
     >
       {/* Ambient backdrop */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
-        <div className="absolute left-1/4 top-1/4 h-[20rem] w-[20rem] rounded-full bg-violet-500/[0.06] blur-3xl" />
-        <div className="absolute -right-24 bottom-0 h-[22rem] w-[22rem] rounded-full bg-fuchsia-500/[0.05] blur-3xl" />
+        <div className="absolute left-[10%] top-1/4 h-[24rem] w-[24rem] rounded-full bg-violet-500/[0.06] blur-3xl" />
+        <div className="absolute right-[5%] bottom-[10%] h-[26rem] w-[26rem] rounded-full bg-fuchsia-500/[0.05] blur-3xl" />
       </div>
 
       <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Heading row */}
-        <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end md:gap-12">
-          <div className="max-w-2xl">
+        {/* Two-column manifesto layout */}
+        <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
+          {/* LEFT — sticky headline pillar */}
+          <div className="lg:col-span-5 lg:sticky lg:top-24 lg:self-start">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
               Why Kedeyo
             </span>
-            <h2 className="mt-4 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-[2.5rem] lg:leading-[1.05]">
-              Four reasons growing teams{" "}
+            <h2 className="mt-5 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-[2.75rem] lg:leading-[1.04]">
+              Built different,{" "}
               <span className="bg-gradient-to-r from-violet-600 via-fuchsia-500 to-rose-500 bg-clip-text text-transparent">
-                switch to Kedeyo
+                on purpose.
               </span>
             </h2>
+            <p className="mt-5 max-w-md text-pretty text-base leading-relaxed text-muted-foreground">
+              Four ideas that decide why a growing Indian team picks Kedeyo over a global suite — and why they stay.
+            </p>
+
+            {/* Inline aggregate proof */}
+            <div className="mt-8 flex flex-wrap items-baseline gap-x-7 gap-y-3 border-t border-border/70 pt-6 text-sm">
+              <span>
+                <span className="text-2xl font-bold tracking-tight text-foreground">5K+</span>
+                <span className="ml-1.5 text-xs uppercase tracking-wider text-muted-foreground">teams</span>
+              </span>
+              <span>
+                <span className="text-2xl font-bold tracking-tight text-foreground">2M+</span>
+                <span className="ml-1.5 text-xs uppercase tracking-wider text-muted-foreground">calls / day</span>
+              </span>
+              <span>
+                <span className="text-2xl font-bold tracking-tight text-foreground">68%</span>
+                <span className="ml-1.5 text-xs uppercase tracking-wider text-muted-foreground">AI resolved</span>
+              </span>
+            </div>
           </div>
-          {/* Aggregate stats — inline, no card */}
-          <dl className="flex shrink-0 items-baseline gap-8">
-            <div>
-              <dt className="text-[10px] uppercase tracking-wider text-muted-foreground">Teams</dt>
-              <dd className="mt-0.5 text-xl font-bold tracking-tight text-foreground">5K+</dd>
-            </div>
-            <div>
-              <dt className="text-[10px] uppercase tracking-wider text-muted-foreground">Calls / day</dt>
-              <dd className="mt-0.5 text-xl font-bold tracking-tight text-foreground">2M+</dd>
-            </div>
-            <div>
-              <dt className="text-[10px] uppercase tracking-wider text-muted-foreground">AI resolved</dt>
-              <dd className="mt-0.5 text-xl font-bold tracking-tight text-foreground">68%</dd>
-            </div>
-          </dl>
+
+          {/* RIGHT — 4 reasons as typographic items, no boxes, no dividers */}
+          <ol className="lg:col-span-7 space-y-10 lg:space-y-12">
+            {REASONS.map((r, i) => {
+              const Icon = r.icon
+              const num = String(i + 1).padStart(2, "0")
+              return (
+                <li key={r.title} className="group relative flex items-start gap-5 sm:gap-7">
+                  {/* Floating glow + icon — no ring, no box */}
+                  <div className="relative shrink-0 pt-1.5">
+                    <span
+                      aria-hidden
+                      className={`absolute -inset-3 rounded-full opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100 ${r.glow}`}
+                    />
+                    <span
+                      className={`relative inline-flex items-center justify-center transition-transform duration-300 group-hover:scale-110 ${r.accent}`}
+                    >
+                      <Icon className="h-6 w-6" strokeWidth={2} />
+                    </span>
+                  </div>
+
+                  {/* Content */}
+                  <div className="min-w-0 flex-1">
+                    {/* Tiny metadata row */}
+                    <div className="flex items-baseline gap-3">
+                      <span className="font-mono text-[10px] font-semibold tracking-[0.22em] text-muted-foreground">
+                        {num}
+                      </span>
+                      <span
+                        aria-hidden
+                        className="h-px flex-1 bg-gradient-to-r from-border to-transparent"
+                      />
+                    </div>
+
+                    {/* Big inline metric → title */}
+                    <h3 className="mt-2 text-balance text-xl font-semibold leading-tight tracking-tight text-foreground sm:text-2xl">
+                      <span className={`mr-2 ${r.accent}`}>{r.metric}</span>
+                      <span className="text-muted-foreground/60">·</span> <span>{r.title}</span>
+                    </h3>
+
+                    <p className="mt-2 text-pretty text-sm leading-relaxed text-muted-foreground sm:text-[15px]">
+                      {r.desc}
+                    </p>
+                  </div>
+                </li>
+              )
+            })}
+          </ol>
         </div>
-
-        {/* Horizontal divider above columns */}
-        <div className="mt-10 border-t border-border" />
-
-        {/* 4-up reasons — columns separated by vertical hairlines, no boxes */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-          {REASONS.map((r, i) => {
-            const Icon = r.icon
-            const num = String(i + 1).padStart(2, "0")
-            return (
-              <div
-                key={r.title}
-                className={`group relative flex flex-col gap-4 px-2 py-8 lg:px-6 ${
-                  i > 0 ? "border-t border-border sm:border-t-0 lg:border-l" : ""
-                } ${i === 2 ? "sm:border-t lg:border-t-0" : ""}`}
-              >
-                {/* Top hover bar */}
-                <span
-                  aria-hidden
-                  className={`pointer-events-none absolute left-0 right-0 top-0 h-[2px] origin-left scale-x-0 bg-gradient-to-r transition-transform duration-500 ease-out group-hover:scale-x-100 ${r.bar}`}
-                />
-
-                {/* Number + icon row */}
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-[11px] font-semibold tracking-[0.18em] text-muted-foreground">
-                    {num}
-                  </span>
-                  <span
-                    className={`inline-flex h-9 w-9 items-center justify-center rounded-full ring-1 ring-border transition-all duration-300 group-hover:scale-110 group-hover:ring-current ${r.accent}`}
-                    aria-hidden
-                  >
-                    <Icon className="h-4 w-4" />
-                  </span>
-                </div>
-
-                {/* Metric */}
-                <div className="flex items-baseline gap-2">
-                  <span className={`text-3xl font-bold tracking-tight ${r.accent}`}>{r.metric}</span>
-                  <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                    {r.metricLabel}
-                  </span>
-                </div>
-
-                {/* Title + desc */}
-                <div className="space-y-2">
-                  <h3 className="text-lg font-semibold tracking-tight text-foreground">{r.title}</h3>
-                  <p className="text-[13px] leading-relaxed text-muted-foreground">{r.desc}</p>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-
-        {/* Bottom divider mirrors top */}
-        <div className="border-t border-border" />
       </div>
     </section>
   )
