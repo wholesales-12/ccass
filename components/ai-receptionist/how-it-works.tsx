@@ -47,7 +47,7 @@ export function HowItWorks() {
   return (
     <section
       id="how-it-works"
-      className="relative border-y border-border/60 bg-muted/30 py-20 lg:py-28"
+      className="relative border-y border-border/60 bg-white py-20 lg:py-28"
     >
       <div className="mx-auto max-w-7xl px-4 lg:px-6">
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">

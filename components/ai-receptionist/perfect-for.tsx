@@ -37,7 +37,7 @@ const FITS = [
 
 export function PerfectFor() {
   return (
-    <section className="relative bg-muted/30 py-16 lg:py-20">
+    <section className="relative bg-white py-16 lg:py-20">
       <div className="mx-auto max-w-6xl px-4 lg:px-6">
         {/* Header — single line */}
         <div className="flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-end">

@@ -85,7 +85,7 @@ export function ComparisonTable() {
               </div>
             </div>
             <div className="col-span-4 flex items-center gap-2 sm:col-span-4">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full border border-border bg-muted text-muted-foreground">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full border border-border bg-white text-muted-foreground">
                 <User className="h-3 w-3" />
               </span>
               <div className="leading-tight">
@@ -101,7 +101,7 @@ export function ComparisonTable() {
           {ROWS.map((row) => (
             <div
               key={row.factor}
-              className="grid grid-cols-12 items-start gap-x-4 border-b border-border py-5 transition-colors hover:bg-muted/40"
+              className="grid grid-cols-12 items-start gap-x-4 border-b border-border py-5 transition-colors hover:bg-white"
             >
               <div className="col-span-4 text-[14.5px] font-semibold text-foreground">
                 {row.factor}
