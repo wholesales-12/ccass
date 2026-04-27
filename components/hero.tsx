@@ -8,15 +8,14 @@ import {
   ShieldCheck,
   Activity,
   MapPin,
-  Sparkles,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 /**
  * Dark hero — "Every Call Answered. By an AI Receptionist."
- * Right side: a focused, breathing live-call visualization. No boxes.
- * Just an identity wordmark + a single rolling 2-turn conversation window
- * with an animated spotlight waveform on the active speaker.
+ * Right side: a "conversation thread on a wire" visualization.
+ * A single luminous vertical line; caller turns left, AI turns right.
+ * No card chrome, no boxes, no bubbles.
  */
 
 const STATS = [
@@ -145,9 +144,9 @@ export function Hero() {
             </div>
           </div>
 
-          {/* RIGHT — focused live call visualization */}
+          {/* RIGHT — conversation thread on a wire */}
           <div className="lg:col-span-5">
-            <AIReceptionistConsole />
+            <ConversationThread />
           </div>
         </div>
       </div>
@@ -155,10 +154,7 @@ export function Hero() {
   )
 }
 
-/* ─────────────────────  AI Receptionist Console  ─────────────────────
- * Identity wordmark + rolling 2-turn conversation spotlight.
- * No card chrome. Plenty of breathing room.
- */
+/* ─────────────────  Conversation Thread on a Wire  ───────────────── */
 
 type Turn = {
   id: string
@@ -167,51 +163,46 @@ type Turn = {
   langTag: string
   primary: string
   secondary: string
-  intel: { tag: string; value: string; conf?: string }
 }
 
 const TURNS: Turn[] = [
   {
-    id: "caller-1",
+    id: "t1",
     side: "caller",
     speaker: "Rahul",
     langTag: "HI",
     primary: "मुझे कल 11 बजे appointment book करनी है।",
-    secondary: "I want to book an appointment for tomorrow at 11.",
-    intel: { tag: "Intent", value: "Booking", conf: "98%" },
+    secondary: "I want to book for tomorrow at 11.",
   },
   {
-    id: "ai-1",
+    id: "t2",
     side: "ai",
-    speaker: "Kedeyo AI",
+    speaker: "AI",
     langTag: "EN",
-    primary: "11 AM tomorrow with Dr. Sharma is available — shall I confirm?",
-    secondary: "कल 11 बजे डॉ. शर्मा के साथ available है।",
-    intel: { tag: "Calendar", value: "Slot found" },
+    primary: "11 AM tomorrow with Dr. Sharma is open — confirm?",
+    secondary: "कल 11 बजे डॉ. शर्मा available है।",
   },
   {
-    id: "caller-2",
+    id: "t3",
     side: "caller",
     speaker: "Rahul",
     langTag: "HI",
     primary: "हाँ, confirm कर दीजिए।",
-    secondary: "Yes, please confirm.",
-    intel: { tag: "Action", value: "book(11:00)" },
+    secondary: "Yes please.",
   },
   {
-    id: "ai-2",
+    id: "t4",
     side: "ai",
-    speaker: "Kedeyo AI",
+    speaker: "AI",
     langTag: "EN",
-    primary: "Booked. SMS + WhatsApp confirmation sent.",
+    primary: "Booked. SMS + WhatsApp sent.",
     secondary: "Resolved in 23s.",
-    intel: { tag: "Outcome", value: "Resolved" },
   },
 ]
 
-const TICK = 2400
+const TICK_MS = 1800
 
-function AIReceptionistConsole() {
+function ConversationThread() {
   const [seconds, setSeconds] = useState(14)
   const [active, setActive] = useState(0)
 
@@ -222,188 +213,215 @@ function AIReceptionistConsole() {
 
   useEffect(() => {
     const t = setInterval(() => {
-      setActive((a) => (a + 1) % TURNS.length)
-    }, TICK)
+      setActive((a) => (a + 1) % (TURNS.length + 1))
+    }, TICK_MS)
     return () => clearInterval(t)
   }, [])
 
   const mm = String(Math.floor(seconds / 60)).padStart(2, "0")
   const ss = String(seconds % 60).padStart(2, "0")
-
-  const previous = (active - 1 + TURNS.length) % TURNS.length
-  const next = (active + 1) % TURNS.length
-  const current = TURNS[active]
-  const prevTurn = TURNS[previous]
-  const nextTurn = TURNS[next]
+  const resolved = active >= TURNS.length
 
   return (
     <div className="relative mx-auto w-full max-w-[480px]">
-      {/* Ambient backdrop only */}
+      {/* Soft ambient backdrop only */}
       <div
         aria-hidden
         className="pointer-events-none absolute -inset-12 -z-10"
         style={{
           background:
-            "radial-gradient(60% 50% at 50% 0%, oklch(0.55 0.24 300 / 0.35), transparent 75%), radial-gradient(50% 60% at 80% 100%, oklch(0.55 0.24 320 / 0.22), transparent 75%)",
+            "radial-gradient(60% 50% at 50% 0%, oklch(0.55 0.24 300 / 0.32), transparent 75%), radial-gradient(50% 60% at 80% 100%, oklch(0.55 0.24 320 / 0.20), transparent 75%)",
           filter: "blur(12px)",
         }}
       />
 
       {/* ── Identity wordmark ── */}
-      <div className="flex items-end justify-between">
-        <div>
-          <div className="inline-flex items-center gap-2">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            </span>
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-emerald-300">
-              Live · {mm}:{ss}
-            </span>
-          </div>
-          <h2
-            className="mt-2 font-semibold leading-none tracking-tight"
-            style={{ fontSize: "clamp(1.625rem, 2.6vw, 2.125rem)" }}
-          >
-            <span className="bg-gradient-to-r from-white via-fuchsia-200 to-violet-300 bg-clip-text text-transparent">
-              AI Receptionist
-            </span>
-          </h2>
-          <p className="mt-1.5 inline-flex items-center gap-2 text-[11.5px] text-white/55">
-            <Sparkles className="h-3 w-3 text-fuchsia-300" />
-            Picking up call <span className="font-mono text-white/80">#2,341</span> · Mumbai · HI ⇄ EN
-          </p>
+      <div className="text-center">
+        <div className="inline-flex items-center gap-2">
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+          </span>
+          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-emerald-300">
+            Live · {mm}:{ss}
+          </span>
         </div>
+        <h2
+          className="mt-2 font-semibold leading-none tracking-tight"
+          style={{ fontSize: "clamp(1.875rem, 3vw, 2.5rem)" }}
+        >
+          <span className="bg-gradient-to-r from-white via-fuchsia-200 to-violet-300 bg-clip-text text-transparent">
+            AI Receptionist
+          </span>
+        </h2>
+        <p className="mt-2 text-[11.5px] text-white/55">
+          <span className="font-mono text-white/80">Call #2,341</span> · Mumbai · HI ⇄ EN · Inbound
+        </p>
       </div>
 
-      {/* ── Spotlight: previous (small, dim) ── */}
-      <div className="mt-10">
-        <MiniTurn turn={prevTurn} />
+      {/* ── Thread ── */}
+      <div className="relative mt-10 pb-12">
+        {/* Vertical wire */}
+        <span
+          aria-hidden
+          className="absolute left-1/2 top-2 bottom-2 w-px -translate-x-1/2"
+          style={{
+            background:
+              "linear-gradient(to bottom, transparent 0%, rgba(232,121,249,0.35) 12%, rgba(167,139,250,0.5) 50%, rgba(232,121,249,0.35) 88%, transparent 100%)",
+          }}
+        />
+        {/* Traveling pulse on the wire */}
+        <span
+          aria-hidden
+          className="absolute left-1/2 h-12 w-px -translate-x-1/2 rounded-full"
+          style={{
+            top: 0,
+            background: "linear-gradient(to bottom, transparent, #f0abfc, transparent)",
+            animation: "hero-thread-pulse 4.2s ease-in-out infinite",
+            opacity: 0.9,
+          }}
+        />
 
-        {/* Active turn — large, bright */}
-        <div className="my-5">
-          <ActiveTurn turn={current} />
+        <ol className="relative space-y-5">
+          {TURNS.map((t, i) => {
+            const isActive = i === active
+            const isPast = i < active
+            return (
+              <ThreadTurn
+                key={t.id}
+                turn={t}
+                active={isActive}
+                past={isPast}
+              />
+            )
+          })}
+        </ol>
+
+        {/* ── Resolved outcome ── */}
+        <div
+          className={`mt-7 flex items-center justify-center transition-all duration-500 ${
+            resolved ? "opacity-100 translate-y-0" : "opacity-50 translate-y-1"
+          }`}
+        >
+          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-emerald-300/80">
+            ●  Booked · 11 AM · Confirmation sent
+          </span>
         </div>
-
-        {/* Next turn (small, dim, italic preview) */}
-        <MiniTurn turn={nextTurn} dimmer />
       </div>
 
       <style jsx global>{`
-        @keyframes hero-marker-ping {
-          0% { transform: scale(1); opacity: 0.55 }
-          100% { transform: scale(2.4); opacity: 0 }
+        @keyframes hero-thread-pulse {
+          0%   { top: -8%; opacity: 0 }
+          15%  { opacity: 0.95 }
+          85%  { opacity: 0.95 }
+          100% { top: 100%; opacity: 0 }
         }
-        @keyframes hero-eq {
+        @keyframes hero-thread-dot {
+          0%   { transform: scale(1); opacity: 0.9 }
+          100% { transform: scale(2.6); opacity: 0 }
+        }
+        @keyframes hero-thread-eq {
           0%, 100% { transform: scaleY(0.3) }
-          50% { transform: scaleY(1) }
+          50%      { transform: scaleY(1) }
         }
-        @keyframes hero-caret {
-          0%, 49% { opacity: 1 }
+        @keyframes hero-thread-caret {
+          0%, 49%   { opacity: 1 }
           50%, 100% { opacity: 0 }
-        }
-        @keyframes hero-spotlight-fade {
-          from { opacity: 0; transform: translateY(6px) }
-          to   { opacity: 1; transform: translateY(0) }
         }
       `}</style>
     </div>
   )
 }
 
-/* ── Active turn (spotlight) ── */
-function ActiveTurn({ turn }: { turn: Turn }) {
+function ThreadTurn({
+  turn,
+  active,
+  past,
+}: {
+  turn: Turn
+  active: boolean
+  past: boolean
+}) {
   const isAi = turn.side === "ai"
-  const langPill = isAi
-    ? "bg-violet-500/15 text-violet-200 border-violet-400/30"
-    : "bg-fuchsia-500/15 text-fuchsia-200 border-fuchsia-400/30"
-  const monogramCls = isAi
-    ? "bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white"
-    : "border border-fuchsia-400/40 bg-fuchsia-500/10 text-fuchsia-200"
+
+  // Side alignment: caller → left, AI → right
+  const sideCls = isAi
+    ? "ml-auto pl-7 pr-0 text-left"
+    : "mr-auto pr-7 pl-0 text-right"
+
   const accent = isAi ? "text-violet-300" : "text-fuchsia-300"
   const eqTone = isAi ? "violet" : "fuchsia"
+  const dotInner = isAi ? "bg-violet-400" : "bg-fuchsia-400"
+  const dotPing = isAi ? "bg-violet-400/60" : "bg-fuchsia-400/60"
+
+  // Faded when not active and not past
+  const opacity = active ? 1 : past ? 0.45 : 0.22
 
   return (
-    <div
-      key={turn.id}
-      className="relative pl-12"
-      style={{ animation: "hero-spotlight-fade 500ms ease-out" }}
+    <li
+      className="relative grid grid-cols-2 transition-opacity duration-500"
+      style={{ opacity }}
     >
-      {/* Left accent rail */}
-      <span
-        aria-hidden
-        className="absolute left-[14px] top-1.5 bottom-1.5 w-px"
-        style={{
-          background: isAi
-            ? "linear-gradient(to bottom, transparent, oklch(0.7 0.22 295), transparent)"
-            : "linear-gradient(to bottom, transparent, oklch(0.7 0.22 320), transparent)",
-        }}
-      />
-
-      {/* Avatar marker */}
-      <span className="absolute left-0 top-0 grid h-[30px] w-[30px] place-items-center">
-        <span
-          aria-hidden
-          className={`absolute inset-0 rounded-full ${
-            isAi ? "bg-violet-500/15" : "bg-fuchsia-500/15"
-          }`}
-          style={{ animation: "hero-marker-ping 1.6s ease-out infinite" }}
-        />
-        <span
-          className={`relative grid h-[30px] w-[30px] place-items-center rounded-full text-[11px] font-bold ${monogramCls}`}
-        >
-          {isAi ? "AI" : turn.speaker.slice(0, 1)}
+      {/* Dot anchor on the wire */}
+      <span className="absolute left-1/2 top-2.5 -translate-x-1/2">
+        <span className="relative grid h-3 w-3 place-items-center">
+          {active && (
+            <span
+              aria-hidden
+              className={`absolute inset-0 rounded-full ${dotPing}`}
+              style={{ animation: "hero-thread-dot 1.4s ease-out infinite" }}
+            />
+          )}
+          <span
+            className={`relative h-2 w-2 rounded-full ${dotInner}`}
+            style={{
+              boxShadow: active
+                ? isAi
+                  ? "0 0 0 2px rgba(167,139,250,0.25), 0 0 12px rgba(167,139,250,0.6)"
+                  : "0 0 0 2px rgba(232,121,249,0.25), 0 0 12px rgba(232,121,249,0.6)"
+                : "0 0 0 2px rgba(255,255,255,0.06)",
+            }}
+          />
         </span>
       </span>
 
-      {/* Header */}
-      <div className="flex items-center gap-2">
-        <span className={`text-[13px] font-semibold ${accent}`}>{turn.speaker}</span>
-        <span
-          className={`rounded-sm border px-1 py-px font-mono text-[9px] font-bold tracking-wider ${langPill}`}
+      {/* Spacer for opposite side */}
+      {isAi ? <span aria-hidden /> : null}
+
+      {/* Content side */}
+      <div className={sideCls}>
+        <div
+          className={`flex items-center gap-1.5 ${
+            isAi ? "" : "flex-row-reverse"
+          }`}
         >
-          {turn.langTag}
-        </span>
-        <SpeakingDots tone={eqTone} />
-        <span className="ml-auto inline-flex items-baseline gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-white/55">
-          <span className="text-white/35">{turn.intel.tag}</span>
-          <span className="text-pink-200">{turn.intel.value}</span>
-          {turn.intel.conf && <span className="text-emerald-300/85">· {turn.intel.conf}</span>}
-        </span>
+          <span className={`text-[11px] font-bold uppercase tracking-[0.16em] ${accent}`}>
+            {turn.speaker}
+          </span>
+          <span className="font-mono text-[9px] font-bold uppercase tracking-wider text-white/35">
+            · {turn.langTag}
+          </span>
+          {active && <SpeakingDots tone={eqTone} />}
+        </div>
+
+        <p className="mt-1 text-[14px] font-semibold leading-snug tracking-tight text-white">
+          {turn.primary}
+          {active && (
+            <span
+              aria-hidden
+              className="ml-0.5 inline-block h-[1em] w-[2px] translate-y-[2px] bg-white/85 align-baseline"
+              style={{ animation: "hero-thread-caret 0.9s steps(1) infinite" }}
+            />
+          )}
+        </p>
+        <p className="mt-0.5 text-[10.5px] italic leading-snug text-white/45">
+          {turn.secondary}
+        </p>
       </div>
 
-      {/* Speech — oversized */}
-      <p className="mt-1.5 text-[16.5px] font-semibold leading-snug tracking-tight text-white">
-        {turn.primary}
-        <span
-          aria-hidden
-          className="ml-0.5 inline-block h-[1em] w-[2px] translate-y-[2px] bg-white/85 align-baseline"
-          style={{ animation: "hero-caret 0.9s steps(1) infinite" }}
-        />
-      </p>
-      <p className="mt-1 text-[12px] italic leading-snug text-white/55">{turn.secondary}</p>
-    </div>
-  )
-}
-
-/* ── Compressed previous/next preview ── */
-function MiniTurn({ turn, dimmer }: { turn: Turn; dimmer?: boolean }) {
-  const isAi = turn.side === "ai"
-  const accent = isAi ? "text-violet-300/70" : "text-fuchsia-300/70"
-  return (
-    <div
-      className={`flex items-center gap-3 pl-12 ${dimmer ? "opacity-40" : "opacity-55"}`}
-    >
-      <span
-        className={`text-[10.5px] font-semibold uppercase tracking-[0.16em] ${accent}`}
-      >
-        {turn.speaker}
-      </span>
-      <span aria-hidden className="h-px flex-1 bg-white/10" />
-      <p className="max-w-[60%] truncate text-[11.5px] text-white/55">
-        {dimmer ? `→ ${turn.primary}` : turn.primary}
-      </p>
-    </div>
+      {/* Right-side spacer for caller */}
+      {!isAi ? <span aria-hidden /> : null}
+    </li>
   )
 }
 
@@ -416,8 +434,8 @@ function SpeakingDots({ tone }: { tone: "violet" | "fuchsia" }) {
           key={i}
           className={`block w-[2px] rounded-full ${cls}`}
           style={{
-            height: "10px",
-            animation: `hero-eq ${600 + i * 80}ms ease-in-out ${i * 60}ms infinite`,
+            height: "9px",
+            animation: `hero-thread-eq ${600 + i * 80}ms ease-in-out ${i * 60}ms infinite`,
             transformOrigin: "bottom",
           }}
         />
