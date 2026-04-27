@@ -147,21 +147,31 @@ export function ReceptionistHero() {
   return (
     <section
       id="top"
-      className="relative isolate overflow-hidden bg-[#0a0612] pb-16 pt-24 lg:pb-20 lg:pt-28"
+      className="relative isolate overflow-hidden bg-[#050b1f] pb-16 pt-24 lg:pb-20 lg:pt-28"
       style={{
         backgroundImage:
-          "radial-gradient(ellipse 80% 60% at 0% 0%, oklch(0.45 0.22 295 / 0.55), transparent 65%), radial-gradient(ellipse 60% 50% at 100% 100%, oklch(0.62 0.24 300 / 0.35), transparent 70%)",
+          "radial-gradient(ellipse 70% 55% at 100% 0%, oklch(0.55 0.18 235 / 0.55), transparent 65%), radial-gradient(ellipse 65% 55% at 0% 100%, oklch(0.50 0.20 270 / 0.45), transparent 70%), radial-gradient(ellipse 50% 40% at 60% 50%, oklch(0.58 0.16 200 / 0.18), transparent 75%)",
       }}
     >
-      {/* Ambient grid */}
+      {/* Ambient dot pattern */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.08]"
+        className="pointer-events-none absolute inset-0 opacity-[0.18]"
         style={{
           backgroundImage:
-            "linear-gradient(to right, rgba(168,85,247,0.4) 1px, transparent 1px), linear-gradient(to bottom, rgba(168,85,247,0.4) 1px, transparent 1px)",
-          backgroundSize: "56px 56px",
-          maskImage: "radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 80%)",
+            "radial-gradient(rgba(125,211,252,0.45) 1px, transparent 1px)",
+          backgroundSize: "28px 28px",
+          maskImage:
+            "radial-gradient(ellipse 80% 70% at 50% 50%, black 25%, transparent 80%)",
+        }}
+      />
+      {/* Subtle horizon line */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-1/2 h-px"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent 0%, rgba(125,211,252,0.18) 50%, transparent 100%)",
         }}
       />
 
