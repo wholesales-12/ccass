@@ -1,7 +1,5 @@
 import { SiteNav } from "@/components/site-nav"
 import { Hero } from "@/components/hero"
-import { ProblemSection } from "@/components/problem-section"
-import { WhatKedeyoIs } from "@/components/what-kedeyo-is"
 import { FeaturesGrid } from "@/components/features-grid"
 import { IndustriesSection } from "@/components/industries-section"
 import { WhyChooseSection } from "@/components/why-choose-section"
@@ -17,8 +15,6 @@ export default function HomePage() {
     <main className="relative min-h-screen bg-background">
       <SiteNav />
       <Hero />
-      <ProblemSection />
-      <WhatKedeyoIs />
       <FeaturesGrid />
       <IndustriesSection />
       <WhyChooseSection />
