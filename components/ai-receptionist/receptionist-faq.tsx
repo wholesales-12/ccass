@@ -89,7 +89,7 @@ export function ReceptionistFaq() {
                 >
                   <div className="overflow-hidden">
                     <p
-                      className="border-t bg-muted/30 px-5 py-4 text-sm leading-relaxed text-muted-foreground"
+                      className="border-t bg-white px-5 py-4 text-sm leading-relaxed text-muted-foreground"
                       dangerouslySetInnerHTML={{ __html: faq.a }}
                     />
                   </div>
