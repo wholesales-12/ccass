@@ -1,23 +1,15 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { Star } from "lucide-react"
+import { Star, Quote, ChevronLeft, ChevronRight } from "lucide-react"
 
 /**
- * Cinematic single-quote spotlight.
- * - One large editorial quote at a time, auto-rotating every 6s.
- * - Animated counter that ticks up to the metric on every change.
- * - Brand selector row with thin progress bar acts as nav.
- * - No card chrome, no boxes — only typography, motion, and a single hairline.
+ * Compact 2×2 slideshow of testimonials.
+ * - 8 testimonials split into 2 slides of 4 (2 rows × 2 cols).
+ * - Slides cross-fade every 7s; dots + arrows let users navigate.
+ * - No card chrome — items live on the section background, separated
+ *   only by a single vertical + horizontal hairline that forms a "+".
  */
-
-type Metric = {
-  prefix: string
-  number: number
-  suffix: string
-  label: string
-  isInteger?: boolean
-}
 
 type Testimonial = {
   id: string
@@ -25,7 +17,8 @@ type Testimonial = {
   industry: string
   city: string
   quote: string
-  metric: Metric
+  metric: string
+  metricLabel: string
 }
 
 const TESTIMONIALS: Testimonial[] = [
@@ -35,8 +28,9 @@ const TESTIMONIALS: Testimonial[] = [
     industry: "E-Commerce",
     city: "Mumbai",
     quote:
-      "We replaced three tools with Kedeyo and cut our cost per conversation by 40%. The Voice Bot now handles 60% of our inbound calls. Setup took five minutes, not five weeks.",
-    metric: { prefix: "−", number: 40, suffix: "%", label: "Cost / conversation" },
+      "We replaced three tools with Kedeyo and cut cost per conversation by 40%. Setup took five minutes.",
+    metric: "−40%",
+    metricLabel: "Cost / conversation",
   },
   {
     id: "lendfast",
@@ -44,8 +38,9 @@ const TESTIMONIALS: Testimonial[] = [
     industry: "NBFC",
     city: "Bengaluru",
     quote:
-      "Our collections team is dialing 3× more accounts since we moved to Kedeyo's predictive dialer. The TRAI compliance and AI QA stack means we sleep better at audit time.",
-    metric: { prefix: "", number: 3, suffix: "×", label: "Accounts dialed", isInteger: true },
+      "Our collections team is dialing 3× more accounts. TRAI and AI QA built in — we sleep better at audit time.",
+    metric: "3×",
+    metricLabel: "Accounts dialed",
   },
   {
     id: "healthbridge",
@@ -53,8 +48,9 @@ const TESTIMONIALS: Testimonial[] = [
     industry: "Healthcare",
     city: "Delhi",
     quote:
-      "Appointment no-shows dropped 30% in two months. Patients get reminders on WhatsApp, confirm with one tap, and our front desk is finally not on the phone all day.",
-    metric: { prefix: "−", number: 30, suffix: "%", label: "No-shows" },
+      "Appointment no-shows dropped 30% in two months. Our front desk is finally not on the phone all day.",
+    metric: "−30%",
+    metricLabel: "No-shows",
   },
   {
     id: "edureach",
@@ -62,8 +58,9 @@ const TESTIMONIALS: Testimonial[] = [
     industry: "EdTech",
     city: "Hyderabad",
     quote:
-      "Counselor productivity went up 85%. The AI receptionist qualifies inbound applicants in Hindi and English, and only the warm ones reach a human counselor.",
-    metric: { prefix: "+", number: 85, suffix: "%", label: "Counselor output" },
+      "Counselor productivity went up 85%. Only the warm leads reach a human — the AI handles the rest in Hindi and English.",
+    metric: "+85%",
+    metricLabel: "Counselor output",
   },
   {
     id: "fastfleet",
@@ -71,8 +68,9 @@ const TESTIMONIALS: Testimonial[] = [
     industry: "Logistics",
     city: "Pune",
     quote:
-      "Driver-customer calls are now masked and recorded. SLA visibility is real-time and we deflect 60% of \"where is my order\" calls automatically.",
-    metric: { prefix: "", number: 60, suffix: "%", label: "Calls deflected" },
+      "Driver-customer calls are masked, recorded and SLA-tracked. We deflect 60% of \"where is my order\" calls automatically.",
+    metric: "60%",
+    metricLabel: "Calls deflected",
   },
   {
     id: "shieldbank",
@@ -80,29 +78,63 @@ const TESTIMONIALS: Testimonial[] = [
     industry: "Banking",
     city: "Chennai",
     quote:
-      "TRAI compliance, DPDP-ready consent capture and AI QA are built in — we sleep better at audit time and our regulator response window dropped to hours.",
-    metric: { prefix: "", number: 0, suffix: "", label: "Audit issues", isInteger: true },
+      "DPDP-ready consent capture and AI QA are built in. Our regulator response window dropped from days to hours.",
+    metric: "0",
+    metricLabel: "Audit issues",
+  },
+  {
+    id: "aksharprop",
+    brand: "AksharProp",
+    industry: "Real Estate",
+    city: "Ahmedabad",
+    quote:
+      "Site-visit bookings doubled and our brokers stopped chasing dead leads. The AI re-engages every cold inquiry on WhatsApp.",
+    metric: "2×",
+    metricLabel: "Site visits",
+  },
+  {
+    id: "voyagein",
+    brand: "VoyageIn",
+    industry: "Travel",
+    city: "Goa",
+    quote:
+      "Peak-season call abandonment went to near zero. Multilingual coverage, no extra hardware, agents only on what matters.",
+    metric: "−92%",
+    metricLabel: "Call abandonment",
   },
 ]
 
-const ROTATE_MS = 6000
+const PER_SLIDE = 4
+const ROTATE_MS = 7000
+
+function chunk<T>(arr: T[], size: number): T[][] {
+  const out: T[][] = []
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size))
+  return out
+}
 
 export function Testimonials() {
+  const slides = chunk(TESTIMONIALS, PER_SLIDE)
   const [active, setActive] = useState(0)
   const [progress, setProgress] = useState(0)
   const startRef = useRef<number | null>(null)
   const rafRef = useRef<number | null>(null)
+  const pausedRef = useRef(false)
 
   useEffect(() => {
     startRef.current = performance.now()
     const tick = (now: number) => {
-      const elapsed = now - (startRef.current ?? now)
-      const p = Math.min(1, elapsed / ROTATE_MS)
-      setProgress(p)
-      if (p >= 1) {
-        setActive((i) => (i + 1) % TESTIMONIALS.length)
-        startRef.current = now
-        setProgress(0)
+      if (!pausedRef.current) {
+        const elapsed = now - (startRef.current ?? now)
+        const p = Math.min(1, elapsed / ROTATE_MS)
+        setProgress(p)
+        if (p >= 1) {
+          setActive((i) => (i + 1) % slides.length)
+          startRef.current = now
+          setProgress(0)
+        }
+      } else {
+        startRef.current = now - progress * ROTATE_MS
       }
       rafRef.current = requestAnimationFrame(tick)
     }
@@ -110,14 +142,19 @@ export function Testimonials() {
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
-  }, [active])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active, slides.length])
 
-  const t = TESTIMONIALS[active]
+  const goTo = (i: number) => {
+    setActive((i + slides.length) % slides.length)
+    startRef.current = performance.now()
+    setProgress(0)
+  }
 
   return (
     <section
       id="testimonials"
-      className="relative isolate overflow-hidden bg-background py-24 lg:py-32"
+      className="relative isolate overflow-hidden bg-background py-20 lg:py-24"
     >
       {/* Ambient backdrop */}
       <div
@@ -125,20 +162,20 @@ export function Testimonials() {
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
           background:
-            "radial-gradient(60% 50% at 20% 20%, oklch(0.62 0.24 300 / 0.08), transparent 70%), radial-gradient(50% 50% at 85% 80%, oklch(0.55 0.24 320 / 0.06), transparent 70%)",
+            "radial-gradient(50% 40% at 15% 20%, oklch(0.62 0.24 300 / 0.07), transparent 70%), radial-gradient(40% 40% at 85% 85%, oklch(0.55 0.24 320 / 0.05), transparent 70%)",
         }}
       />
 
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         {/* Header row */}
-        <div className="flex items-end justify-between gap-6">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-fuchsia-600">
               Real results
             </div>
             <h2
-              className="mt-3 font-semibold leading-[1.05] tracking-tight text-foreground"
-              style={{ fontSize: "clamp(2rem, 4.6vw, 3.5rem)" }}
+              className="mt-2 font-semibold leading-[1.1] tracking-tight text-foreground"
+              style={{ fontSize: "clamp(1.75rem, 3.6vw, 2.75rem)" }}
             >
               What teams say after they{" "}
               <span className="bg-gradient-to-r from-fuchsia-600 via-violet-600 to-pink-600 bg-clip-text text-transparent">
@@ -146,121 +183,108 @@ export function Testimonials() {
               </span>
             </h2>
           </div>
-          <div className="hidden shrink-0 text-right sm:block">
-            <div className="inline-flex items-center gap-1.5">
-              {[0, 1, 2, 3, 4].map((i) => (
-                <Star key={i} className="h-4 w-4 fill-fuchsia-500 text-fuchsia-500" />
-              ))}
-              <span className="ml-1 font-semibold text-foreground">4.9 / 5</span>
+
+          <div className="flex items-center gap-5">
+            <div className="text-right">
+              <div className="inline-flex items-center gap-1">
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <Star key={i} className="h-3.5 w-3.5 fill-fuchsia-500 text-fuchsia-500" />
+                ))}
+                <span className="ml-1.5 text-sm font-semibold text-foreground">4.9 / 5</span>
+              </div>
+              <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                Across 500+ teams
+              </div>
             </div>
-            <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-              Across 500+ teams
+
+            {/* Arrow nav */}
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => goTo(active - 1)}
+                aria-label="Previous testimonials"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-foreground transition-colors hover:border-fuchsia-500/40 hover:text-fuchsia-600"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => goTo(active + 1)}
+                aria-label="Next testimonials"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-foreground transition-colors hover:border-fuchsia-500/40 hover:text-fuchsia-600"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Spotlight area */}
-        <div className="mt-14 grid gap-10 md:grid-cols-12 md:items-start">
-          {/* Quote column */}
-          <div className="md:col-span-8">
+        {/* Slideshow */}
+        <div
+          className="relative mt-12"
+          onMouseEnter={() => (pausedRef.current = true)}
+          onMouseLeave={() => (pausedRef.current = false)}
+        >
+          {/* Cross hairlines forming a + */}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute left-0 right-0 top-1/2 hidden h-px -translate-y-1/2 bg-border md:block"
+          />
+          <span
+            aria-hidden
+            className="pointer-events-none absolute bottom-0 left-1/2 top-0 hidden w-px -translate-x-1/2 bg-border md:block"
+          />
+
+          {slides.map((slide, sIdx) => (
             <div
-              aria-hidden
-              className="font-serif text-7xl leading-none text-fuchsia-500/15 sm:text-8xl"
-              style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
-            >
-              &ldquo;
-            </div>
-            <blockquote
-              key={t.id}
-              className="mt-2 text-pretty font-semibold tracking-tight text-foreground"
+              key={sIdx}
+              aria-hidden={sIdx !== active}
+              className="transition-opacity duration-700"
               style={{
-                fontSize: "clamp(1.35rem, 2.4vw, 2rem)",
-                lineHeight: 1.3,
-                animation: "test-quote-in 600ms cubic-bezier(.2,.7,.2,1) both",
+                opacity: sIdx === active ? 1 : 0,
+                pointerEvents: sIdx === active ? "auto" : "none",
+                position: sIdx === active ? "relative" : "absolute",
+                inset: sIdx === active ? "auto" : 0,
               }}
             >
-              {t.quote}
-            </blockquote>
-
-            <div
-              key={`att-${t.id}`}
-              className="mt-8 flex flex-wrap items-baseline gap-x-3 gap-y-1"
-              style={{ animation: "test-quote-in 600ms cubic-bezier(.2,.7,.2,1) 80ms both" }}
-            >
-              <span className="text-[18px] font-semibold tracking-tight text-foreground">
-                {t.brand}
-              </span>
-              <span className="h-3 w-px bg-border" />
-              <span className="font-mono text-[12px] uppercase tracking-[0.18em] text-muted-foreground">
-                {t.industry} · {t.city}
-              </span>
+              <div className="grid gap-y-10 md:grid-cols-2 md:gap-x-12 md:gap-y-12">
+                {slide.map((t, idx) => (
+                  <Item key={t.id} t={t} index={idx} animate={sIdx === active} />
+                ))}
+              </div>
             </div>
-          </div>
-
-          {/* Metric column — animated counter */}
-          <div className="relative md:col-span-4 md:pl-8">
-            <span
-              aria-hidden
-              className="absolute left-0 top-1 hidden h-[110px] w-px bg-gradient-to-b from-fuchsia-500/50 via-fuchsia-500/15 to-transparent md:block"
-            />
-            <CounterMetric metric={t.metric} keyId={t.id} />
-          </div>
+          ))}
         </div>
 
-        {/* Selector row + progress */}
-        <div className="mt-16 border-t border-border pt-6">
-          <div className="grid grid-cols-3 gap-x-6 gap-y-4 sm:grid-cols-6">
-            {TESTIMONIALS.map((it, i) => {
-              const isActive = i === active
-              return (
-                <button
-                  key={it.id}
-                  type="button"
-                  onClick={() => {
-                    setActive(i)
-                    startRef.current = performance.now()
-                    setProgress(0)
-                  }}
-                  aria-pressed={isActive}
-                  className="group relative pt-3 text-left"
-                >
-                  <span aria-hidden className="absolute left-0 right-0 top-0 h-[2px] bg-border/70" />
-                  {isActive && (
-                    <span
-                      aria-hidden
-                      className="absolute left-0 top-0 h-[2px] bg-gradient-to-r from-fuchsia-500 via-violet-500 to-pink-500"
-                      style={{ width: `${Math.round(progress * 100)}%` }}
-                    />
-                  )}
-                  <div
-                    className={`text-[13px] font-semibold tracking-tight transition-colors ${
-                      isActive ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
-                    }`}
-                  >
-                    {it.brand}
-                  </div>
-                  <div
-                    className={`mt-0.5 font-mono text-[10.5px] uppercase tracking-[0.16em] transition-colors ${
-                      isActive ? "text-fuchsia-600" : "text-muted-foreground/70"
-                    }`}
-                  >
-                    {it.metric.prefix}
-                    {it.metric.number}
-                    {it.metric.suffix} · {it.industry}
-                  </div>
-                </button>
-              )
-            })}
-          </div>
+        {/* Dots + progress */}
+        <div className="mt-12 flex items-center justify-center gap-3">
+          {slides.map((_, i) => {
+            const isActive = i === active
+            return (
+              <button
+                key={i}
+                type="button"
+                onClick={() => goTo(i)}
+                aria-label={`Go to slide ${i + 1}`}
+                aria-pressed={isActive}
+                className="group relative h-1.5 overflow-hidden rounded-full bg-border/70 transition-all"
+                style={{ width: isActive ? 64 : 24 }}
+              >
+                {isActive && (
+                  <span
+                    aria-hidden
+                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-fuchsia-500 via-violet-500 to-pink-500"
+                    style={{ width: `${Math.round(progress * 100)}%` }}
+                  />
+                )}
+              </button>
+            )
+          })}
         </div>
       </div>
 
       <style jsx global>{`
-        @keyframes test-quote-in {
-          0%   { opacity: 0; transform: translateY(10px) }
-          100% { opacity: 1; transform: translateY(0)    }
-        }
-        @keyframes test-counter-in {
+        @keyframes test-item-in {
           0%   { opacity: 0; transform: translateY(8px) }
           100% { opacity: 1; transform: translateY(0)   }
         }
@@ -269,49 +293,60 @@ export function Testimonials() {
   )
 }
 
-/* ─────────  Animated counter  ───────── */
+/* ─────────  Single testimonial (no box)  ───────── */
 
-function CounterMetric({ metric, keyId }: { metric: Metric; keyId: string }) {
-  const [value, setValue] = useState(0)
-
-  useEffect(() => {
-    let raf = 0
-    const start = performance.now()
-    const dur = 900
-    const target = metric.number
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / dur)
-      const eased = 1 - Math.pow(1 - t, 3)
-      const v = target * eased
-      setValue(metric.isInteger ? Math.round(v) : Math.round(v * 10) / 10)
-      if (t < 1) raf = requestAnimationFrame(tick)
-    }
-    raf = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(raf)
-  }, [metric, keyId])
-
-  const display = metric.isInteger
-    ? String(value)
-    : Number.isInteger(value)
-      ? String(value)
-      : value.toFixed(1)
-
+function Item({
+  t,
+  index,
+  animate,
+}: {
+  t: Testimonial
+  index: number
+  animate: boolean
+}) {
   return (
-    <div
-      key={keyId}
-      style={{ animation: "test-counter-in 600ms cubic-bezier(.2,.7,.2,1) both" }}
+    <figure
+      className="md:px-6"
+      style={{
+        animation: animate
+          ? `test-item-in 600ms cubic-bezier(.2,.7,.2,1) ${index * 80}ms both`
+          : undefined,
+      }}
     >
-      <div
-        className="bg-gradient-to-br from-fuchsia-600 via-violet-600 to-pink-600 bg-clip-text font-semibold leading-none tracking-tight text-transparent tabular-nums"
-        style={{ fontSize: "clamp(3.25rem, 7vw, 5.5rem)" }}
+      {/* Top row: quote glyph + metric */}
+      <div className="flex items-start justify-between gap-4">
+        <Quote
+          aria-hidden
+          className="h-5 w-5 -scale-x-100 text-fuchsia-500/70"
+          strokeWidth={2}
+        />
+        <div className="text-right">
+          <div className="bg-gradient-to-r from-fuchsia-600 via-violet-600 to-pink-600 bg-clip-text text-2xl font-semibold leading-none tracking-tight text-transparent">
+            {t.metric}
+          </div>
+          <div className="mt-1 font-mono text-[9.5px] uppercase tracking-[0.18em] text-muted-foreground">
+            {t.metricLabel}
+          </div>
+        </div>
+      </div>
+
+      {/* Quote */}
+      <blockquote
+        className="mt-3 text-pretty text-[15.5px] font-medium leading-relaxed text-foreground"
       >
-        {metric.prefix}
-        {display}
-        {metric.suffix}
-      </div>
-      <div className="mt-3 font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-        {metric.label}
-      </div>
-    </div>
+        &ldquo;{t.quote}&rdquo;
+      </blockquote>
+
+      {/* Attribution */}
+      <figcaption className="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+        <span className="text-[14px] font-semibold tracking-tight text-foreground">
+          {t.brand}
+        </span>
+        <span className="h-2.5 w-px bg-border" />
+        <span className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-muted-foreground">
+          {t.industry} · {t.city}
+        </span>
+      </figcaption>
+    </figure>
   )
 }
