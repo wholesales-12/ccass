@@ -9,7 +9,6 @@ import { HowItWorks } from "@/components/ai-receptionist/how-it-works"
 import { VoiceQuality } from "@/components/ai-receptionist/voice-quality"
 import { ComparisonTable } from "@/components/ai-receptionist/comparison-table"
 import { PerfectFor } from "@/components/ai-receptionist/perfect-for"
-import { TechStack } from "@/components/ai-receptionist/tech-stack"
 import { ReceptionistFaq } from "@/components/ai-receptionist/receptionist-faq"
 
 export const metadata: Metadata = {
@@ -44,7 +43,6 @@ export default function AIReceptionistPage() {
       <VoiceQuality />
       <ComparisonTable />
       <PerfectFor />
-      <TechStack />
       <ReceptionistFaq />
       <CtaSection />
       <SiteFooter />
