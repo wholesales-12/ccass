@@ -9,6 +9,8 @@ import {
   Activity,
   MapPin,
   CheckCircle2,
+  Sparkles,
+  Languages,
   CalendarCheck,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -16,7 +18,8 @@ import { Button } from "@/components/ui/button"
 /**
  * Dark hero — "Every Call Answered. By an AI Receptionist."
  * - H1 forced to exactly two lines on >= sm.
- * - Right side simplified: a single "Live Call" card that clearly shows what the AI does.
+ * - Right side: an OPEN, free-floating real-time conversation
+ *   (no surrounding card) — orb + waveform + floating bubbles + chips.
  */
 
 const STATS = [
@@ -151,9 +154,9 @@ export function Hero() {
             </div>
           </div>
 
-          {/* RIGHT — clean Live Call card */}
+          {/* RIGHT — open, free-flowing live conversation (no card) */}
           <div className="lg:col-span-5">
-            <LiveCallCard />
+            <OpenConversation />
           </div>
         </div>
       </div>
@@ -161,211 +164,345 @@ export function Hero() {
   )
 }
 
-/* ─────────────────────  Live Call Card (clean) ────────────────────── */
+/* ─────────────────  Open Conversation (no surrounding card) ──────────────────
+ * A free-floating, real-time conversation visual:
+ *  - Center AI orb with concentric pulse rings + radial waveform
+ *  - Floating chat bubbles for caller & AI (no card chrome)
+ *  - Floating intent / language / latency chips
+ *  - Booked confirmation pops in at end of each cycle
+ */
 
-function LiveCallCard() {
+const STEP_DURATION = 2400 // ms per step
+const STEPS = ["caller", "ai", "booked"] as const
+type Step = (typeof STEPS)[number]
+
+function OpenConversation() {
   const [seconds, setSeconds] = useState(42)
-  const [step, setStep] = useState(0)
+  const [step, setStep] = useState<Step>("caller")
 
   useEffect(() => {
     const t = setInterval(() => setSeconds((s) => s + 1), 1000)
     return () => clearInterval(t)
   }, [])
 
-  // Cycle through the conversation steps (0 = caller, 1 = AI, 2 = booked)
   useEffect(() => {
-    const t = setInterval(() => setStep((s) => (s + 1) % 3), 2200)
+    const t = setInterval(() => {
+      setStep((cur) => {
+        const idx = STEPS.indexOf(cur)
+        return STEPS[(idx + 1) % STEPS.length]
+      })
+    }, STEP_DURATION)
     return () => clearInterval(t)
   }, [])
 
   const mm = String(Math.floor(seconds / 60)).padStart(2, "0")
   const ss = String(seconds % 60).padStart(2, "0")
-
-  const callerSpeaking = step === 0
-  const aiSpeaking = step === 1
-  const booked = step === 2
+  const callerSpeaking = step === "caller"
+  const aiSpeaking = step === "ai"
+  const booked = step === "booked"
 
   return (
-    <div className="relative mx-auto w-full max-w-[440px]">
-      {/* Glow */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -inset-6 -z-10 rounded-[2.5rem] opacity-70 blur-3xl"
-        style={{
-          background:
-            "radial-gradient(50% 50% at 50% 50%, oklch(0.62 0.24 300 / 0.45), transparent 70%)",
-        }}
+    <div
+      className="relative mx-auto h-[480px] w-full max-w-[480px] sm:h-[520px]"
+      role="img"
+      aria-label="Live AI receptionist conversation"
+    >
+      {/* Status strip — small, no box */}
+      <div className="absolute left-0 right-0 top-0 flex items-center justify-between text-[11px]">
+        <span className="inline-flex items-center gap-2 font-semibold text-emerald-300">
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+          </span>
+          LIVE · {mm}:{ss}
+        </span>
+        <span className="font-medium text-white/45">Inbound · +91 98210 ••••</span>
+      </div>
+
+      {/* Center AI orb */}
+      <AiOrb speaking={aiSpeaking} listening={callerSpeaking} done={booked} />
+
+      {/* Caller bubble — top-left */}
+      <FloatingBubble
+        position="top-left"
+        active={callerSpeaking}
+        side="caller"
+        avatar="R"
+        name="Rahul"
+        meta="Speaking · Hindi"
+        primary="मुझे कल 11 बजे appointment book करनी है।"
+        secondary="I want to book an appointment for tomorrow at 11."
       />
 
-      {/* Card */}
-      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-[#1a1126] to-[#120b1c] p-6 shadow-2xl shadow-black/60 backdrop-blur">
-        {/* Top status bar */}
-        <div className="flex items-center justify-between">
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-300">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            </span>
-            Live call · {mm}:{ss}
-          </div>
-          <span className="text-[11px] font-medium text-white/45">Inbound · +91 98210 ••••</span>
-        </div>
+      {/* AI bubble — bottom-right */}
+      <FloatingBubble
+        position="bottom-right"
+        active={aiSpeaking}
+        side="ai"
+        avatar="AI"
+        name="Kedeyo AI"
+        meta="Replying · English"
+        primary="Sure Rahul — 11 AM tomorrow with Dr. Sharma is available."
+        secondary="कल 11 बजे डॉ. शर्मा के साथ available है।"
+      />
 
-        {/* Caller / AI */}
-        <div className="mt-6 grid grid-cols-2 gap-3">
-          {/* Caller */}
-          <div
-            className={`rounded-2xl border p-4 transition-all ${
-              callerSpeaking
-                ? "border-fuchsia-400/40 bg-fuchsia-500/10"
-                : "border-white/10 bg-white/[0.03]"
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <div className="grid h-8 w-8 place-items-center rounded-lg bg-fuchsia-500/20 text-[12px] font-semibold text-fuchsia-200">
-                R
-              </div>
-              <div className="leading-tight">
-                <div className="text-[12px] font-semibold text-white">Rahul (caller)</div>
-                <div className="text-[10px] text-white/40">Speaking · Hindi</div>
-              </div>
-            </div>
-            <Wave active={callerSpeaking} color="fuchsia" />
-          </div>
+      {/* Floating chips */}
+      <FloatingChip
+        position="top-right"
+        icon={<Sparkles className="h-3 w-3" />}
+        label="Intent"
+        value="Booking"
+        tone="violet"
+        active={callerSpeaking || aiSpeaking}
+      />
+      <FloatingChip
+        position="bottom-left"
+        icon={<Languages className="h-3 w-3" />}
+        label="Language"
+        value="HI ⇄ EN"
+        tone="fuchsia"
+        active
+      />
 
-          {/* AI */}
-          <div
-            className={`rounded-2xl border p-4 transition-all ${
-              aiSpeaking
-                ? "border-violet-400/40 bg-violet-500/10"
-                : "border-white/10 bg-white/[0.03]"
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 text-[12px] font-semibold text-white">
-                AI
-              </div>
-              <div className="leading-tight">
-                <div className="text-[12px] font-semibold text-white">Kedeyo AI</div>
-                <div className="text-[10px] text-white/40">Replying · English</div>
-              </div>
-            </div>
-            <Wave active={aiSpeaking} color="violet" />
+      {/* Booked confirmation — center bottom */}
+      <div
+        className={`absolute bottom-0 left-1/2 w-[260px] -translate-x-1/2 transition-all duration-500 ${
+          booked ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
+        }`}
+      >
+        <div className="flex items-center gap-2.5 rounded-2xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-2.5 text-[12px] font-semibold text-emerald-200 shadow-[0_8px_32px_-8px_rgba(16,185,129,0.4)] backdrop-blur">
+          <span className="grid h-7 w-7 place-items-center rounded-lg bg-emerald-500/20 text-emerald-300">
+            <CalendarCheck className="h-3.5 w-3.5" />
+          </span>
+          <div className="leading-tight">
+            <div>Appointment booked</div>
+            <div className="text-[10px] font-medium text-emerald-300/70">SMS + WhatsApp sent</div>
           </div>
-        </div>
-
-        {/* Live transcript line */}
-        <div className="mt-5 rounded-xl border border-white/10 bg-black/30 px-4 py-3">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
-            Live transcript
-          </div>
-          <div className="mt-1.5 min-h-[44px] text-[13px] leading-snug text-white/90">
-            {callerSpeaking && (
-              <span>
-                <span className="text-white">मुझे कल 11 बजे appointment book करनी है।</span>{" "}
-                <span className="text-white/45">/ I want to book an appointment for tomorrow at 11.</span>
-              </span>
-            )}
-            {aiSpeaking && (
-              <span>
-                <span className="text-white">Sure Rahul — 11 AM tomorrow with Dr. Sharma is available.</span>{" "}
-                <span className="text-white/45">/ कल 11 बजे डॉ. शर्मा के साथ available है।</span>
-              </span>
-            )}
-            {booked && (
-              <span className="inline-flex items-center gap-2 font-semibold text-emerald-300">
-                <CheckCircle2 className="h-4 w-4" />
-                Appointment booked. SMS + WhatsApp confirmation sent.
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Outcome row */}
-        <div className="mt-4 grid grid-cols-3 gap-2">
-          <Outcome label="Detected" value="Booking" tone="violet" active />
-          <Outcome label="Language" value="HI · EN" tone="fuchsia" active />
-          <Outcome
-            label="Status"
-            value={booked ? "Booked" : "In progress"}
-            tone="emerald"
-            active={booked}
-          />
-        </div>
-
-        {/* Footer */}
-        <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4">
-          <div className="inline-flex items-center gap-2 text-[11px] text-white/55">
-            <CalendarCheck className="h-3.5 w-3.5 text-emerald-400" />
-            38 appointments booked today
-          </div>
-          <div className="text-[11px] font-medium text-white/45">Latency 280ms</div>
+          <CheckCircle2 className="ml-auto h-4 w-4 text-emerald-300" />
         </div>
       </div>
-    </div>
-  )
-}
 
-function Wave({ active, color }: { active: boolean; color: "fuchsia" | "violet" }) {
-  const palette =
-    color === "fuchsia"
-      ? "from-fuchsia-500/30 via-fuchsia-400 to-pink-400"
-      : "from-violet-500/30 via-violet-400 to-fuchsia-400"
-  return (
-    <div className="mt-3 flex h-7 items-end gap-[2px]">
-      {Array.from({ length: 18 }).map((_, k) => (
-        <span
-          key={k}
-          className={`block w-[3px] rounded-full bg-gradient-to-t ${palette} ${
-            active ? "" : "opacity-25"
-          }`}
-          style={{
-            height: `${active ? 6 + ((k * 11) % 22) : 4 + (k % 4) * 2}px`,
-            animation: active
-              ? `heroWave ${600 + (k % 5) * 80}ms ease-in-out ${k * 35}ms infinite alternate`
-              : undefined,
-          }}
-        />
-      ))}
       <style jsx global>{`
-        @keyframes heroWave {
-          from {
-            transform: scaleY(0.4);
-          }
-          to {
-            transform: scaleY(1);
-          }
+        @keyframes hero-orb-pulse {
+          0%, 100% { transform: scale(1); opacity: 0.6 }
+          50% { transform: scale(1.08); opacity: 1 }
+        }
+        @keyframes hero-orb-ring {
+          0% { transform: scale(0.6); opacity: 0.7 }
+          100% { transform: scale(2.2); opacity: 0 }
+        }
+        @keyframes hero-wave-bar {
+          0%, 100% { transform: scaleY(0.35) }
+          50% { transform: scaleY(1) }
+        }
+        @keyframes hero-bubble-in {
+          0% { transform: translateY(8px) scale(0.97); opacity: 0 }
+          15% { opacity: 1 }
+          100% { transform: translateY(0) scale(1); opacity: 1 }
+        }
+        @keyframes hero-bubble-idle {
+          0%, 100% { transform: translateY(0) }
+          50% { transform: translateY(-3px) }
         }
       `}</style>
     </div>
   )
 }
 
-function Outcome({
+/* ─────────────  AI Orb (center)  ───────────── */
+
+function AiOrb({
+  speaking,
+  listening,
+  done,
+}: {
+  speaking: boolean
+  listening: boolean
+  done: boolean
+}) {
+  // 24 bars arranged in a circle around the orb
+  const bars = Array.from({ length: 24 })
+  return (
+    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+      <div className="relative h-44 w-44">
+        {/* Outer expanding rings (only when AI is talking/listening) */}
+        {[0, 1, 2].map((i) => (
+          <span
+            key={i}
+            aria-hidden
+            className="absolute inset-0 rounded-full border border-fuchsia-400/30"
+            style={{
+              animation: `hero-orb-ring 2.6s ease-out ${i * 0.7}s infinite`,
+              opacity: done ? 0.15 : 0.6,
+            }}
+          />
+        ))}
+
+        {/* Radial waveform around the orb */}
+        <div className="absolute inset-0">
+          {bars.map((_, i) => {
+            const angle = (i / bars.length) * 360
+            const active = speaking || listening
+            const base = 6
+            const amp = active ? 8 + ((i * 7) % 14) : 4
+            return (
+              <span
+                key={i}
+                aria-hidden
+                className="absolute left-1/2 top-1/2 block w-[2.5px] origin-bottom rounded-full"
+                style={{
+                  height: `${base + amp}px`,
+                  background:
+                    listening
+                      ? "linear-gradient(to top, rgba(232,121,249,0.2), rgba(244,114,182,1))"
+                      : speaking
+                        ? "linear-gradient(to top, rgba(167,139,250,0.2), rgba(196,181,253,1))"
+                        : "linear-gradient(to top, rgba(255,255,255,0.05), rgba(255,255,255,0.4))",
+                  transform: `translate(-50%, -100%) rotate(${angle}deg) translateY(-78px)`,
+                  transformOrigin: "bottom center",
+                  animation: active
+                    ? `hero-wave-bar ${700 + (i % 5) * 90}ms ease-in-out ${i * 25}ms infinite`
+                    : undefined,
+                  opacity: active ? 1 : 0.45,
+                }}
+              />
+            )
+          })}
+        </div>
+
+        {/* Inner orb */}
+        <div
+          className="absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full"
+          style={{
+            background:
+              "radial-gradient(circle at 35% 30%, oklch(0.85 0.15 320), oklch(0.55 0.25 295) 55%, oklch(0.32 0.2 290) 100%)",
+            boxShadow:
+              "0 0 60px 12px rgba(217,70,239,0.35), inset 0 0 30px rgba(255,255,255,0.15)",
+            animation: "hero-orb-pulse 2.6s ease-in-out infinite",
+          }}
+        />
+
+        {/* Center label */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+          <div className="text-[9px] font-semibold uppercase tracking-[0.22em] text-white/70">
+            Kedeyo AI
+          </div>
+          <div className="mt-0.5 text-[10px] font-medium text-white/55">
+            {listening ? "Listening…" : speaking ? "Replying…" : done ? "Resolved" : "Idle"}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ─────────────  Floating Bubble  ───────────── */
+
+function FloatingBubble({
+  position,
+  active,
+  side,
+  avatar,
+  name,
+  meta,
+  primary,
+  secondary,
+}: {
+  position: "top-left" | "bottom-right"
+  active: boolean
+  side: "caller" | "ai"
+  avatar: string
+  name: string
+  meta: string
+  primary: string
+  secondary: string
+}) {
+  const positionCls =
+    position === "top-left"
+      ? "top-10 left-0 sm:left-2 max-w-[260px]"
+      : "bottom-16 right-0 sm:right-2 max-w-[280px]"
+  const tone =
+    side === "caller"
+      ? "border-fuchsia-400/30 bg-fuchsia-500/[0.08]"
+      : "border-violet-400/30 bg-violet-500/[0.08]"
+  const avatarTone =
+    side === "caller"
+      ? "bg-fuchsia-500/25 text-fuchsia-200"
+      : "bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white"
+  const dotTone = side === "caller" ? "bg-fuchsia-400" : "bg-violet-400"
+
+  return (
+    <div
+      className={`absolute ${positionCls} transition-all duration-500 ${
+        active ? "scale-100 opacity-100" : "scale-[0.96] opacity-50"
+      }`}
+      style={{
+        animation: active
+          ? "hero-bubble-in 420ms ease-out, hero-bubble-idle 4s ease-in-out infinite 420ms"
+          : undefined,
+      }}
+    >
+      <div
+        className={`rounded-2xl border ${tone} px-3.5 py-2.5 backdrop-blur-md shadow-[0_12px_40px_-12px_rgba(0,0,0,0.6)]`}
+      >
+        <div className="flex items-center gap-2">
+          <div
+            className={`grid h-7 w-7 place-items-center rounded-lg text-[11px] font-semibold ${avatarTone}`}
+          >
+            {avatar}
+          </div>
+          <div className="leading-tight">
+            <div className="text-[11px] font-semibold text-white">{name}</div>
+            <div className="flex items-center gap-1 text-[9.5px] text-white/45">
+              {active && (
+                <span className={`inline-block h-1 w-1 rounded-full ${dotTone} animate-pulse`} />
+              )}
+              {meta}
+            </div>
+          </div>
+        </div>
+        <div className="mt-2 text-[12px] leading-snug text-white/90">{primary}</div>
+        <div className="mt-0.5 text-[10.5px] leading-snug text-white/45">{secondary}</div>
+      </div>
+    </div>
+  )
+}
+
+/* ─────────────  Floating Chip  ───────────── */
+
+function FloatingChip({
+  position,
+  icon,
   label,
   value,
   tone,
   active,
 }: {
+  position: "top-right" | "bottom-left"
+  icon: React.ReactNode
   label: string
   value: string
-  tone: "fuchsia" | "violet" | "emerald"
+  tone: "violet" | "fuchsia"
   active?: boolean
 }) {
+  const positionCls =
+    position === "top-right"
+      ? "top-12 right-0 sm:right-2"
+      : "bottom-32 left-0 sm:left-2"
   const toneCls =
-    tone === "fuchsia"
-      ? "text-fuchsia-300"
-      : tone === "violet"
-        ? "text-violet-300"
-        : "text-emerald-300"
+    tone === "violet"
+      ? "border-violet-400/30 bg-violet-500/10 text-violet-200"
+      : "border-fuchsia-400/30 bg-fuchsia-500/10 text-fuchsia-200"
   return (
     <div
-      className={`rounded-xl border px-3 py-2 transition-colors ${
-        active ? "border-white/15 bg-white/[0.04]" : "border-white/10 bg-white/[0.02]"
+      className={`absolute ${positionCls} inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-semibold backdrop-blur-md transition-opacity duration-500 ${toneCls} ${
+        active ? "opacity-100" : "opacity-55"
       }`}
+      style={{ animation: "hero-bubble-idle 5s ease-in-out infinite" }}
     >
-      <div className="text-[9px] font-semibold uppercase tracking-[0.16em] text-white/40">{label}</div>
-      <div className={`mt-0.5 text-[12px] font-semibold ${toneCls}`}>{value}</div>
+      {icon}
+      <span className="text-white/45">{label}</span>
+      <span>{value}</span>
     </div>
   )
 }

@@ -8,9 +8,6 @@ import {
   HeartPulse,
   Landmark,
   Building2,
-  Plane,
-  Truck,
-  Megaphone,
   ArrowRight,
   Sparkles,
   CheckCircle2,
@@ -31,7 +28,7 @@ type Industry = {
   dot: string
   gradient: string
   panelGlow: string
-  preview: "ecommerce" | "bfsi" | "healthcare" | "edtech" | "realestate" | "logistics" | "travel" | "government"
+  preview: "ecommerce" | "bfsi" | "healthcare" | "edtech" | "realestate"
 }
 
 const INDUSTRIES: Industry[] = [
@@ -134,66 +131,6 @@ const INDUSTRIES: Industry[] = [
     gradient: "from-sky-600 via-blue-600 to-indigo-500",
     panelGlow: "from-sky-500/12 via-blue-500/8 to-transparent",
     preview: "realestate",
-  },
-  {
-    id: "logistics",
-    name: "Logistics",
-    short: "Masked calls & SLA",
-    icon: Truck,
-    title: "Masked calling, RTO recovery and live SLA",
-    description:
-      "Cut driver-customer coordination chaos with masked calling, delivery confirmations, RTO recovery and live SLA dashboards.",
-    highlights: ["Masked driver-customer calls", "Delivery confirmations", "RTO recovery", "Live SLA dashboards"],
-    stats: [
-      { value: "−50%", label: "Wait times" },
-      { value: "100%", label: "Privacy" },
-      { value: "Live", label: "SLA" },
-    ],
-    href: "/industries/logistics",
-    dot: "bg-rose-500",
-    gradient: "from-rose-600 via-red-600 to-orange-500",
-    panelGlow: "from-rose-500/12 via-red-500/8 to-transparent",
-    preview: "logistics",
-  },
-  {
-    id: "travel",
-    name: "Travel",
-    short: "Bookings & refunds",
-    icon: Plane,
-    title: "Bookings, modifications and seasonal scaling",
-    description:
-      "Manage booking, modification and refund calls in multiple languages with seasonal scaling that does not require new hardware.",
-    highlights: ["Booking calls", "Modification & refunds", "Multilingual support", "Seasonal scaling"],
-    stats: [
-      { value: "24×7", label: "Coverage" },
-      { value: "10×", label: "Peak ready" },
-      { value: "0", label: "New hardware" },
-    ],
-    href: "/industries/travel",
-    dot: "bg-orange-500",
-    gradient: "from-orange-500 via-amber-500 to-rose-500",
-    panelGlow: "from-orange-500/12 via-amber-500/8 to-transparent",
-    preview: "travel",
-  },
-  {
-    id: "government",
-    name: "Government",
-    short: "Helplines & awareness",
-    icon: Megaphone,
-    title: "Citizen helplines and awareness campaigns",
-    description:
-      "Run citizen helplines, grievance redressal and outbound awareness campaigns with multilingual IVR and full audit logging.",
-    highlights: ["Citizen helplines", "Grievance redressal", "Awareness campaigns", "Full audit logging"],
-    stats: [
-      { value: "Multi", label: "Lingual" },
-      { value: "100%", label: "Audit log" },
-      { value: "12+", label: "Languages" },
-    ],
-    href: "/industries/government",
-    dot: "bg-indigo-500",
-    gradient: "from-indigo-600 via-violet-600 to-purple-500",
-    panelGlow: "from-indigo-500/12 via-violet-500/8 to-transparent",
-    preview: "government",
   },
 ]
 
@@ -411,116 +348,6 @@ function RealEstatePreview({ gradient }: { gradient: string }) {
   )
 }
 
-function LogisticsPreview({ gradient }: { gradient: string }) {
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between rounded-lg border border-rose-500/20 bg-rose-500/5 px-3 py-2">
-        <div>
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Wait time reduction</div>
-          <div className={cn("bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent", gradient)}>−50%</div>
-        </div>
-        <div className="text-right">
-          <div className="font-mono text-[10px] text-muted-foreground">Active routes</div>
-          <div className="text-sm font-semibold text-foreground">38 live</div>
-        </div>
-      </div>
-      <div className="relative h-16 overflow-hidden rounded-md border border-border bg-card">
-        <svg viewBox="0 0 200 60" className="h-full w-full" preserveAspectRatio="none">
-          <path d="M 5 40 Q 50 10, 100 30 T 195 20" stroke="oklch(0.6 0.22 30)" strokeWidth="2" strokeDasharray="4 3" fill="none" strokeLinecap="round" />
-          <circle cx="5" cy="40" r="3" fill="oklch(0.6 0.22 30)" />
-          <circle cx="195" cy="20" r="3" fill="oklch(0.55 0.22 350)" />
-          <circle
-            cx="100"
-            cy="28"
-            r="4"
-            fill="oklch(0.6 0.22 30)"
-            className={PAUSE}
-            style={{ animation: "ind-truck 2.4s ease-in-out infinite" }}
-          />
-        </svg>
-        <span className="absolute bottom-1 left-2 font-mono text-[9px] text-muted-foreground">Hub</span>
-        <span className="absolute bottom-1 right-2 font-mono text-[9px] text-muted-foreground">Customer</span>
-      </div>
-      <div className="flex items-center gap-2 rounded-md border border-rose-500/20 bg-rose-500/5 px-2 py-1">
-        <span className="rounded-md bg-rose-500/15 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-rose-700">
-          MASKED
-        </span>
-        <span className="font-mono text-[9px] text-muted-foreground">Driver ↔ Customer · Numbers hidden</span>
-      </div>
-      <style>{`@keyframes ind-truck { 0%,100% { cx: 100 } 50% { cx: 150 } }`}</style>
-    </div>
-  )
-}
-
-function TravelPreview({ gradient }: { gradient: string }) {
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between rounded-lg border border-orange-500/20 bg-orange-500/5 px-3 py-2">
-        <div>
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Coverage</div>
-          <div className={cn("bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent", gradient)}>24×7</div>
-        </div>
-        <div className="text-right">
-          <div className="font-mono text-[10px] text-muted-foreground">Languages</div>
-          <div className="text-sm font-semibold text-foreground">Hi · En · Ta</div>
-        </div>
-      </div>
-      {[
-        { code: "BLR → BOM", state: "Confirmed", color: "text-emerald-700 bg-emerald-500/10" },
-        { code: "DEL → GOA", state: "Modified", color: "text-cyan-700 bg-cyan-500/10" },
-        { code: "BOM → DXB", state: "Refunded", color: "text-orange-700 bg-orange-500/10" },
-      ].map((row, i) => (
-        <div
-          key={row.code}
-          className={cn("flex items-center gap-2 rounded-md border border-border bg-card px-2 py-1.5", PAUSE)}
-          style={{ animation: `ind-row 2.4s ease-in-out ${i * 0.3}s infinite` }}
-        >
-          <span className="font-mono text-[10px] font-semibold text-foreground">{row.code}</span>
-          <div className="h-px flex-1 border-t border-dashed border-border" />
-          <span className={cn("rounded-md px-1.5 py-0.5 text-[9px] font-medium", row.color)}>{row.state}</span>
-        </div>
-      ))}
-      <style>{`@keyframes ind-row { 0%,100% { opacity: 0.85 } 50% { opacity: 1 } }`}</style>
-    </div>
-  )
-}
-
-function GovernmentPreview({ gradient }: { gradient: string }) {
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between rounded-lg border border-indigo-500/20 bg-indigo-500/5 px-3 py-2">
-        <div>
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Languages live</div>
-          <div className={cn("bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent", gradient)}>12+</div>
-        </div>
-        <div className="text-right">
-          <div className="font-mono text-[10px] text-muted-foreground">Audit log</div>
-          <div className="text-sm font-semibold text-foreground">100%</div>
-        </div>
-      </div>
-      {[
-        { num: "1", label: "Helpline", queue: "08 calls" },
-        { num: "2", label: "Grievance", queue: "12 calls" },
-        { num: "3", label: "Awareness", queue: "Outbound" },
-      ].map((row, i) => (
-        <div
-          key={row.num}
-          className={cn("flex items-center gap-2 rounded-md border border-border bg-card px-2 py-1.5", PAUSE)}
-          style={{ animation: `ind-row 2.4s ease-in-out ${i * 0.3}s infinite` }}
-        >
-          <span className="flex h-5 w-5 items-center justify-center rounded-md border border-indigo-500/30 bg-indigo-500/10 font-mono text-[10px] font-bold text-indigo-700">
-            {row.num}
-          </span>
-          <span className="text-[11px] font-semibold text-foreground">{row.label}</span>
-          <div className="h-px flex-1 border-t border-dashed border-border" />
-          <span className="font-mono text-[9px] text-muted-foreground">{row.queue}</span>
-        </div>
-      ))}
-      <style>{`@keyframes ind-row { 0%,100% { opacity: 0.85 } 50% { opacity: 1 } }`}</style>
-    </div>
-  )
-}
-
 function IndustryPreview({ kind, gradient }: { kind: Industry["preview"]; gradient: string }) {
   switch (kind) {
     case "ecommerce":
@@ -533,12 +360,6 @@ function IndustryPreview({ kind, gradient }: { kind: Industry["preview"]; gradie
       return <EdtechPreview gradient={gradient} />
     case "realestate":
       return <RealEstatePreview gradient={gradient} />
-    case "logistics":
-      return <LogisticsPreview gradient={gradient} />
-    case "travel":
-      return <TravelPreview gradient={gradient} />
-    case "government":
-      return <GovernmentPreview gradient={gradient} />
     default:
       return null
   }
@@ -601,7 +422,7 @@ export function IndustriesSection() {
         <div
           role="tablist"
           aria-label="Industries"
-          className="mx-auto mt-12 flex max-w-5xl flex-wrap items-center justify-center gap-2 sm:gap-2.5"
+          className="mx-auto mt-12 flex max-w-4xl flex-wrap items-center justify-center gap-2 md:flex-nowrap md:gap-2.5"
         >
           {INDUSTRIES.map((tab) => {
             const Icon = tab.icon

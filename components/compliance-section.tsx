@@ -1,4 +1,4 @@
-import { ShieldCheck, Lock, FileCheck, Building2, MapPin } from "lucide-react"
+import { ShieldCheck, Lock, FileCheck, Building2 } from "lucide-react"
 
 const STANDARDS = [
   {
@@ -20,11 +20,6 @@ const STANDARDS = [
     icon: Building2,
     name: "RBI / IRDAI",
     desc: "Tamper-proof recordings, retention policies, role-based access, full audit trails, regulator-export packages on demand.",
-  },
-  {
-    icon: MapPin,
-    name: "Made in India",
-    desc: "Built, hosted (Mumbai region), supported and certified inside India — no data leaves the country unless you choose it.",
   },
 ]
 
@@ -71,8 +66,8 @@ export function ComplianceSection() {
           </p>
         </div>
 
-        {/* Standards grid */}
-        <div className="mt-12 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+        {/* Standards grid — 4 in one row at lg, 2 cols at md, 1 on mobile */}
+        <div className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {STANDARDS.map((s) => {
             const Icon = s.icon
             return (
