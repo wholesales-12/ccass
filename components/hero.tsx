@@ -10,18 +10,16 @@ import {
   MapPin,
   Ear,
   Brain,
-  MessageSquareText,
   CalendarCheck,
   CheckCircle2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 /**
- * Dark hero — "Every Call Answered. By an AI Receptionist."
- * Right side: centered AI Receptionist "Stage" — a glowing pulsing orb
- * surrounded by 4 floating capability labels with animated beam lines.
- * Below: a single live caption that rotates through caller / AI turns.
- * No card chrome, no containers, no boxes.
+ * Hero — "Every Call Answered. By an AI Receptionist."
+ * Right side: free-flowing live call transcript — pure typography,
+ * no orb, no stage, no containers. Speaker dot + bilingual lines
+ * stack vertically with the active turn lighting up.
  */
 
 const STATS = [
@@ -150,61 +148,33 @@ export function Hero() {
             </div>
           </div>
 
-          {/* RIGHT — AI Receptionist Stage */}
+          {/* RIGHT — live transcript */}
           <div className="lg:col-span-5">
-            <ReceptionistStage />
+            <ReceptionistTranscript />
           </div>
         </div>
       </div>
 
       {/* Shared keyframes */}
       <style jsx global>{`
-        @keyframes hero-orb-pulse {
-          0%, 100% { transform: scale(1); filter: brightness(1) }
-          50%      { transform: scale(1.04); filter: brightness(1.15) }
-        }
-        @keyframes hero-orb-ring {
-          0%   { transform: scale(0.55); opacity: 0.7 }
-          100% { transform: scale(2.3);  opacity: 0   }
-        }
         @keyframes hero-eq-bar {
           0%, 100% { transform: scaleY(0.35) }
           50%      { transform: scaleY(1)    }
-        }
-        @keyframes hero-beam {
-          0%   { stroke-dashoffset: 80; opacity: 0   }
-          15%  {                        opacity: 1   }
-          85%  {                        opacity: 1   }
-          100% { stroke-dashoffset: 0;  opacity: 0.2 }
-        }
-        @keyframes hero-cap-glow {
-          0%, 100% { opacity: 0.55 }
-          50%      { opacity: 1    }
         }
         @keyframes hero-caret {
           0%, 49%  { opacity: 1 }
           50%, 100%{ opacity: 0 }
         }
-        @keyframes hero-caption-in {
-          0%   { opacity: 0; transform: translateY(6px) }
-          100% { opacity: 1; transform: translateY(0)   }
-        }
-        @keyframes hero-msg-pop {
-          0%   { opacity: 0; transform: translateY(10px) scale(0.97) }
-          60%  { opacity: 1; transform: translateY(-2px) scale(1.015) }
-          100% { opacity: 1; transform: translateY(0) scale(1) }
-        }
-        @keyframes hero-msg-sweep {
-          0%   { transform: translateX(-100%); opacity: 0   }
-          30%  {                                opacity: 0.9 }
-          100% { transform: translateX(100%);  opacity: 0   }
+        @keyframes hero-turn-glow {
+          0%, 100% { opacity: 0.55 }
+          50%      { opacity: 1    }
         }
       `}</style>
     </section>
   )
 }
 
-/* ─────────────  AI Receptionist Stage  ───────────── */
+/* ─────────────  Live Transcript (pure typography, no boxes)  ───────────── */
 
 type Turn = {
   side: "caller" | "ai"
@@ -212,8 +182,6 @@ type Turn = {
   langTag: "HI" | "EN"
   primary: string
   secondary: string
-  /** which capability is "lit up" during this turn */
-  cap: "listen" | "understand" | "speak" | "act"
 }
 
 const TURNS: Turn[] = [
@@ -223,7 +191,6 @@ const TURNS: Turn[] = [
     langTag: "HI",
     primary: "मुझे कल 11 बजे appointment book करनी है।",
     secondary: "I want to book for tomorrow at 11.",
-    cap: "listen",
   },
   {
     side: "ai",
@@ -231,7 +198,6 @@ const TURNS: Turn[] = [
     langTag: "EN",
     primary: "11 AM tomorrow with Dr. Sharma is open — confirm?",
     secondary: "कल 11 बजे डॉ. शर्मा available है।",
-    cap: "understand",
   },
   {
     side: "caller",
@@ -239,7 +205,6 @@ const TURNS: Turn[] = [
     langTag: "HI",
     primary: "हाँ, confirm कर दीजिए।",
     secondary: "Yes, please confirm.",
-    cap: "speak",
   },
   {
     side: "ai",
@@ -247,32 +212,12 @@ const TURNS: Turn[] = [
     langTag: "EN",
     primary: "Booked. SMS + WhatsApp sent.",
     secondary: "Resolved in 23s.",
-    cap: "act",
   },
 ]
 
-type CapId = "listen" | "understand" | "speak" | "act"
-
-const CAPABILITIES: Array<{
-  id: CapId
-  label: string
-  sub: string
-  icon: typeof Ear
-  /** percent positions inside the stage box */
-  x: number
-  y: number
-  /** which side of the orb this capability sits, controls beam path */
-  anchor: "tl" | "tr" | "bl" | "br"
-}> = [
-  { id: "listen",     label: "Listens",        sub: "Hi · En · Ta",     icon: Ear,                x: 6,  y: 8,  anchor: "tl" },
-  { id: "understand", label: "Understands",    sub: "Intent · 98%",     icon: Brain,              x: 94, y: 8,  anchor: "tr" },
-  { id: "speak",      label: "Speaks back",    sub: "Natural voice",    icon: MessageSquareText,  x: 6,  y: 92, anchor: "bl" },
-  { id: "act",        label: "Books / Routes", sub: "Calendar · CRM",   icon: CalendarCheck,      x: 94, y: 92, anchor: "br" },
-]
-
-function ReceptionistStage() {
+function ReceptionistTranscript() {
   const [seconds, setSeconds] = useState(46)
-  const [turnIdx, setTurnIdx] = useState(0)
+  const [active, setActive] = useState(0)
 
   useEffect(() => {
     const t = setInterval(() => setSeconds((s) => s + 1), 1000)
@@ -280,289 +225,154 @@ function ReceptionistStage() {
   }, [])
 
   useEffect(() => {
-    const t = setInterval(() => setTurnIdx((i) => (i + 1) % TURNS.length), 3200)
+    const t = setInterval(() => setActive((i) => (i + 1) % TURNS.length), 2800)
     return () => clearInterval(t)
   }, [])
 
   const mm = String(Math.floor(seconds / 60)).padStart(2, "0")
   const ss = String(seconds % 60).padStart(2, "0")
-  const turn = TURNS[turnIdx]
-  const activeCap = turn.cap
-  const aiSpeaking = turn.side === "ai"
-  const callerSpeaking = turn.side === "caller"
-  const resolved = turnIdx === TURNS.length - 1
+  const resolved = active === TURNS.length - 1
 
   return (
-    <div className="relative mx-auto w-full max-w-[520px]">
-      {/* Top status row — pure typography */}
-      <div className="flex items-center justify-between text-[11px]">
-        <span className="inline-flex items-center gap-2 font-mono font-semibold uppercase tracking-[0.2em] text-emerald-300">
+    <div className="relative mx-auto w-full max-w-[480px]">
+      {/* Status row */}
+      <div className="flex items-center justify-between text-[10.5px] font-mono uppercase tracking-[0.22em]">
+        <span className="inline-flex items-center gap-2 font-semibold text-emerald-300">
           <span className="relative flex h-1.5 w-1.5">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
           </span>
           Live · {mm}:{ss}
         </span>
-        <span className="font-mono uppercase tracking-[0.18em] text-white/40">
-          Hi <span className="text-white/30">⇄</span> En · Mumbai
-        </span>
+        <span className="text-white/45">Inbound · Mumbai · HI ⇄ EN</span>
       </div>
 
       {/* Identity wordmark */}
-      <div className="mt-2">
+      <div className="mt-3 flex items-baseline justify-between gap-3">
         <h3
-          className="bg-gradient-to-r from-fuchsia-300 via-violet-300 to-pink-300 bg-clip-text text-transparent font-semibold leading-[1] tracking-tight"
+          className="bg-gradient-to-r from-fuchsia-300 via-violet-300 to-pink-300 bg-clip-text font-semibold leading-[1] tracking-tight text-transparent"
           style={{ fontSize: "clamp(1.4rem, 2.6vw, 1.85rem)" }}
         >
           AI Receptionist
         </h3>
-        <p className="mt-1 max-w-[420px] text-[11.5px] leading-snug text-white/55">
-          Picks up, understands, qualifies and books — in your customer&apos;s language.
-        </p>
+        <span className="hidden font-mono text-[9.5px] uppercase tracking-[0.2em] text-white/35 sm:inline">
+          Call #2,341 · today
+        </span>
       </div>
+      <p className="mt-1 text-[12px] leading-snug text-white/55">
+        Real call, resolved in <span className="font-semibold text-white/80">23 seconds</span>.
+      </p>
 
-      {/* Stage: orb + capabilities + beams */}
-      <div className="relative mt-4 h-[210px] sm:h-[230px]">
-        {/* SVG beam lines (under everything) */}
-        <svg
-          aria-hidden
-          className="absolute inset-0 h-full w-full"
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-        >
-          <defs>
-            <linearGradient id="beam-fuchsia" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="rgba(236,72,153,0)" />
-              <stop offset="100%" stopColor="rgba(236,72,153,0.9)" />
-            </linearGradient>
-            <linearGradient id="beam-violet" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="rgba(167,139,250,0)" />
-              <stop offset="100%" stopColor="rgba(167,139,250,0.9)" />
-            </linearGradient>
-          </defs>
+      {/* Transcript — speaker dot + bilingual lines, no containers */}
+      <ol className="mt-6 space-y-4">
+        {TURNS.map((t, i) => {
+          const isActive = i === active
+          const isPast = i < active
+          const isAi = t.side === "ai"
+          const dotColor = isAi ? "bg-violet-400" : "bg-fuchsia-400"
+          const speakerColor = isAi ? "text-violet-300" : "text-fuchsia-300"
 
-          {CAPABILITIES.map((c) => {
-            const isActive = c.id === activeCap
-            const grad = c.anchor === "tl" || c.anchor === "bl" ? "url(#beam-fuchsia)" : "url(#beam-violet)"
-            return (
-              <line
-                key={c.id}
-                x1={c.x}
-                y1={c.y}
-                x2={50}
-                y2={50}
-                stroke={grad}
-                strokeWidth={isActive ? 0.5 : 0.25}
-                strokeLinecap="round"
-                strokeDasharray="2 1.5"
-                vectorEffect="non-scaling-stroke"
-                style={{
-                  opacity: isActive ? 1 : 0.18,
-                  transition: "opacity 400ms ease, stroke-width 400ms ease",
-                }}
-              />
-            )
-          })}
-        </svg>
-
-        {/* Capability labels — positioned at corners, no box */}
-        {CAPABILITIES.map((c) => {
-          const isActive = c.id === activeCap
-          const Icon = c.icon
-          const align =
-            c.anchor === "tl"
-              ? "items-start text-left"
-              : c.anchor === "tr"
-                ? "items-end text-right"
-                : c.anchor === "bl"
-                  ? "items-start text-left"
-                  : "items-end text-right"
           return (
-            <div
-              key={c.id}
-              className={`absolute flex w-[120px] flex-col gap-0.5 ${align}`}
+            <li
+              key={i}
+              className="grid grid-cols-[14px_1fr] gap-x-3 transition-opacity duration-500"
               style={{
-                left: c.x <= 50 ? 0 : "auto",
-                right: c.x > 50 ? 0 : "auto",
-                top: c.y <= 50 ? 0 : "auto",
-                bottom: c.y > 50 ? 0 : "auto",
-                transition: "all 400ms ease",
+                opacity: isActive ? 1 : isPast ? 0.55 : 0.28,
               }}
             >
-              <div
-                className="flex h-7 w-7 items-center justify-center rounded-full transition-all duration-500"
-                style={{
-                  background: isActive
-                    ? "radial-gradient(circle, rgba(236,72,153,0.35), rgba(167,139,250,0.18) 70%, transparent)"
-                    : "rgba(255,255,255,0.04)",
-                  boxShadow: isActive
-                    ? "0 0 24px 6px rgba(217,70,239,0.45), inset 0 0 0 1px rgba(244,114,182,0.55)"
-                    : "inset 0 0 0 1px rgba(255,255,255,0.10)",
-                }}
-              >
-                <Icon
-                  className={`h-4 w-4 transition-colors duration-500 ${
-                    isActive ? "text-fuchsia-200" : "text-white/55"
-                  }`}
-                  strokeWidth={2}
+              {/* Speaker dot column */}
+              <div className="relative flex justify-center pt-1.5">
+                <span
+                  className={`relative inline-flex h-2 w-2 rounded-full ${dotColor}`}
+                  style={{
+                    boxShadow: isActive
+                      ? isAi
+                        ? "0 0 0 3px rgba(167,139,250,0.18), 0 0 14px 2px rgba(167,139,250,0.5)"
+                        : "0 0 0 3px rgba(244,114,182,0.18), 0 0 14px 2px rgba(244,114,182,0.5)"
+                      : "none",
+                  }}
                 />
+                {isActive && (
+                  <span
+                    aria-hidden
+                    className={`absolute top-1.5 inline-flex h-2 w-2 animate-ping rounded-full ${dotColor} opacity-70`}
+                  />
+                )}
+                {/* Connecting hairline to next turn */}
+                {i < TURNS.length - 1 && (
+                  <span
+                    aria-hidden
+                    className="absolute left-1/2 top-5 h-[calc(100%+8px)] w-px -translate-x-1/2 bg-white/8"
+                  />
+                )}
               </div>
-              <div className={`text-[12px] font-semibold leading-tight transition-colors duration-500 ${isActive ? "text-white" : "text-white/70"}`}>
-                {c.label}
+
+              {/* Content column */}
+              <div className="min-w-0">
+                <div className="flex items-baseline gap-2 font-mono text-[10px] uppercase tracking-[0.2em]">
+                  <span className={`font-semibold ${speakerColor}`}>{t.speaker}</span>
+                  <span className="text-white/25">·</span>
+                  <span className="text-white/45">{t.langTag}</span>
+                  {isActive && (
+                    <span className="ml-1 inline-flex items-end gap-[2px]">
+                      {[0, 1, 2].map((k) => (
+                        <span
+                          key={k}
+                          className={`block w-[2px] rounded-full ${isAi ? "bg-violet-300" : "bg-fuchsia-300"}`}
+                          style={{
+                            height: "8px",
+                            transformOrigin: "bottom",
+                            animation: `hero-eq-bar 700ms ease-in-out ${k * 90}ms infinite`,
+                          }}
+                        />
+                      ))}
+                    </span>
+                  )}
+                </div>
+                <p className="mt-1 text-[14px] font-medium leading-snug text-white/95 sm:text-[14.5px]">
+                  {t.primary}
+                  {isActive && (
+                    <span
+                      aria-hidden
+                      className="ml-0.5 inline-block h-[1em] w-[2px] translate-y-[2px] bg-white/85 align-baseline"
+                      style={{ animation: "hero-caret 0.9s steps(1) infinite" }}
+                    />
+                  )}
+                </p>
+                <p className="mt-0.5 text-[11.5px] italic leading-snug text-white/45">
+                  {t.secondary}
+                </p>
               </div>
-              <div className="font-mono text-[9.5px] uppercase tracking-[0.16em] text-white/40">
-                {c.sub}
-              </div>
-            </div>
+            </li>
           )
         })}
+      </ol>
 
-        {/* Center orb */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          <div className="relative h-[110px] w-[110px]">
-            {/* Expanding rings */}
-            {[0, 1, 2].map((i) => (
-              <span
-                key={i}
-                aria-hidden
-                className="absolute inset-0 rounded-full border border-fuchsia-400/40"
-                style={{ animation: `hero-orb-ring 2.6s ease-out ${i * 0.7}s infinite` }}
-              />
-            ))}
-
-            {/* Radial waveform halo (24 bars in a circle) */}
-            <div className="absolute inset-0">
-              {Array.from({ length: 24 }).map((_, i) => {
-                const angle = (i / 24) * 360
-                const active = aiSpeaking || callerSpeaking
-                return (
-                  <span
-                    key={i}
-                    aria-hidden
-                    className="absolute left-1/2 top-1/2 block w-[2.5px] origin-bottom rounded-full"
-                    style={{
-                      height: `${8 + (active ? (i * 7) % 10 : 3)}px`,
-                      background: aiSpeaking
-                        ? "linear-gradient(to top, rgba(167,139,250,0.2), rgba(196,181,253,1))"
-                        : "linear-gradient(to top, rgba(232,121,249,0.2), rgba(244,114,182,1))",
-                      transform: `translate(-50%, -100%) rotate(${angle}deg) translateY(-50px)`,
-                      transformOrigin: "bottom center",
-                      animation: active
-                        ? `hero-eq-bar ${680 + (i % 5) * 90}ms ease-in-out ${i * 30}ms infinite`
-                        : undefined,
-                      opacity: active ? 1 : 0.45,
-                    }}
-                  />
-                )
-              })}
-            </div>
-
-            {/* Inner orb */}
-            <div
-              className="absolute left-1/2 top-1/2 h-[64px] w-[64px] -translate-x-1/2 -translate-y-1/2 rounded-full"
-              style={{
-                background:
-                  "radial-gradient(circle at 35% 30%, oklch(0.86 0.16 320), oklch(0.55 0.25 295) 55%, oklch(0.30 0.18 290) 100%)",
-                boxShadow:
-                  "0 0 70px 14px rgba(217,70,239,0.40), inset 0 0 30px rgba(255,255,255,0.18)",
-                animation: "hero-orb-pulse 2.6s ease-in-out infinite",
-              }}
-            />
-
-            {/* Orb label */}
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-              <div className="font-mono text-[8.5px] font-bold uppercase tracking-[0.22em] text-white/85">
-                Kedeyo
-              </div>
-              <div className="mt-0.5 text-[10px] font-semibold text-white/65">
-                {callerSpeaking ? "Listening" : aiSpeaking ? "Replying" : "Resolved"}
-              </div>
-              {/* Mini eq when speaking */}
-              <div className="mt-1.5 flex items-end justify-center gap-[2px]">
-                {Array.from({ length: 5 }).map((_, k) => (
-                  <span
-                    key={k}
-                    className="block w-[2px] rounded-full bg-white/85"
-                    style={{
-                      height: "8px",
-                      animation: callerSpeaking || aiSpeaking
-                        ? `hero-eq-bar 700ms ease-in-out ${k * 80}ms infinite`
-                        : undefined,
-                      transformOrigin: "bottom",
-                      opacity: callerSpeaking || aiSpeaking ? 1 : 0.3,
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* Resolution hairline + outcome */}
+      <div
+        className="mt-5 flex items-center gap-3 font-mono text-[10.5px] uppercase tracking-[0.22em] transition-opacity duration-700"
+        style={{ opacity: resolved ? 1 : 0.4 }}
+      >
+        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+        <span className="font-semibold text-emerald-300">Booked · 11 AM</span>
+        <span className="h-px flex-1 bg-gradient-to-r from-emerald-400/50 via-emerald-400/15 to-transparent" />
+        <span className="text-white/55">Conf. sent</span>
       </div>
 
-      {/* Live caption — inverts to white when a new message arrives */}
-      <div className="mt-2 min-h-[96px]">
-        {/* Header (stays on dark background) */}
-        <div className="flex items-center gap-2 font-mono text-[9.5px] uppercase tracking-[0.2em]">
-          <span
-            className={`inline-block h-1.5 w-1.5 rounded-full ${
-              callerSpeaking ? "bg-fuchsia-400" : "bg-violet-400"
-            } animate-pulse`}
-          />
-          <span className={callerSpeaking ? "text-fuchsia-300" : "text-violet-300"}>
-            {turn.speaker}
-          </span>
-          <span className="text-white/30">·</span>
-          <span className="text-white/45">{turn.langTag}</span>
-          <span className="text-white/30">·</span>
-          <span className="font-semibold text-white/60">
-            {callerSpeaking ? "Speaking" : aiSpeaking ? "Replying" : "Resolved"}
-          </span>
-          {resolved && (
-            <span className="ml-auto inline-flex items-center gap-1 text-emerald-300">
-              <CheckCircle2 className="h-3 w-3" />
-              <span>Booked · 11 AM</span>
-            </span>
-          )}
-        </div>
-
-        {/* White inverted message — re-flashes on every turn change */}
-        <div
-          key={turnIdx}
-          className="relative mt-1.5 overflow-hidden rounded-xl bg-white px-4 py-3 text-[#0a0612] shadow-[0_14px_30px_-12px_rgba(217,70,239,0.45)]"
-          style={{ animation: "hero-msg-pop 520ms cubic-bezier(.22,.9,.28,1.2) both" }}
-        >
-          {/* Reveal sweep — fuchsia flash that wipes across when message lands */}
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-y-0 left-0 w-full"
-            style={{
-              background:
-                "linear-gradient(90deg, transparent 0%, rgba(244,114,182,0.45) 45%, rgba(167,139,250,0.45) 55%, transparent 100%)",
-              animation: "hero-msg-sweep 720ms ease-out both",
-            }}
-          />
-          {/* Accent bar on the left edge */}
-          <span
-            aria-hidden
-            className={`absolute inset-y-0 left-0 w-[3px] ${
-              callerSpeaking
-                ? "bg-gradient-to-b from-fuchsia-500 to-pink-500"
-                : "bg-gradient-to-b from-violet-500 to-fuchsia-500"
-            }`}
-          />
-
-          <p className="relative text-[13.5px] font-semibold leading-snug">
-            {turn.primary}
-            <span
-              aria-hidden
-              className="ml-0.5 inline-block h-[1em] w-[2px] translate-y-[2px] bg-[#0a0612] align-baseline"
-              style={{ animation: "hero-caret 0.9s steps(1) infinite" }}
-            />
-          </p>
-          <p className="relative mt-0.5 text-[11px] italic leading-snug text-[#0a0612]/55">
-            {turn.secondary}
-          </p>
-        </div>
+      {/* Capability footer — pure typography row */}
+      <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-white/10 pt-4 font-mono text-[10px] uppercase tracking-[0.18em] text-white/55">
+        <span className="inline-flex items-center gap-1.5">
+          <Ear className="h-3 w-3 text-fuchsia-300" />
+          0.4s pickup
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <Brain className="h-3 w-3 text-violet-300" />
+          12+ languages
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <CalendarCheck className="h-3 w-3 text-emerald-400" />
+          Books · routes · resolves
+        </span>
       </div>
     </div>
   )
