@@ -10,18 +10,17 @@ import {
   MapPin,
   PhoneOutgoing,
   MessageSquare,
-  CheckCircle2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 /**
  * Hero — "Every Call Answered. By an AI Receptionist."
  *
- * Right side: a premium product showcase featuring the AI Receptionist
- * as the centerpiece — a pulsing gradient orb with a 24-bar radial
- * waveform, four orbiting capability tags, an oversized rotating live
- * caption, KPI line, and an inline secondary-feature teaser
- * ("Outbound Voice AI · WhatsApp AI"). No card containers anywhere.
+ * Right side: an editorial typographic poster — no orb, no boxes,
+ * no orbiting tags. Composition driven entirely by oversized rotating
+ * display verbs, giant multilingual script samples, a flowing SVG
+ * waveform line, and a real call quote as freeform type. A small
+ * inline footer also teases Outbound Voice AI + WhatsApp AI.
  */
 
 const STATS = [
@@ -150,57 +149,64 @@ export function Hero() {
             </div>
           </div>
 
-          {/* RIGHT — premium AI Receptionist showcase */}
+          {/* RIGHT — editorial typographic poster */}
           <div className="lg:col-span-5">
-            <ReceptionistShowcase />
+            <ReceptionistPoster />
           </div>
         </div>
       </div>
 
       {/* Shared keyframes */}
       <style jsx global>{`
-        @keyframes hero-orb-pulse {
-          0%, 100% { transform: scale(1);    opacity: 1   }
-          50%      { transform: scale(1.06); opacity: 0.92 }
+        @keyframes hero-verb-in {
+          0%   { opacity: 0; transform: translateY(14px) skewX(-2deg) }
+          60%  { opacity: 1; transform: translateY(0)    skewX(0)     }
+          100% { opacity: 1; transform: translateY(0)    skewX(0)     }
         }
-        @keyframes hero-ripple {
-          0%   { transform: scale(0.6); opacity: 0.55 }
-          100% { transform: scale(1.7); opacity: 0    }
-        }
-        @keyframes hero-bar {
-          0%, 100% { transform: scaleY(0.30) }
-          50%      { transform: scaleY(1)    }
+        @keyframes hero-script-in {
+          0%   { opacity: 0; transform: translateX(20px) }
+          100% { opacity: 1; transform: translateX(0)    }
         }
         @keyframes hero-caret {
           0%, 49%  { opacity: 1 }
           50%, 100%{ opacity: 0 }
         }
-        @keyframes hero-caption-in {
+        @keyframes hero-quote-in {
           0%   { opacity: 0; transform: translateY(8px) }
           100% { opacity: 1; transform: translateY(0)   }
         }
-        @keyframes hero-tag-float {
-          0%, 100% { transform: translateY(0)    }
-          50%      { transform: translateY(-4px) }
+        @keyframes hero-wave-flow {
+          0%   { stroke-dashoffset: 0    }
+          100% { stroke-dashoffset: -120 }
         }
       `}</style>
     </section>
   )
 }
 
-/* ─────────────  AI Receptionist Showcase (no boxes)  ───────────── */
+/* ─────────────  Editorial poster (no orb, no boxes)  ───────────── */
 
-type Scene = {
+const VERBS = ["Listens.", "Understands.", "Speaks back.", "Books.", "Routes."]
+
+const SCRIPTS: { sample: string; tag: string; font: string }[] = [
+  { sample: "हिन्दी",  tag: "Hindi",   font: "serif"     },
+  { sample: "English", tag: "English", font: "sans-serif"},
+  { sample: "தமிழ்",   tag: "Tamil",   font: "serif"     },
+  { sample: "বাংলা",   tag: "Bangla",  font: "serif"     },
+  { sample: "मराठी",   tag: "Marathi", font: "serif"     },
+]
+
+type Quote = {
   caller: string
   city: string
-  langTag: "HI" | "EN"
+  langTag: string
   intent: string
   primary: string
   secondary: string
   outcome: string
 }
 
-const SCENES: Scene[] = [
+const QUOTES: Quote[] = [
   {
     caller: "Rahul",
     city: "Mumbai",
@@ -230,27 +236,38 @@ const SCENES: Scene[] = [
   },
 ]
 
-function ReceptionistShowcase() {
+function ReceptionistPoster() {
   const [seconds, setSeconds] = useState(46)
-  const [active, setActive] = useState(0)
+  const [verbIdx, setVerbIdx] = useState(0)
+  const [scriptIdx, setScriptIdx] = useState(0)
+  const [quoteIdx, setQuoteIdx] = useState(0)
 
   useEffect(() => {
     const t = setInterval(() => setSeconds((s) => s + 1), 1000)
     return () => clearInterval(t)
   }, [])
-
   useEffect(() => {
-    const t = setInterval(() => setActive((i) => (i + 1) % SCENES.length), 4400)
+    const t = setInterval(() => setVerbIdx((i) => (i + 1) % VERBS.length), 2000)
+    return () => clearInterval(t)
+  }, [])
+  useEffect(() => {
+    const t = setInterval(() => setScriptIdx((i) => (i + 1) % SCRIPTS.length), 1600)
+    return () => clearInterval(t)
+  }, [])
+  useEffect(() => {
+    const t = setInterval(() => setQuoteIdx((i) => (i + 1) % QUOTES.length), 5400)
     return () => clearInterval(t)
   }, [])
 
   const mm = String(Math.floor(seconds / 60)).padStart(2, "0")
   const ss = String(seconds % 60).padStart(2, "0")
-  const scene = SCENES[active]
+  const verb = VERBS[verbIdx]
+  const script = SCRIPTS[scriptIdx]
+  const quote = QUOTES[quoteIdx]
 
   return (
-    <div className="relative mx-auto w-full max-w-[520px]">
-      {/* Top status row */}
+    <div className="relative mx-auto w-full max-w-[540px]">
+      {/* TOP META — pure typography on dark bg */}
       <div className="flex items-center justify-between font-mono text-[10.5px] uppercase tracking-[0.22em]">
         <span className="inline-flex items-center gap-2 font-semibold text-emerald-300">
           <span className="relative flex h-1.5 w-1.5">
@@ -259,165 +276,145 @@ function ReceptionistShowcase() {
           </span>
           Live · {mm}:{ss}
         </span>
-        <span className="text-white/45">Call #2,341 · today</span>
+        <span className="text-white/40">AI Receptionist · v2.4</span>
       </div>
 
-      {/* Identity */}
-      <div className="mt-3">
-        <h3
-          className="bg-gradient-to-r from-fuchsia-300 via-violet-300 to-pink-300 bg-clip-text font-semibold leading-[1] tracking-tight text-transparent"
-          style={{ fontSize: "clamp(1.6rem, 3vw, 2.1rem)" }}
-        >
-          AI Receptionist
-        </h3>
-        <p className="mt-1.5 text-[12.5px] leading-snug text-white/55">
-          Picks up in <span className="font-semibold text-white/85">0.4s</span> · Speaks{" "}
-          <span className="font-semibold text-white/85">12+ Indian languages</span> · Books, qualifies, routes.
-        </p>
-      </div>
-
-      {/* Centerpiece — pulsing orb + radial waveform + 4 orbiting tags */}
-      <div className="relative mx-auto mt-5 flex h-[260px] w-full items-center justify-center sm:h-[280px]">
-        {/* Soft glow halo behind orb */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute left-1/2 top-1/2 h-[260px] w-[260px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-70 blur-3xl"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(244,114,182,0.45) 0%, rgba(167,139,250,0.30) 40%, transparent 75%)",
-          }}
-        />
-
-        {/* Concentric ripples */}
-        {[0, 1, 2].map((i) => (
+      {/* DISPLAY: rotating verb — massive, set against the column */}
+      <div
+        className="relative mt-3 select-none"
+        style={{
+          fontSize: "clamp(3.2rem, 7.5vw, 5.4rem)",
+          lineHeight: 0.92,
+        }}
+      >
+        <div className="font-semibold tracking-tight">
+          <span className="text-white/45">It </span>
           <span
-            key={i}
-            aria-hidden
-            className="pointer-events-none absolute h-[140px] w-[140px] rounded-full border border-fuchsia-400/40"
-            style={{
-              animation: `hero-ripple 3.6s ease-out ${i * 1.2}s infinite`,
-            }}
-          />
-        ))}
-
-        {/* Radial 24-bar waveform */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute left-1/2 top-1/2 h-[170px] w-[170px] -translate-x-1/2 -translate-y-1/2"
-        >
-          {Array.from({ length: 24 }).map((_, i) => {
-            const angle = (i / 24) * 360
-            return (
-              <span
-                key={i}
-                className="absolute left-1/2 top-1/2"
-                style={{
-                  width: 3,
-                  height: `${10 + ((i * 5) % 14)}px`,
-                  background: i % 2 === 0
-                    ? "linear-gradient(to top, rgba(232,121,249,0.15), rgba(244,114,182,0.95))"
-                    : "linear-gradient(to top, rgba(167,139,250,0.15), rgba(196,181,253,0.95))",
-                  transformOrigin: "50% 100%",
-                  transform: `translate(-50%, -100%) rotate(${angle}deg) translateY(-60px)`,
-                  animation: `hero-bar 1.4s ease-in-out ${(i * 60) % 1400}ms infinite`,
-                  borderRadius: 2,
-                }}
-              />
-            )
-          })}
-        </div>
-
-        {/* Central orb */}
-        <div
-          className="relative z-10 flex h-[124px] w-[124px] items-center justify-center rounded-full"
-          style={{
-            background:
-              "radial-gradient(circle at 30% 25%, rgba(255,255,255,0.95), rgba(244,114,182,0.85) 30%, rgba(167,139,250,0.85) 60%, rgba(120,57,177,0.95) 100%)",
-            boxShadow:
-              "0 0 0 1px rgba(255,255,255,0.18), 0 24px 70px -10px rgba(167,139,250,0.55), inset 0 0 30px rgba(255,255,255,0.18)",
-            animation: "hero-orb-pulse 2.6s ease-in-out infinite",
-          }}
-        >
-          {/* Inner highlight */}
-          <span
-            aria-hidden
-            className="absolute left-[18%] top-[14%] h-6 w-6 rounded-full bg-white/55 blur-md"
-          />
-          {/* Orb label */}
-          <div className="relative text-center">
-            <div className="font-mono text-[8.5px] font-bold uppercase tracking-[0.28em] text-white/90">
-              Kedeyo
-            </div>
-            <div className="mt-0.5 text-[11px] font-semibold tracking-tight text-white drop-shadow">
-              AI Voice
-            </div>
-            {/* Mini live equalizer */}
-            <div className="mt-1 inline-flex items-end gap-[2px]">
-              {[0, 1, 2, 3].map((k) => (
-                <span
-                  key={k}
-                  className="block w-[2px] rounded-full bg-white"
-                  style={{
-                    height: 8,
-                    transformOrigin: "bottom",
-                    animation: `hero-bar 700ms ease-in-out ${k * 90}ms infinite`,
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Orbiting capability tags — pure typography on dark bg */}
-        <FloatingTag position="top-2 left-0" delay="0s" color="text-fuchsia-200">
-          Hindi · English · Tamil
-        </FloatingTag>
-        <FloatingTag position="top-6 right-0" delay="0.6s" color="text-violet-200">
-          Books appointments
-        </FloatingTag>
-        <FloatingTag position="bottom-6 left-2" delay="1.2s" color="text-emerald-200">
-          Routes hot leads
-        </FloatingTag>
-        <FloatingTag position="bottom-2 right-2" delay="1.8s" color="text-pink-200">
-          Qualifies callers
-        </FloatingTag>
-      </div>
-
-      {/* Live caption — caller meta + bilingual speech, freeform typography */}
-      <div key={active} style={{ animation: "hero-caption-in 460ms ease-out both" }}>
-        <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[10.5px] uppercase tracking-[0.2em]">
-          <span className="font-semibold text-fuchsia-300">{scene.caller}</span>
-          <span className="text-white/30">·</span>
-          <span className="text-white/55">{scene.city}</span>
-          <span className="text-white/30">·</span>
-          <span className="rounded-sm bg-fuchsia-500/12 px-1.5 py-0.5 text-fuchsia-200">
-            {scene.langTag}
+            key={verbIdx}
+            className="bg-gradient-to-r from-fuchsia-300 via-violet-300 to-pink-300 bg-clip-text text-transparent"
+            style={{ animation: "hero-verb-in 600ms cubic-bezier(.2,.7,.2,1) both" }}
+          >
+            {verb}
           </span>
-          <span className="text-white/30">·</span>
-          <span className="text-violet-200">{scene.intent}</span>
         </div>
-        <p className="mt-2 text-pretty text-[16px] font-semibold leading-snug text-white sm:text-[17px]">
-          {scene.primary}
+        {/* Verb rail underneath — small inline mono list of all verbs */}
+        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-[0.22em]">
+          {VERBS.map((v, i) => (
+            <span
+              key={v}
+              className={
+                i === verbIdx
+                  ? "text-fuchsia-300"
+                  : "text-white/30"
+              }
+            >
+              {v.replace(".", "")}
+              {i < VERBS.length - 1 && (
+                <span className="ml-3 text-white/15">/</span>
+              )}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* FLOWING WAVEFORM — single horizontal SVG line cutting across */}
+      <div className="relative mt-7 h-[60px]">
+        <svg
+          aria-hidden
+          viewBox="0 0 540 60"
+          width="100%"
+          height="60"
+          className="absolute inset-0"
+        >
+          <defs>
+            <linearGradient id="hero-wave-grad" x1="0" x2="1" y1="0" y2="0">
+              <stop offset="0%"  stopColor="rgba(244,114,182,0.0)" />
+              <stop offset="20%" stopColor="rgba(244,114,182,1)" />
+              <stop offset="50%" stopColor="rgba(167,139,250,1)" />
+              <stop offset="80%" stopColor="rgba(232,121,249,1)" />
+              <stop offset="100%" stopColor="rgba(232,121,249,0.0)" />
+            </linearGradient>
+          </defs>
+          {/* Soft baseline */}
+          <line x1="0" y1="30" x2="540" y2="30" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+          {/* Animated sine wave */}
+          <path
+            d="M0,30 Q22,8 45,30 T90,30 T135,30 T180,30 T225,30 T270,30 T315,30 T360,30 T405,30 T450,30 T495,30 T540,30"
+            fill="none"
+            stroke="url(#hero-wave-grad)"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeDasharray="6 6"
+            style={{ animation: "hero-wave-flow 1.6s linear infinite" }}
+          />
+        </svg>
+        {/* Rotating script samples — sit on the wave */}
+        <div className="absolute inset-0 flex items-center justify-between px-1">
+          <div
+            key={scriptIdx}
+            className="flex items-baseline gap-3"
+            style={{ animation: "hero-script-in 480ms cubic-bezier(.2,.7,.2,1) both" }}
+          >
+            <span
+              className="bg-gradient-to-r from-white via-white to-white/70 bg-clip-text font-semibold leading-none tracking-tight text-transparent"
+              style={{ fontSize: "clamp(1.6rem, 3.2vw, 2.25rem)", fontFamily: script.font }}
+            >
+              {script.sample}
+            </span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/45">
+              {script.tag}
+            </span>
+          </div>
+          <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/35">
+            12+ langs
+          </span>
+        </div>
+      </div>
+
+      {/* LIVE QUOTE — caller meta + bilingual transcript, freeform type */}
+      <div key={quoteIdx} style={{ animation: "hero-quote-in 520ms ease-out both" }}>
+        <div className="mt-6 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[10.5px] uppercase tracking-[0.2em]">
+          <span className="font-semibold text-fuchsia-300">{quote.caller}</span>
+          <span className="text-white/30">·</span>
+          <span className="text-white/55">{quote.city}</span>
+          <span className="text-white/30">·</span>
+          <span className="text-fuchsia-200">{quote.langTag}</span>
+          <span className="text-white/30">·</span>
+          <span className="text-violet-200">{quote.intent}</span>
+        </div>
+
+        {/* Big editorial quote — open + close marks as oversized accents, no box */}
+        <div className="relative mt-2">
           <span
             aria-hidden
-            className="ml-0.5 inline-block h-[1em] w-[2px] translate-y-[2px] bg-white/85 align-baseline"
-            style={{ animation: "hero-caret 0.9s steps(1) infinite" }}
-          />
-        </p>
-        <p className="mt-1 text-[12px] italic leading-snug text-white/45">{scene.secondary}</p>
+            className="absolute -left-3 -top-2 select-none bg-gradient-to-br from-fuchsia-400 to-violet-400 bg-clip-text text-[40px] font-bold leading-none text-transparent"
+          >
+            &ldquo;
+          </span>
+          <p className="pl-5 text-pretty text-[17px] font-semibold leading-snug text-white sm:text-[18px]">
+            {quote.primary}
+            <span
+              aria-hidden
+              className="ml-0.5 inline-block h-[1em] w-[2px] translate-y-[2px] bg-white/85 align-baseline"
+              style={{ animation: "hero-caret 0.9s steps(1) infinite" }}
+            />
+          </p>
+          <p className="mt-1 pl-5 text-[12px] italic leading-snug text-white/45">
+            {quote.secondary}
+          </p>
+        </div>
+
+        {/* Outcome — hairline + inline */}
+        <div className="mt-4 flex items-center gap-3 font-mono text-[10.5px] uppercase tracking-[0.22em]">
+          <span className="h-px w-6 bg-emerald-400/70" />
+          <span className="font-semibold text-emerald-300">{quote.outcome}</span>
+          <span className="h-px flex-1 bg-gradient-to-r from-emerald-400/40 via-emerald-400/10 to-transparent" />
+          <span className="text-white/40">23s</span>
+        </div>
       </div>
 
-      {/* Outcome rule */}
-      <div className="mt-4 flex items-center gap-3 font-mono text-[10.5px] uppercase tracking-[0.22em]">
-        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
-        <span key={`o-${active}`} className="font-semibold text-emerald-300" style={{ animation: "hero-caption-in 460ms ease-out both" }}>
-          {scene.outcome}
-        </span>
-        <span className="h-px flex-1 bg-gradient-to-r from-emerald-400/50 via-emerald-400/15 to-transparent" />
-      </div>
-
-      {/* Secondary feature teaser — inline, no box */}
-      <div className="mt-5 flex flex-col gap-2 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
+      {/* SECONDARY FEATURE TEASER — inline, hairline rule */}
+      <div className="mt-7 flex flex-col gap-2 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
         <span className="font-mono text-[9.5px] font-bold uppercase tracking-[0.22em] text-white/45">
           Also part of Kedeyo
         </span>
@@ -440,28 +437,6 @@ function ReceptionistShowcase() {
           </Link>
         </div>
       </div>
-    </div>
-  )
-}
-
-function FloatingTag({
-  children,
-  position,
-  delay,
-  color,
-}: {
-  children: React.ReactNode
-  position: string
-  delay: string
-  color: string
-}) {
-  return (
-    <div
-      className={`absolute ${position} z-20 inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.18em] ${color}`}
-      style={{ animation: `hero-tag-float 4s ease-in-out ${delay} infinite` }}
-    >
-      <span className="inline-block h-1.5 w-1.5 rounded-full bg-current opacity-80" />
-      {children}
     </div>
   )
 }
