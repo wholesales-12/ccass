@@ -10,17 +10,19 @@ import {
   MapPin,
   PhoneOutgoing,
   MessageSquare,
+  CalendarCheck2,
+  UserCheck,
+  Sparkles,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 /**
  * Hero — "Every Call Answered. By an AI Receptionist."
  *
- * Right side: an editorial typographic poster — no orb, no boxes,
- * no orbiting tags. Composition driven entirely by oversized rotating
- * display verbs, giant multilingual script samples, a flowing SVG
- * waveform line, and a real call quote as freeform type. A small
- * inline footer also teases Outbound Voice AI + WhatsApp AI.
+ * Right side: a compact, diagrammatic flow showing how the AI
+ * Receptionist works.  Caller → AI Receptionist → branches to
+ * Booked / Routed.  Pure icons + labels + animated SVG connectors,
+ * no rectangular containers.
  */
 
 const STATS = [
@@ -149,125 +151,108 @@ export function Hero() {
             </div>
           </div>
 
-          {/* RIGHT — editorial typographic poster */}
+          {/* RIGHT — diagrammatic flow */}
           <div className="lg:col-span-5">
-            <ReceptionistPoster />
+            <ReceptionistDiagram />
           </div>
         </div>
       </div>
 
       {/* Shared keyframes */}
       <style jsx global>{`
-        @keyframes hero-verb-in {
-          0%   { opacity: 0; transform: translateY(14px) skewX(-2deg) }
-          60%  { opacity: 1; transform: translateY(0)    skewX(0)     }
-          100% { opacity: 1; transform: translateY(0)    skewX(0)     }
+        @keyframes hero-flow-dash {
+          0%   { stroke-dashoffset: 0   }
+          100% { stroke-dashoffset: -48 }
         }
-        @keyframes hero-script-in {
-          0%   { opacity: 0; transform: translateX(20px) }
-          100% { opacity: 1; transform: translateX(0)    }
+        @keyframes hero-pulse-ring {
+          0%   { transform: scale(0.6); opacity: 0.55 }
+          100% { transform: scale(1.6); opacity: 0    }
         }
         @keyframes hero-caret {
           0%, 49%  { opacity: 1 }
           50%, 100%{ opacity: 0 }
         }
-        @keyframes hero-quote-in {
-          0%   { opacity: 0; transform: translateY(8px) }
+        @keyframes hero-caption-in {
+          0%   { opacity: 0; transform: translateY(6px) }
           100% { opacity: 1; transform: translateY(0)   }
         }
-        @keyframes hero-wave-flow {
-          0%   { stroke-dashoffset: 0    }
-          100% { stroke-dashoffset: -120 }
+        @keyframes hero-node-glow {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(217,70,239,0.0), 0 0 28px 0 rgba(217,70,239,0.45) }
+          50%      { box-shadow: 0 0 0 3px rgba(217,70,239,0.08), 0 0 36px 4px rgba(217,70,239,0.55) }
+        }
+        @keyframes hero-bar {
+          0%, 100% { transform: scaleY(0.4) }
+          50%      { transform: scaleY(1)   }
         }
       `}</style>
     </section>
   )
 }
 
-/* ─────────────  Editorial poster (no orb, no boxes)  ───────────── */
+/* ─────────────  Diagrammatic flow  ───────────── */
 
-const VERBS = ["Listens.", "Understands.", "Speaks back.", "Books.", "Routes."]
-
-const SCRIPTS: { sample: string; tag: string; font: string }[] = [
-  { sample: "हिन्दी",  tag: "Hindi",   font: "serif"     },
-  { sample: "English", tag: "English", font: "sans-serif"},
-  { sample: "தமிழ்",   tag: "Tamil",   font: "serif"     },
-  { sample: "বাংলা",   tag: "Bangla",  font: "serif"     },
-  { sample: "मराठी",   tag: "Marathi", font: "serif"     },
-]
-
-type Quote = {
+type Scene = {
   caller: string
   city: string
   langTag: string
-  intent: string
   primary: string
   secondary: string
-  outcome: string
+  outcome: "booked" | "routed"
+  outcomeText: string
 }
 
-const QUOTES: Quote[] = [
+const SCENES: Scene[] = [
   {
     caller: "Rahul",
     city: "Mumbai",
     langTag: "HI",
-    intent: "Booking · Dental",
     primary: "मुझे कल 11 बजे appointment book करनी है।",
-    secondary: "I want to book an appointment for tomorrow at 11.",
-    outcome: "Booked · 11 AM with Dr. Sharma",
+    secondary: "Book me an appointment for 11 AM tomorrow.",
+    outcome: "booked",
+    outcomeText: "Booked · 11 AM · Dr. Sharma",
   },
   {
     caller: "Priya",
     city: "Bengaluru",
     langTag: "EN",
-    intent: "Lead · Real Estate",
     primary: "Looking for a 2BHK in Whitefield, ready to move.",
-    secondary: "Hot lead — qualified and routed to owner.",
-    outcome: "Routed · Sales · 12s",
+    secondary: "Hot lead — qualified and routed.",
+    outcome: "routed",
+    outcomeText: "Routed · Sales · 12s",
   },
   {
     caller: "Aman",
     city: "Delhi",
     langTag: "HI",
-    intent: "Support · D2C",
     primary: "Order #4821 का status क्या है?",
     secondary: "What is the status of my order?",
-    outcome: "Resolved · Order shipped today",
+    outcome: "booked",
+    outcomeText: "Resolved · Order shipped",
   },
 ]
 
-function ReceptionistPoster() {
+function ReceptionistDiagram() {
   const [seconds, setSeconds] = useState(46)
-  const [verbIdx, setVerbIdx] = useState(0)
-  const [scriptIdx, setScriptIdx] = useState(0)
-  const [quoteIdx, setQuoteIdx] = useState(0)
+  const [sceneIdx, setSceneIdx] = useState(0)
 
   useEffect(() => {
     const t = setInterval(() => setSeconds((s) => s + 1), 1000)
     return () => clearInterval(t)
   }, [])
   useEffect(() => {
-    const t = setInterval(() => setVerbIdx((i) => (i + 1) % VERBS.length), 2000)
-    return () => clearInterval(t)
-  }, [])
-  useEffect(() => {
-    const t = setInterval(() => setScriptIdx((i) => (i + 1) % SCRIPTS.length), 1600)
-    return () => clearInterval(t)
-  }, [])
-  useEffect(() => {
-    const t = setInterval(() => setQuoteIdx((i) => (i + 1) % QUOTES.length), 5400)
+    const t = setInterval(() => setSceneIdx((i) => (i + 1) % SCENES.length), 4800)
     return () => clearInterval(t)
   }, [])
 
   const mm = String(Math.floor(seconds / 60)).padStart(2, "0")
   const ss = String(seconds % 60).padStart(2, "0")
-  const verb = VERBS[verbIdx]
-  const script = SCRIPTS[scriptIdx]
-  const quote = QUOTES[quoteIdx]
+  const scene = SCENES[sceneIdx]
+  const bookedActive = scene.outcome === "booked"
+  const routedActive = scene.outcome === "routed"
 
   return (
-    <div className="relative mx-auto w-full max-w-[540px]">
-      {/* TOP META — pure typography on dark bg */}
+    <div className="relative mx-auto w-full max-w-[520px]">
+      {/* TOP META */}
       <div className="flex items-center justify-between font-mono text-[10.5px] uppercase tracking-[0.22em]">
         <span className="inline-flex items-center gap-2 font-semibold text-emerald-300">
           <span className="relative flex h-1.5 w-1.5">
@@ -276,145 +261,154 @@ function ReceptionistPoster() {
           </span>
           Live · {mm}:{ss}
         </span>
-        <span className="text-white/40">AI Receptionist · v2.4</span>
+        <span className="text-white/40">How a call flows</span>
       </div>
 
-      {/* DISPLAY: rotating verb — massive, set against the column */}
-      <div
-        className="relative mt-3 select-none"
-        style={{
-          fontSize: "clamp(3.2rem, 7.5vw, 5.4rem)",
-          lineHeight: 0.92,
-        }}
-      >
-        <div className="font-semibold tracking-tight">
-          <span className="text-white/45">It </span>
-          <span
-            key={verbIdx}
-            className="bg-gradient-to-r from-fuchsia-300 via-violet-300 to-pink-300 bg-clip-text text-transparent"
-            style={{ animation: "hero-verb-in 600ms cubic-bezier(.2,.7,.2,1) both" }}
-          >
-            {verb}
-          </span>
-        </div>
-        {/* Verb rail underneath — small inline mono list of all verbs */}
-        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-[0.22em]">
-          {VERBS.map((v, i) => (
-            <span
-              key={v}
-              className={
-                i === verbIdx
-                  ? "text-fuchsia-300"
-                  : "text-white/30"
-              }
-            >
-              {v.replace(".", "")}
-              {i < VERBS.length - 1 && (
-                <span className="ml-3 text-white/15">/</span>
-              )}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* FLOWING WAVEFORM — single horizontal SVG line cutting across */}
-      <div className="relative mt-7 h-[60px]">
+      {/* ─────────────  The diagram  ─────────────
+          Layout (relative, h-[260px]):
+          - Left node:  Caller   (left:0,  top:50%)
+          - Center node: AI      (left:50%, top:50%)
+          - Right top: Booked    (right:0, top:18%)
+          - Right bot: Routed    (right:0, top:82%)
+          - SVG draws curved animated paths between them
+      */}
+      <div className="relative mt-4 h-[260px]">
+        {/* SVG connector layer */}
         <svg
           aria-hidden
-          viewBox="0 0 540 60"
-          width="100%"
-          height="60"
-          className="absolute inset-0"
+          viewBox="0 0 520 260"
+          className="absolute inset-0 h-full w-full"
         >
           <defs>
-            <linearGradient id="hero-wave-grad" x1="0" x2="1" y1="0" y2="0">
-              <stop offset="0%"  stopColor="rgba(244,114,182,0.0)" />
-              <stop offset="20%" stopColor="rgba(244,114,182,1)" />
-              <stop offset="50%" stopColor="rgba(167,139,250,1)" />
-              <stop offset="80%" stopColor="rgba(232,121,249,1)" />
-              <stop offset="100%" stopColor="rgba(232,121,249,0.0)" />
+            <linearGradient id="hero-conn-in" x1="0" x2="1" y1="0" y2="0">
+              <stop offset="0%"  stopColor="rgba(244,114,182,0)" />
+              <stop offset="20%" stopColor="rgba(244,114,182,0.9)" />
+              <stop offset="100%" stopColor="rgba(167,139,250,0.9)" />
+            </linearGradient>
+            <linearGradient id="hero-conn-booked" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%"  stopColor="rgba(167,139,250,0.9)" />
+              <stop offset="100%" stopColor="rgba(52,211,153,0.9)" />
+            </linearGradient>
+            <linearGradient id="hero-conn-routed" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%"  stopColor="rgba(167,139,250,0.9)" />
+              <stop offset="100%" stopColor="rgba(244,114,182,0.9)" />
             </linearGradient>
           </defs>
-          {/* Soft baseline */}
-          <line x1="0" y1="30" x2="540" y2="30" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-          {/* Animated sine wave */}
+
+          {/* Caller → AI (curved horizontal) */}
           <path
-            d="M0,30 Q22,8 45,30 T90,30 T135,30 T180,30 T225,30 T270,30 T315,30 T360,30 T405,30 T450,30 T495,30 T540,30"
+            d="M 56 130 C 130 130, 170 130, 240 130"
             fill="none"
-            stroke="url(#hero-wave-grad)"
-            strokeWidth="2"
+            stroke="url(#hero-conn-in)"
+            strokeWidth="1.6"
             strokeLinecap="round"
             strokeDasharray="6 6"
-            style={{ animation: "hero-wave-flow 1.6s linear infinite" }}
+            style={{ animation: "hero-flow-dash 1.4s linear infinite" }}
+          />
+
+          {/* AI → Booked (curve up) */}
+          <path
+            d="M 296 130 C 360 130, 400 80, 470 50"
+            fill="none"
+            stroke="url(#hero-conn-booked)"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeDasharray="6 6"
+            style={{
+              animation: "hero-flow-dash 1.4s linear infinite",
+              opacity: bookedActive ? 1 : 0.18,
+              transition: "opacity 400ms",
+            }}
+          />
+
+          {/* AI → Routed (curve down) */}
+          <path
+            d="M 296 130 C 360 130, 400 180, 470 210"
+            fill="none"
+            stroke="url(#hero-conn-routed)"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeDasharray="6 6"
+            style={{
+              animation: "hero-flow-dash 1.4s linear infinite",
+              opacity: routedActive ? 1 : 0.18,
+              transition: "opacity 400ms",
+            }}
           />
         </svg>
-        {/* Rotating script samples — sit on the wave */}
-        <div className="absolute inset-0 flex items-center justify-between px-1">
-          <div
-            key={scriptIdx}
-            className="flex items-baseline gap-3"
-            style={{ animation: "hero-script-in 480ms cubic-bezier(.2,.7,.2,1) both" }}
-          >
-            <span
-              className="bg-gradient-to-r from-white via-white to-white/70 bg-clip-text font-semibold leading-none tracking-tight text-transparent"
-              style={{ fontSize: "clamp(1.6rem, 3.2vw, 2.25rem)", fontFamily: script.font }}
-            >
-              {script.sample}
-            </span>
-            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/45">
-              {script.tag}
-            </span>
-          </div>
-          <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/35">
-            12+ langs
-          </span>
-        </div>
+
+        {/* Caller node */}
+        <Node
+          className="absolute left-0 top-1/2 -translate-y-1/2"
+          color="fuchsia"
+          icon={<Phone className="h-4 w-4" />}
+          title={scene.caller}
+          meta={`${scene.city} · ${scene.langTag}`}
+          tag="Caller"
+          align="right"
+          ping
+        />
+
+        {/* AI Receptionist (center) — pulsing primary node */}
+        <CenterNode />
+
+        {/* Booked node */}
+        <Node
+          className="absolute right-0 top-[18%]"
+          color="emerald"
+          icon={<CalendarCheck2 className="h-4 w-4" />}
+          title="Calendar"
+          meta="Booked"
+          tag="Outcome"
+          align="left"
+          dim={!bookedActive}
+        />
+
+        {/* Routed node */}
+        <Node
+          className="absolute right-0 top-[82%] -translate-y-full"
+          color="pink"
+          icon={<UserCheck className="h-4 w-4" />}
+          title="Owner"
+          meta="Routed"
+          tag="Outcome"
+          align="left"
+          dim={!routedActive}
+        />
       </div>
 
-      {/* LIVE QUOTE — caller meta + bilingual transcript, freeform type */}
-      <div key={quoteIdx} style={{ animation: "hero-quote-in 520ms ease-out both" }}>
-        <div className="mt-6 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[10.5px] uppercase tracking-[0.2em]">
-          <span className="font-semibold text-fuchsia-300">{quote.caller}</span>
-          <span className="text-white/30">·</span>
-          <span className="text-white/55">{quote.city}</span>
-          <span className="text-white/30">·</span>
-          <span className="text-fuchsia-200">{quote.langTag}</span>
-          <span className="text-white/30">·</span>
-          <span className="text-violet-200">{quote.intent}</span>
-        </div>
-
-        {/* Big editorial quote — open + close marks as oversized accents, no box */}
-        <div className="relative mt-2">
-          <span
-            aria-hidden
-            className="absolute -left-3 -top-2 select-none bg-gradient-to-br from-fuchsia-400 to-violet-400 bg-clip-text text-[40px] font-bold leading-none text-transparent"
-          >
+      {/* TRANSCRIPT — small line under the diagram */}
+      <div
+        key={sceneIdx}
+        className="mt-2"
+        style={{ animation: "hero-caption-in 460ms ease-out both" }}
+      >
+        <p className="text-[14px] font-semibold leading-snug text-white">
+          <span className="bg-gradient-to-br from-fuchsia-400 to-violet-400 bg-clip-text text-transparent">
             &ldquo;
           </span>
-          <p className="pl-5 text-pretty text-[17px] font-semibold leading-snug text-white sm:text-[18px]">
-            {quote.primary}
-            <span
-              aria-hidden
-              className="ml-0.5 inline-block h-[1em] w-[2px] translate-y-[2px] bg-white/85 align-baseline"
-              style={{ animation: "hero-caret 0.9s steps(1) infinite" }}
-            />
-          </p>
-          <p className="mt-1 pl-5 text-[12px] italic leading-snug text-white/45">
-            {quote.secondary}
-          </p>
-        </div>
-
-        {/* Outcome — hairline + inline */}
-        <div className="mt-4 flex items-center gap-3 font-mono text-[10.5px] uppercase tracking-[0.22em]">
-          <span className="h-px w-6 bg-emerald-400/70" />
-          <span className="font-semibold text-emerald-300">{quote.outcome}</span>
-          <span className="h-px flex-1 bg-gradient-to-r from-emerald-400/40 via-emerald-400/10 to-transparent" />
+          {scene.primary}
+          <span
+            aria-hidden
+            className="ml-0.5 inline-block h-[1em] w-[2px] translate-y-[2px] bg-white/85 align-baseline"
+            style={{ animation: "hero-caret 0.9s steps(1) infinite" }}
+          />
+        </p>
+        <p className="mt-0.5 text-[11px] italic leading-snug text-white/45">
+          {scene.secondary}
+        </p>
+        <div className="mt-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em]">
+          <span className={`h-px w-5 ${bookedActive ? "bg-emerald-400/70" : "bg-fuchsia-400/70"}`} />
+          <span className={bookedActive ? "font-semibold text-emerald-300" : "font-semibold text-fuchsia-300"}>
+            {scene.outcomeText}
+          </span>
+          <span className="h-px flex-1 bg-white/10" />
           <span className="text-white/40">23s</span>
         </div>
       </div>
 
-      {/* SECONDARY FEATURE TEASER — inline, hairline rule */}
-      <div className="mt-7 flex flex-col gap-2 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
+      {/* SECONDARY FEATURE TEASER */}
+      <div className="mt-5 flex flex-col gap-2 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
         <span className="font-mono text-[9.5px] font-bold uppercase tracking-[0.22em] text-white/45">
           Also part of Kedeyo
         </span>
@@ -436,6 +430,108 @@ function ReceptionistPoster() {
             <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
           </Link>
         </div>
+      </div>
+    </div>
+  )
+}
+
+/* ─────────────  Diagram primitives  ───────────── */
+
+function Node({
+  className,
+  color,
+  icon,
+  title,
+  meta,
+  tag,
+  align = "right",
+  ping = false,
+  dim = false,
+}: {
+  className?: string
+  color: "fuchsia" | "emerald" | "pink"
+  icon: React.ReactNode
+  title: string
+  meta: string
+  tag: string
+  align?: "left" | "right"
+  ping?: boolean
+  dim?: boolean
+}) {
+  const colorMap = {
+    fuchsia: { ring: "border-fuchsia-400/60", glow: "bg-fuchsia-500/15", text: "text-fuchsia-200", tag: "text-fuchsia-300" },
+    emerald: { ring: "border-emerald-400/60", glow: "bg-emerald-500/15", text: "text-emerald-200", tag: "text-emerald-300" },
+    pink:    { ring: "border-pink-400/60",    glow: "bg-pink-500/15",    text: "text-pink-200",    tag: "text-pink-300"    },
+  }[color]
+
+  return (
+    <div
+      className={`flex items-center gap-3 transition-opacity duration-500 ${className ?? ""}`}
+      style={{
+        opacity: dim ? 0.35 : 1,
+        flexDirection: align === "left" ? "row" : "row-reverse",
+      }}
+    >
+      {/* Label stack */}
+      <div
+        className={`flex flex-col leading-tight ${
+          align === "left" ? "items-start" : "items-end text-right"
+        }`}
+      >
+        <span className={`font-mono text-[9px] font-bold uppercase tracking-[0.22em] ${colorMap.tag}`}>
+          {tag}
+        </span>
+        <span className="text-[13px] font-semibold text-white">{title}</span>
+        <span className="text-[10.5px] text-white/50">{meta}</span>
+      </div>
+
+      {/* Icon glyph — circular ring, no filled card */}
+      <div className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border ${colorMap.ring} ${colorMap.glow} ${colorMap.text}`}>
+        {ping && (
+          <>
+            <span
+              aria-hidden
+              className={`absolute inset-0 rounded-full border ${colorMap.ring}`}
+              style={{ animation: "hero-pulse-ring 2s ease-out infinite" }}
+            />
+            <span
+              aria-hidden
+              className={`absolute inset-0 rounded-full border ${colorMap.ring}`}
+              style={{ animation: "hero-pulse-ring 2s ease-out 1s infinite" }}
+            />
+          </>
+        )}
+        {icon}
+      </div>
+    </div>
+  )
+}
+
+function CenterNode() {
+  return (
+    <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center">
+      <div
+        className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-fuchsia-500 via-violet-500 to-pink-500 text-white"
+        style={{ animation: "hero-node-glow 2.4s ease-in-out infinite" }}
+      >
+        <Sparkles className="h-6 w-6" />
+        {/* Inner equalizer along the bottom edge */}
+        <div className="absolute -bottom-1 left-1/2 flex -translate-x-1/2 items-end gap-[3px]">
+          {[0, 1, 2, 3].map((i) => (
+            <span
+              key={i}
+              className="h-2 w-[3px] origin-bottom rounded-full bg-white/90"
+              style={{ animation: `hero-bar 900ms ease-in-out ${i * 110}ms infinite` }}
+            />
+          ))}
+        </div>
+      </div>
+      <div className="mt-2 text-center">
+        <div className="font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-violet-200">
+          Kedeyo
+        </div>
+        <div className="text-[12.5px] font-semibold text-white">AI Receptionist</div>
+        <div className="text-[10px] text-white/50">Listens · Decides · Acts</div>
       </div>
     </div>
   )
