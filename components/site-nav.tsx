@@ -21,6 +21,7 @@ import {
   Landmark,
   Building2,
   Plane,
+  Cloud,
   BookOpen,
   HelpCircle,
   Users,
@@ -55,6 +56,13 @@ const FEATURES = [
     icon: Bot,
     color: "bg-violet-500",
     badge: "Most Popular",
+  },
+  {
+    title: "Cloud Contact Center",
+    description: "Voice, WhatsApp, email & chat in one agent desktop. 99.95% uptime",
+    href: "/features/cloud-contact-center",
+    icon: Cloud,
+    color: "bg-indigo-500",
   },
   {
     title: "Auto Dialer",
