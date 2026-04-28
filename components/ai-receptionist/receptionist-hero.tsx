@@ -14,67 +14,63 @@ import {
   PhoneIncoming,
   PhoneOutgoing,
   MessageSquare,
+  AudioLines,
+  BrainCircuit,
+  Calendar,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 /**
  * AI Receptionist hero — light theme.
- * - LEFT: headline, subhead, KPIs (typographic, no boxes).
- * - RIGHT: a focused single-call story. One conversation rendered as a
- *   vertical typographic thread (no card/lane chrome), with caller and AI
- *   alternating, an animated waveform on the active turn, and a small
- *   secondary-feature teaser at the bottom (Outbound Voice AI · WhatsApp AI).
+ * RIGHT side: a 5-stage horizontal pipeline diagram (Pickup → Listen →
+ * Understand → Decide → Act). Pure SVG connectors with an animated pulse,
+ * icon-ring nodes (no rectangular cards), an active glow that walks the
+ * pipeline, and a single compact live-caption line beneath the diagram.
  */
 
-type Side = "caller" | "ai"
-
-type Turn = {
-  id: number
-  side: Side
-  speaker: string
-  lang: "HI" | "EN"
-  primary: string
-  translation: string
-  meta?: string
+type Stage = {
+  id: string
+  label: string
+  meta: string
+  icon: React.ComponentType<{ className?: string }>
 }
 
-const TURNS: Turn[] = [
-  {
-    id: 1,
-    side: "caller",
-    speaker: "Rahul Sharma",
-    lang: "HI",
-    primary: "मुझे कल 11 बजे appointment book करनी है।",
-    translation: "I need to book an appointment for tomorrow at 11.",
-    meta: "Intent · book_appointment   96%",
-  },
-  {
-    id: 2,
-    side: "ai",
-    speaker: "Kedeyo AI",
-    lang: "HI",
-    primary: "11 बजे डॉ. शर्मा available हैं — confirm करूँ?",
-    translation: "11 AM with Dr. Sharma is available — shall I confirm?",
-    meta: "Calendar · slot 11:00 open",
-  },
-  {
-    id: 3,
-    side: "caller",
-    speaker: "Rahul Sharma",
-    lang: "HI",
-    primary: "हाँ, please confirm कर दीजिए।",
-    translation: "Yes, please go ahead and confirm.",
-  },
-  {
-    id: 4,
-    side: "ai",
-    speaker: "Kedeyo AI",
-    lang: "EN",
-    primary: "Booked. SMS + WhatsApp confirmation sent.",
-    translation: "कन्फर्मेशन भेज दिया है — कल 11 बजे मिलते हैं।",
-    meta: "Action · CRM updated · 23s call",
-  },
+const STAGES: Stage[] = [
+  { id: "pickup",    label: "Pickup",     meta: "<1s",          icon: Phone },
+  { id: "listen",    label: "Listen",     meta: "HI · auto",    icon: AudioLines },
+  { id: "understand",label: "Understand", meta: "Intent · 96%", icon: BrainCircuit },
+  { id: "decide",    label: "Decide",     meta: "Slot · 11 AM", icon: Calendar },
+  { id: "act",       label: "Act",        meta: "Booked",       icon: CheckCircle2 },
 ]
+
+// Live caption rotates with the active stage so the diagram tells a story.
+const CAPTIONS: Record<string, { hi: string; en: string; meta: string }> = {
+  pickup: {
+    hi: "Sunshine Dental — Mumbai · inbound call ringing",
+    en: "Picked up in 0.4 s · greeted in caller's language",
+    meta: "Caller · Rahul Sharma · +91 98 ····2140",
+  },
+  listen: {
+    hi: "मुझे कल 11 बजे appointment book करनी है।",
+    en: "I want to book an appointment for tomorrow at 11.",
+    meta: "Language detected · Hindi (HI) ⇄ English",
+  },
+  understand: {
+    hi: "Detecting intent · book_appointment",
+    en: "Confidence 96% · entity: appointment, time: 11:00",
+    meta: "Routing · receptionist skill · Sunshine Dental",
+  },
+  decide: {
+    hi: "Calendar lookup · Dr. Sharma · 11:00 IST",
+    en: "Slot is open · no conflicts · within working hours",
+    meta: "Decision · confirm with caller before booking",
+  },
+  act: {
+    hi: "Booked · Tue 11:00 · Dr. Sharma",
+    en: "SMS + WhatsApp confirmation sent · CRM updated",
+    meta: "Resolved in 23 s · zero human handoff",
+  },
+}
 
 export function ReceptionistHero() {
   const [seconds, setSeconds] = useState(134)
@@ -85,17 +81,18 @@ export function ReceptionistHero() {
     return () => clearInterval(t)
   }, [])
 
-  // Reveal turns one by one, then hold on the last and loop
+  // Walk the pipeline
   useEffect(() => {
     const t = setInterval(() => {
-      setActiveIdx((i) => (i + 1) % (TURNS.length + 1))
-    }, 2200)
+      setActiveIdx((i) => (i + 1) % STAGES.length)
+    }, 2000)
     return () => clearInterval(t)
   }, [])
 
   const mm = String(Math.floor(seconds / 60)).padStart(2, "0")
   const ss = String(seconds % 60).padStart(2, "0")
-  const resolved = activeIdx >= TURNS.length
+  const active = STAGES[activeIdx]
+  const caption = CAPTIONS[active.id]
 
   return (
     <section
@@ -184,10 +181,10 @@ export function ReceptionistHero() {
             </div>
           </div>
 
-          {/* ───────── RIGHT — Single live call ───────── */}
+          {/* ───────── RIGHT — Pipeline diagram ───────── */}
           <div className="lg:col-span-6">
-            <div className="relative mx-auto w-full max-w-[560px]">
-              {/* Soft glow backdrop */}
+            <div className="relative mx-auto w-full max-w-[600px]">
+              {/* Soft ambient glow */}
               <div
                 aria-hidden
                 className="pointer-events-none absolute -inset-x-6 -inset-y-10 -z-10"
@@ -197,7 +194,7 @@ export function ReceptionistHero() {
                 }}
               />
 
-              {/* Hairline header — live ticker */}
+              {/* Live ticker */}
               <div className="flex items-baseline justify-between border-b border-border pb-3">
                 <div className="flex items-center gap-2">
                   <span className="relative flex h-1.5 w-1.5">
@@ -217,59 +214,49 @@ export function ReceptionistHero() {
                 </div>
               </div>
 
-              {/* Caller identity */}
-              <div className="mt-5 flex items-end justify-between">
+              {/* Diagram title */}
+              <div className="mt-5 flex items-baseline justify-between">
                 <div>
                   <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-fuchsia-600">
-                    Sunshine Dental · Mumbai
+                    How the AI handles a call
                   </div>
-                  <div className="mt-1 text-[26px] font-semibold leading-tight tracking-tight text-foreground">
-                    Rahul Sharma
-                  </div>
-                  <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
-                    +91 98 ····2140 &nbsp;·&nbsp; picked up in 0.4 s
-                  </div>
+                  <h3 className="mt-1 text-[20px] font-semibold leading-tight tracking-tight text-foreground sm:text-[22px]">
+                    Pickup &rarr; Listen &rarr; Decide &rarr; Act
+                  </h3>
                 </div>
-                <div className="flex flex-col items-end gap-1">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-fuchsia-200 bg-fuchsia-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-fuchsia-700">
-                    <Globe2 className="h-3 w-3" />
-                    HI ⇄ EN
-                  </span>
-                  <span className="font-mono text-[9.5px] uppercase tracking-[0.18em] text-muted-foreground">
-                    auto-detected
-                  </span>
-                </div>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-fuchsia-200 bg-fuchsia-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-fuchsia-700">
+                  <Globe2 className="h-3 w-3" />
+                  HI &harr; EN
+                </span>
               </div>
 
-              {/* Conversation thread — vertical, no boxes */}
-              <ol className="mt-7 space-y-5">
-                {TURNS.map((t, i) => {
-                  const revealed = activeIdx >= i
-                  const active = activeIdx === i && !resolved
-                  return (
-                    <li key={t.id}>
-                      <ThreadTurn turn={t} revealed={revealed} active={active} />
-                    </li>
-                  )
-                })}
-              </ol>
+              {/* ── Pipeline diagram ── */}
+              <Pipeline activeIdx={activeIdx} />
 
-              {/* Outcome — appears on resolution */}
+              {/* Live caption tied to the active stage */}
               <div
-                className="mt-6 flex items-center gap-3 border-t border-border pt-4 transition-opacity duration-500"
-                style={{ opacity: resolved ? 1 : 0.3 }}
+                key={active.id}
+                className="mt-5 grid grid-cols-[auto_1fr] items-start gap-x-3 border-t border-border pt-4"
+                style={{ animation: "hero-fade-in 360ms ease-out both" }}
               >
-                <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
-                <span className="text-[14px] font-semibold tracking-tight text-foreground">
-                  Booked · 11 AM with Dr. Sharma
+                <span className="mt-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-fuchsia-600">
+                  {active.label}
                 </span>
-                <span className="ml-auto font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-                  SMS + WhatsApp sent
-                </span>
+                <div className="min-w-0">
+                  <p className="text-[15px] font-semibold leading-snug tracking-tight text-foreground">
+                    {caption.hi}
+                  </p>
+                  <p className="mt-0.5 text-[12px] italic leading-snug text-muted-foreground">
+                    {caption.en}
+                  </p>
+                  <p className="mt-1 font-mono text-[9.5px] uppercase tracking-[0.18em] text-muted-foreground/80">
+                    {caption.meta}
+                  </p>
+                </div>
               </div>
 
-              {/* Secondary features — inline teasers, no boxes */}
-              <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-border pt-5">
+              {/* Secondary feature teasers */}
+              <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-border pt-5">
                 <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
                   Also part of Kedeyo
                 </span>
@@ -300,20 +287,219 @@ export function ReceptionistHero() {
       </div>
 
       <style>{`
-        @keyframes hero-bar {
-          0%, 100% { transform: scaleY(0.35) }
-          50%      { transform: scaleY(1)    }
-        }
-        @keyframes hero-caret-blink {
-          0%, 50%   { opacity: 1 }
-          51%, 100% { opacity: 0 }
-        }
         @keyframes hero-fade-in {
           from { opacity: 0; transform: translateY(6px) }
           to   { opacity: 1; transform: translateY(0)   }
         }
+        @keyframes pipe-flow {
+          to { stroke-dashoffset: -36 }
+        }
+        @keyframes pipe-pulse {
+          0%, 100% { transform: scale(1);    opacity: 0.55 }
+          50%      { transform: scale(1.18); opacity: 0    }
+        }
+        @keyframes pipe-bar {
+          0%, 100% { transform: scaleY(0.35) }
+          50%      { transform: scaleY(1)    }
+        }
       `}</style>
     </section>
+  )
+}
+
+/* ─────────── Pipeline diagram ─────────── */
+
+function Pipeline({ activeIdx }: { activeIdx: number }) {
+  // Layout maths — 5 nodes evenly distributed across a 560-unit-wide SVG
+  const W = 560
+  const H = 168
+  const nodeY = 72
+  const nodeR = 22
+  const positions = STAGES.map((_, i) => {
+    const pad = 36
+    const step = (W - pad * 2) / (STAGES.length - 1)
+    return { x: pad + step * i, y: nodeY }
+  })
+
+  return (
+    <div className="mt-6">
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        className="block w-full"
+        role="img"
+        aria-label="AI Receptionist call pipeline"
+      >
+        <defs>
+          <linearGradient id="pipe-grad" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%"   stopColor="#d946ef" />
+            <stop offset="50%"  stopColor="#a855f7" />
+            <stop offset="100%" stopColor="#ec4899" />
+          </linearGradient>
+          <linearGradient id="pipe-grad-active" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%"   stopColor="#a855f7" />
+            <stop offset="100%" stopColor="#d946ef" />
+          </linearGradient>
+        </defs>
+
+        {/* Connectors between consecutive nodes */}
+        {positions.slice(0, -1).map((p, i) => {
+          const next = positions[i + 1]
+          const completed = i < activeIdx
+          const isCurrent = i === activeIdx
+          // Curved path between nodes (slight S-curve for visual interest)
+          const midX = (p.x + next.x) / 2
+          const offsetY = i % 2 === 0 ? -10 : 10
+          const d = `M ${p.x + nodeR} ${p.y} C ${midX} ${p.y + offsetY}, ${midX} ${p.y + offsetY}, ${next.x - nodeR} ${p.y}`
+
+          return (
+            <g key={`c-${i}`}>
+              {/* Base connector */}
+              <path
+                d={d}
+                fill="none"
+                stroke={completed || isCurrent ? "url(#pipe-grad)" : "rgba(168,85,247,0.18)"}
+                strokeWidth={completed || isCurrent ? 1.6 : 1.2}
+                strokeLinecap="round"
+              />
+              {/* Animated pulse only on the active connector */}
+              {isCurrent && (
+                <path
+                  d={d}
+                  fill="none"
+                  stroke="url(#pipe-grad-active)"
+                  strokeWidth={2.4}
+                  strokeLinecap="round"
+                  strokeDasharray="5 7"
+                  style={{
+                    filter: "drop-shadow(0 0 5px rgba(217,70,239,0.55))",
+                    animation: "pipe-flow 1.1s linear infinite",
+                  }}
+                />
+              )}
+            </g>
+          )
+        })}
+
+        {/* Nodes */}
+        {STAGES.map((s, i) => {
+          const p = positions[i]
+          const completed = i < activeIdx
+          const active = i === activeIdx
+          return (
+            <g key={s.id}>
+              {/* Halo for active node */}
+              {active && (
+                <circle
+                  cx={p.x}
+                  cy={p.y}
+                  r={nodeR + 6}
+                  fill="none"
+                  stroke="rgba(217,70,239,0.35)"
+                  strokeWidth={1.5}
+                  style={{
+                    transformOrigin: `${p.x}px ${p.y}px`,
+                    animation: "pipe-pulse 1.6s ease-out infinite",
+                  }}
+                />
+              )}
+              {/* Outer ring */}
+              <circle
+                cx={p.x}
+                cy={p.y}
+                r={nodeR}
+                fill="white"
+                stroke={
+                  active
+                    ? "url(#pipe-grad)"
+                    : completed
+                      ? "rgba(217,70,239,0.55)"
+                      : "rgba(168,85,247,0.25)"
+                }
+                strokeWidth={active ? 2 : 1.4}
+                style={
+                  active
+                    ? { filter: "drop-shadow(0 6px 14px rgba(217,70,239,0.35))" }
+                    : undefined
+                }
+              />
+              {/* Inner dot for completed steps */}
+              {completed && (
+                <circle
+                  cx={p.x}
+                  cy={p.y}
+                  r={3}
+                  fill="url(#pipe-grad)"
+                  opacity={0.9}
+                />
+              )}
+            </g>
+          )
+        })}
+      </svg>
+
+      {/* Icon + label overlay (rendered as HTML so icons stay crisp) */}
+      <div className="relative -mt-[168px] flex h-[168px]">
+        {STAGES.map((s, i) => {
+          const Icon = s.icon
+          const completed = i < activeIdx
+          const active = i === activeIdx
+          const leftPct = (36 + (i * (560 - 72)) / (STAGES.length - 1)) / 5.6 // % of 560
+          return (
+            <div
+              key={s.id}
+              className="absolute flex -translate-x-1/2 flex-col items-center"
+              style={{ left: `${leftPct}%`, top: "50px" }}
+            >
+              {/* Icon centered in the SVG node */}
+              <div
+                className={`flex h-11 w-11 items-center justify-center rounded-full transition-all duration-300 ${
+                  active
+                    ? "text-fuchsia-600"
+                    : completed
+                      ? "text-fuchsia-500/80"
+                      : "text-muted-foreground/55"
+                }`}
+              >
+                {active && s.id === "listen" ? (
+                  <span className="flex h-5 items-end gap-[2.5px]" aria-hidden>
+                    {[0, 1, 2, 3, 4].map((b) => (
+                      <span
+                        key={b}
+                        className="block w-[2.5px] origin-bottom rounded-full bg-gradient-to-t from-fuchsia-500 to-violet-500"
+                        style={{
+                          height: "100%",
+                          animation: `pipe-bar ${0.55 + b * 0.06}s ease-in-out ${b * 0.06}s infinite`,
+                        }}
+                      />
+                    ))}
+                  </span>
+                ) : (
+                  <Icon className="h-[18px] w-[18px]" />
+                )}
+              </div>
+
+              {/* Label below the node */}
+              <div className="mt-3 text-center">
+                <div
+                  className={`text-[11.5px] font-semibold tracking-tight transition-colors ${
+                    active
+                      ? "text-foreground"
+                      : completed
+                        ? "text-foreground/85"
+                        : "text-muted-foreground"
+                  }`}
+                >
+                  {s.label}
+                </div>
+                <div className="mt-0.5 font-mono text-[9.5px] uppercase tracking-[0.18em] text-muted-foreground">
+                  {s.meta}
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
   )
 }
 
@@ -335,96 +521,6 @@ function Kpi({
         <span className="text-fuchsia-600">{icon}</span>
         {label}
       </span>
-    </div>
-  )
-}
-
-function ThreadTurn({
-  turn,
-  revealed,
-  active,
-}: {
-  turn: Turn
-  revealed: boolean
-  active: boolean
-}) {
-  const isAi = turn.side === "ai"
-  const monogram = isAi ? "K" : turn.speaker.charAt(0)
-  return (
-    <div
-      className="grid grid-cols-[28px_1fr] gap-x-3 transition-opacity duration-500"
-      style={{
-        opacity: revealed ? 1 : 0.18,
-        animation: active ? "hero-fade-in 360ms ease-out both" : undefined,
-      }}
-    >
-      {/* Speaker monogram (no card around it) */}
-      <div className="flex flex-col items-center pt-1">
-        <span
-          className={`flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-semibold tracking-tight transition-all ${
-            isAi
-              ? "bg-gradient-to-br from-fuchsia-500 via-violet-500 to-pink-500 text-white shadow-[0_6px_16px_-8px_rgba(217,70,239,0.7)]"
-              : "border border-border bg-white text-foreground/70"
-          } ${active ? "ring-2 ring-fuchsia-300/60 ring-offset-2 ring-offset-white" : ""}`}
-        >
-          {monogram}
-        </span>
-        {/* Connector hairline to next turn */}
-        <span aria-hidden className="mt-1 h-full w-px bg-border/70" />
-      </div>
-
-      {/* Content column — pure typography */}
-      <div className="min-w-0 pb-2">
-        <div className="flex items-center gap-2">
-          <span
-            className={`text-[12px] font-semibold tracking-tight ${
-              isAi ? "text-fuchsia-700" : "text-foreground"
-            }`}
-          >
-            {turn.speaker}
-          </span>
-          <span className="rounded-sm border border-border bg-white px-1 py-px font-mono text-[8.5px] font-semibold uppercase tracking-[0.16em] text-foreground/65">
-            {turn.lang}
-          </span>
-          {active && (
-            <span className="flex h-3 items-end gap-[2px]" aria-hidden>
-              {[0, 1, 2, 3, 4].map((b) => (
-                <span
-                  key={b}
-                  className="block w-[2px] origin-bottom rounded-full bg-gradient-to-t from-fuchsia-500 to-violet-500"
-                  style={{
-                    height: "100%",
-                    animation: `hero-bar ${0.55 + b * 0.06}s ease-in-out ${b * 0.06}s infinite`,
-                  }}
-                />
-              ))}
-            </span>
-          )}
-          {active && (
-            <span className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.18em] text-fuchsia-600">
-              speaking
-            </span>
-          )}
-        </div>
-        <p className="mt-1 text-[15.5px] font-medium leading-snug tracking-tight text-foreground">
-          {turn.primary}
-          {active && (
-            <span
-              aria-hidden
-              className="ml-0.5 inline-block h-[0.95em] w-[2px] translate-y-[2px] bg-foreground align-baseline"
-              style={{ animation: "hero-caret-blink 0.9s steps(1) infinite" }}
-            />
-          )}
-        </p>
-        <p className="mt-0.5 text-[12px] italic leading-snug text-muted-foreground">
-          {turn.translation}
-        </p>
-        {turn.meta && (
-          <p className="mt-1 font-mono text-[9.5px] uppercase tracking-[0.18em] text-muted-foreground/80">
-            {turn.meta}
-          </p>
-        )}
-      </div>
     </div>
   )
 }
