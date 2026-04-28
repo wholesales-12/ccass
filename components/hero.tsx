@@ -309,20 +309,20 @@ function ReceptionistStage() {
       </div>
 
       {/* Identity wordmark */}
-      <div className="mt-3">
+      <div className="mt-2">
         <h3
           className="bg-gradient-to-r from-fuchsia-300 via-violet-300 to-pink-300 bg-clip-text text-transparent font-semibold leading-[1] tracking-tight"
-          style={{ fontSize: "clamp(1.85rem, 3.4vw, 2.4rem)" }}
+          style={{ fontSize: "clamp(1.4rem, 2.6vw, 1.85rem)" }}
         >
           AI Receptionist
         </h3>
-        <p className="mt-1.5 max-w-[420px] text-[12.5px] leading-snug text-white/55">
-          Picks up, understands, qualifies and books — in your customer&apos;s language. Watch a live call.
+        <p className="mt-1 max-w-[420px] text-[11.5px] leading-snug text-white/55">
+          Picks up, understands, qualifies and books — in your customer&apos;s language.
         </p>
       </div>
 
       {/* Stage: orb + capabilities + beams */}
-      <div className="relative mt-6 h-[300px] sm:h-[320px]">
+      <div className="relative mt-4 h-[210px] sm:h-[230px]">
         {/* SVG beam lines (under everything) */}
         <svg
           aria-hidden
@@ -380,7 +380,7 @@ function ReceptionistStage() {
           return (
             <div
               key={c.id}
-              className={`absolute flex w-[140px] flex-col gap-1 ${align}`}
+              className={`absolute flex w-[120px] flex-col gap-0.5 ${align}`}
               style={{
                 left: c.x <= 50 ? 0 : "auto",
                 right: c.x > 50 ? 0 : "auto",
@@ -390,7 +390,7 @@ function ReceptionistStage() {
               }}
             >
               <div
-                className="flex h-9 w-9 items-center justify-center rounded-full transition-all duration-500"
+                className="flex h-7 w-7 items-center justify-center rounded-full transition-all duration-500"
                 style={{
                   background: isActive
                     ? "radial-gradient(circle, rgba(236,72,153,0.35), rgba(167,139,250,0.18) 70%, transparent)"
@@ -419,7 +419,7 @@ function ReceptionistStage() {
 
         {/* Center orb */}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          <div className="relative h-[150px] w-[150px]">
+          <div className="relative h-[110px] w-[110px]">
             {/* Expanding rings */}
             {[0, 1, 2].map((i) => (
               <span
@@ -441,11 +441,11 @@ function ReceptionistStage() {
                     aria-hidden
                     className="absolute left-1/2 top-1/2 block w-[2.5px] origin-bottom rounded-full"
                     style={{
-                      height: `${10 + (active ? (i * 7) % 14 : 4)}px`,
+                      height: `${8 + (active ? (i * 7) % 10 : 3)}px`,
                       background: aiSpeaking
                         ? "linear-gradient(to top, rgba(167,139,250,0.2), rgba(196,181,253,1))"
                         : "linear-gradient(to top, rgba(232,121,249,0.2), rgba(244,114,182,1))",
-                      transform: `translate(-50%, -100%) rotate(${angle}deg) translateY(-66px)`,
+                      transform: `translate(-50%, -100%) rotate(${angle}deg) translateY(-50px)`,
                       transformOrigin: "bottom center",
                       animation: active
                         ? `hero-eq-bar ${680 + (i % 5) * 90}ms ease-in-out ${i * 30}ms infinite`
@@ -459,7 +459,7 @@ function ReceptionistStage() {
 
             {/* Inner orb */}
             <div
-              className="absolute left-1/2 top-1/2 h-[88px] w-[88px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+              className="absolute left-1/2 top-1/2 h-[64px] w-[64px] -translate-x-1/2 -translate-y-1/2 rounded-full"
               style={{
                 background:
                   "radial-gradient(circle at 35% 30%, oklch(0.86 0.16 320), oklch(0.55 0.25 295) 55%, oklch(0.30 0.18 290) 100%)",
@@ -500,9 +500,9 @@ function ReceptionistStage() {
       </div>
 
       {/* Live caption — inverts to white when a new message arrives */}
-      <div className="mt-3 min-h-[120px]">
+      <div className="mt-2 min-h-[96px]">
         {/* Header (stays on dark background) */}
-        <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em]">
+        <div className="flex items-center gap-2 font-mono text-[9.5px] uppercase tracking-[0.2em]">
           <span
             className={`inline-block h-1.5 w-1.5 rounded-full ${
               callerSpeaking ? "bg-fuchsia-400" : "bg-violet-400"
@@ -517,12 +517,18 @@ function ReceptionistStage() {
           <span className="font-semibold text-white/60">
             {callerSpeaking ? "Speaking" : aiSpeaking ? "Replying" : "Resolved"}
           </span>
+          {resolved && (
+            <span className="ml-auto inline-flex items-center gap-1 text-emerald-300">
+              <CheckCircle2 className="h-3 w-3" />
+              <span>Booked · 11 AM</span>
+            </span>
+          )}
         </div>
 
         {/* White inverted message — re-flashes on every turn change */}
         <div
           key={turnIdx}
-          className="relative mt-2 overflow-hidden rounded-2xl bg-white px-5 py-4 text-[#0a0612] shadow-[0_18px_40px_-12px_rgba(217,70,239,0.45)]"
+          className="relative mt-1.5 overflow-hidden rounded-xl bg-white px-4 py-3 text-[#0a0612] shadow-[0_14px_30px_-12px_rgba(217,70,239,0.45)]"
           style={{ animation: "hero-msg-pop 520ms cubic-bezier(.22,.9,.28,1.2) both" }}
         >
           {/* Reveal sweep — fuchsia flash that wipes across when message lands */}
@@ -538,14 +544,14 @@ function ReceptionistStage() {
           {/* Accent bar on the left edge */}
           <span
             aria-hidden
-            className={`absolute inset-y-0 left-0 w-1 ${
+            className={`absolute inset-y-0 left-0 w-[3px] ${
               callerSpeaking
                 ? "bg-gradient-to-b from-fuchsia-500 to-pink-500"
                 : "bg-gradient-to-b from-violet-500 to-fuchsia-500"
             }`}
           />
 
-          <p className="relative text-[15.5px] font-semibold leading-snug">
+          <p className="relative text-[13.5px] font-semibold leading-snug">
             {turn.primary}
             <span
               aria-hidden
@@ -553,21 +559,10 @@ function ReceptionistStage() {
               style={{ animation: "hero-caret 0.9s steps(1) infinite" }}
             />
           </p>
-          <p className="relative mt-1 text-[12px] italic leading-snug text-[#0a0612]/55">
+          <p className="relative mt-0.5 text-[11px] italic leading-snug text-[#0a0612]/55">
             {turn.secondary}
           </p>
         </div>
-      </div>
-
-      {/* Resolution ribbon */}
-      <div
-        className="mt-4 flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.18em] transition-opacity duration-500"
-        style={{ opacity: resolved ? 1 : 0.35 }}
-      >
-        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
-        <span className="text-emerald-300">Booked</span>
-        <span className="h-px flex-1 bg-gradient-to-r from-emerald-400/60 to-transparent" />
-        <span className="text-white/55">11 AM · Conf. sent</span>
       </div>
     </div>
   )

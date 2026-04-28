@@ -1,14 +1,14 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { Star, Quote, ChevronLeft, ChevronRight } from "lucide-react"
+import { Star, Quote } from "lucide-react"
 
 /**
- * Featured-quote rotator.
- * - One large quote at a time on the section background — no boxes, no metrics.
- * - Watermarked giant quote glyph anchors the composition.
- * - Brand rail at the bottom doubles as navigation, with an animated
- *   underline tracking the auto-rotation progress.
+ * Editorial vertical column.
+ * - Four testimonials flow down the page as pure typography.
+ * - No grid cells, no card surfaces — only whitespace and a thin
+ *   gradient stripe on the active item.
+ * - Hover or scroll-into-view advances the "now reading" highlight.
  */
 
 type Testimonial = {
@@ -52,80 +52,31 @@ const TESTIMONIALS: Testimonial[] = [
     quote:
       "Counselor productivity went up significantly. The AI receptionist qualifies inbound applicants in Hindi and English, and only the warm ones reach a human counselor.",
   },
-  {
-    id: "fastfleet",
-    brand: "FastFleet",
-    industry: "Logistics",
-    city: "Pune",
-    quote:
-      "Driver-customer calls are masked, recorded and SLA-tracked. We deflect the bulk of \"where is my order\" calls automatically — drivers stay productive, customers stay informed.",
-  },
-  {
-    id: "shieldbank",
-    brand: "ShieldBank",
-    industry: "Banking",
-    city: "Chennai",
-    quote:
-      "DPDP-ready consent capture and AI QA are built in. Our regulator response window dropped from days to hours, and our compliance team finally trusts the call records.",
-  },
-  {
-    id: "aksharprop",
-    brand: "AksharProp",
-    industry: "Real Estate",
-    city: "Ahmedabad",
-    quote:
-      "Site-visit bookings doubled and our brokers stopped chasing dead leads. The AI re-engages every cold inquiry on WhatsApp without us lifting a finger.",
-  },
-  {
-    id: "voyagein",
-    brand: "VoyageIn",
-    industry: "Travel",
-    city: "Goa",
-    quote:
-      "Peak-season call abandonment went to near zero. Multilingual coverage, no extra hardware, and our agents only talk to travellers who are ready to book.",
-  },
 ]
-
-const ROTATE_MS = 7000
 
 export function Testimonials() {
   const [active, setActive] = useState(0)
-  const [progress, setProgress] = useState(0)
-  const startRef = useRef<number | null>(null)
-  const rafRef = useRef<number | null>(null)
-  const pausedRef = useRef(false)
+  const itemRefs = useRef<Array<HTMLElement | null>>([])
 
+  // Advance the highlight as the user scrolls through the column
   useEffect(() => {
-    startRef.current = performance.now()
-    const tick = (now: number) => {
-      if (!pausedRef.current) {
-        const elapsed = now - (startRef.current ?? now)
-        const p = Math.min(1, elapsed / ROTATE_MS)
-        setProgress(p)
-        if (p >= 1) {
-          setActive((i) => (i + 1) % TESTIMONIALS.length)
-          startRef.current = now
-          setProgress(0)
-        }
-      } else {
-        startRef.current = now - progress * ROTATE_MS
-      }
-      rafRef.current = requestAnimationFrame(tick)
-    }
-    rafRef.current = requestAnimationFrame(tick)
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active])
-
-  const goTo = (i: number) => {
-    setActive(((i % TESTIMONIALS.length) + TESTIMONIALS.length) % TESTIMONIALS.length)
-    startRef.current = performance.now()
-    setProgress(0)
-  }
-
-  const t = TESTIMONIALS[active]
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+            const idx = Number((entry.target as HTMLElement).dataset.idx)
+            if (!Number.isNaN(idx)) setActive(idx)
+          }
+        })
+      },
+      {
+        threshold: [0.5],
+        rootMargin: "-20% 0px -20% 0px",
+      },
+    )
+    itemRefs.current.forEach((el) => el && observer.observe(el))
+    return () => observer.disconnect()
+  }, [])
 
   return (
     <section
@@ -138,11 +89,11 @@ export function Testimonials() {
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
           background:
-            "radial-gradient(55% 45% at 18% 25%, oklch(0.62 0.24 300 / 0.08), transparent 70%), radial-gradient(45% 45% at 85% 80%, oklch(0.55 0.24 320 / 0.06), transparent 70%)",
+            "radial-gradient(50% 40% at 18% 20%, oklch(0.62 0.24 300 / 0.07), transparent 70%), radial-gradient(45% 40% at 85% 85%, oklch(0.55 0.24 320 / 0.05), transparent 70%)",
         }}
       />
 
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         {/* Eyebrow + headline */}
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -173,137 +124,101 @@ export function Testimonials() {
           </div>
         </div>
 
-        {/* Featured quote */}
-        <div
-          className="relative mt-14 lg:mt-20"
-          onMouseEnter={() => (pausedRef.current = true)}
-          onMouseLeave={() => (pausedRef.current = false)}
-        >
-          {/* Watermark glyph */}
-          <Quote
+        {/* Editorial column */}
+        <div className="relative mt-14 lg:mt-20">
+          {/* Faint vertical rail (left margin) */}
+          <span
             aria-hidden
-            strokeWidth={1.25}
-            className="pointer-events-none absolute -left-2 -top-12 -z-0 h-40 w-40 -scale-x-100 text-fuchsia-500/10 lg:-left-6 lg:-top-20 lg:h-56 lg:w-56"
+            className="pointer-events-none absolute bottom-0 left-0 top-0 hidden w-px bg-border lg:block"
           />
 
-          {/* Min-height wrapper keeps layout steady through rotations */}
-          <div className="relative min-h-[260px] sm:min-h-[240px] lg:min-h-[260px]">
-            <figure
-              key={t.id}
-              className="relative max-w-4xl"
-              style={{ animation: "quote-in 600ms cubic-bezier(.2,.7,.2,1) both" }}
-            >
-              <blockquote
-                className="text-pretty font-medium leading-[1.25] tracking-tight text-foreground"
-                style={{ fontSize: "clamp(1.4rem, 2.6vw, 2.1rem)" }}
-              >
-                <span className="bg-gradient-to-r from-fuchsia-600 to-violet-600 bg-clip-text text-transparent">
-                  &ldquo;
-                </span>
-                {t.quote}
-                <span className="bg-gradient-to-r from-fuchsia-600 to-violet-600 bg-clip-text text-transparent">
-                  &rdquo;
-                </span>
-              </blockquote>
-
-              <figcaption className="mt-8 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <span
-                  aria-hidden
-                  className="h-px w-10 bg-gradient-to-r from-fuchsia-500 to-violet-500"
-                />
-                <span className="text-[15px] font-semibold tracking-tight text-foreground">
-                  {t.brand}
-                </span>
-                <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                  {t.industry} · {t.city}
-                </span>
-              </figcaption>
-            </figure>
-          </div>
-
-          {/* Inline arrow nav (sits to the right on lg) */}
-          <div className="mt-8 flex items-center justify-between gap-4">
-            <span className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-muted-foreground">
-              <span className="text-foreground">{String(active + 1).padStart(2, "0")}</span>
-              <span className="mx-1.5 text-border">/</span>
-              {String(TESTIMONIALS.length).padStart(2, "0")}
-            </span>
-
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => goTo(active - 1)}
-                aria-label="Previous testimonial"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-foreground transition-colors hover:border-fuchsia-500/40 hover:text-fuchsia-600"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => goTo(active + 1)}
-                aria-label="Next testimonial"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-foreground transition-colors hover:border-fuchsia-500/40 hover:text-fuchsia-600"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Brand rail — also doubles as nav */}
-        <div className="mt-14 border-t border-border pt-6">
-          <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4 lg:grid-cols-8">
-            {TESTIMONIALS.map((row, i) => {
+          <div className="flex flex-col gap-16 lg:gap-24 lg:pl-12">
+            {TESTIMONIALS.map((t, i) => {
               const isActive = i === active
               return (
-                <button
-                  key={row.id}
-                  type="button"
-                  onClick={() => goTo(i)}
-                  aria-label={`Show ${row.brand} testimonial`}
-                  aria-pressed={isActive}
-                  className="group relative pt-3 text-left transition-opacity"
-                  style={{ opacity: isActive ? 1 : 0.55 }}
+                <figure
+                  key={t.id}
+                  data-idx={i}
+                  ref={(el) => {
+                    itemRefs.current[i] = el
+                  }}
+                  onMouseEnter={() => setActive(i)}
+                  className="group relative transition-opacity duration-700"
+                  style={{ opacity: isActive ? 1 : 0.42 }}
                 >
-                  {/* Top progress rail */}
+                  {/* Active accent stripe */}
                   <span
                     aria-hidden
-                    className="absolute inset-x-0 top-0 h-px bg-border"
+                    className="pointer-events-none absolute -left-12 top-1 hidden h-full w-px lg:block"
+                    style={{
+                      background:
+                        "linear-gradient(to bottom, rgba(217,70,239,0.9), rgba(167,139,250,0.9), transparent)",
+                      opacity: isActive ? 1 : 0,
+                      transition: "opacity 600ms ease",
+                    }}
                   />
-                  {isActive && (
-                    <span
-                      aria-hidden
-                      className="absolute left-0 top-0 h-px bg-gradient-to-r from-fuchsia-500 via-violet-500 to-pink-500"
-                      style={{ width: `${Math.round(progress * 100)}%` }}
-                    />
-                  )}
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute -left-[57px] top-2 hidden h-2.5 w-2.5 rounded-full lg:block"
+                    style={{
+                      background:
+                        "radial-gradient(circle, rgba(244,114,182,1) 0%, rgba(167,139,250,1) 60%, transparent 80%)",
+                      boxShadow: isActive
+                        ? "0 0 0 4px rgba(244,114,182,0.18), 0 0 18px 2px rgba(217,70,239,0.45)"
+                        : "none",
+                      opacity: isActive ? 1 : 0.25,
+                      transition: "all 600ms ease",
+                    }}
+                  />
 
-                  <div
-                    className={
-                      "text-[13px] font-semibold tracking-tight " +
-                      (isActive
-                        ? "text-foreground"
-                        : "text-foreground/80 group-hover:text-foreground")
-                    }
+                  {/* Index + brand line */}
+                  <div className="flex items-baseline gap-3 font-mono text-[10.5px] uppercase tracking-[0.22em] text-muted-foreground">
+                    <span
+                      className={
+                        isActive
+                          ? "bg-gradient-to-r from-fuchsia-600 to-violet-600 bg-clip-text font-bold text-transparent"
+                          : "text-muted-foreground"
+                      }
+                    >
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span className="h-px flex-1 max-w-[60px] bg-border" />
+                    <span className="font-semibold tracking-[0.18em] text-foreground">
+                      {t.brand}
+                    </span>
+                    <span className="text-muted-foreground/80">
+                      {t.industry} · {t.city}
+                    </span>
+                  </div>
+
+                  {/* Quote */}
+                  <blockquote
+                    className="relative mt-4 max-w-3xl text-pretty font-medium leading-[1.3] tracking-tight text-foreground"
+                    style={{ fontSize: "clamp(1.15rem, 2vw, 1.65rem)" }}
                   >
-                    {row.brand}
-                  </div>
-                  <div className="mt-0.5 font-mono text-[9.5px] uppercase tracking-[0.18em] text-muted-foreground">
-                    {row.industry}
-                  </div>
-                </button>
+                    <Quote
+                      aria-hidden
+                      strokeWidth={1.5}
+                      className="absolute -left-1 -top-2 h-6 w-6 -scale-x-100 text-fuchsia-500/30 lg:-left-3"
+                    />
+                    {t.quote}
+                  </blockquote>
+                </figure>
               )
             })}
           </div>
+
+          {/* Footer note */}
+          <div className="mt-16 flex items-center gap-3 text-[12px] text-muted-foreground lg:pl-12">
+            <span className="h-px flex-1 bg-border" />
+            <span className="font-mono uppercase tracking-[0.22em]">
+              {String(active + 1).padStart(2, "0")} <span className="text-border">/</span>{" "}
+              {String(TESTIMONIALS.length).padStart(2, "0")} stories
+            </span>
+            <span className="h-px flex-1 bg-border" />
+          </div>
         </div>
       </div>
-
-      <style jsx global>{`
-        @keyframes quote-in {
-          0%   { opacity: 0; transform: translateY(10px) }
-          100% { opacity: 1; transform: translateY(0)    }
-        }
-      `}</style>
     </section>
   )
 }
