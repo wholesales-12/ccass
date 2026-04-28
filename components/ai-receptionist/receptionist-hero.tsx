@@ -10,133 +10,89 @@ import {
   Globe2,
   ShieldCheck,
   Sparkles,
-  CalendarCheck,
-  UserRound,
-  PhoneForwarded,
-  HelpCircle,
+  CheckCircle2,
+  PhoneIncoming,
+  PhoneOutgoing,
+  MessageSquare,
+  AudioLines,
+  BrainCircuit,
+  Calendar,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 /**
- * AI Receptionist hero (light theme).
- * - LEFT: headline, subhead, KPIs (typographic, no boxes).
- * - RIGHT: a *multi-call switchboard* — 4 calls happening in parallel,
- *   each a different industry / outcome (book, route, qualify, FAQ).
+ * AI Receptionist hero — light theme.
+ * RIGHT side: a 5-stage horizontal pipeline diagram (Pickup → Listen →
+ * Understand → Decide → Act). Pure SVG connectors with an animated pulse,
+ * icon-ring nodes (no rectangular cards), an active glow that walks the
+ * pipeline, and a single compact live-caption line beneath the diagram.
  */
 
-type Outcome = "booked" | "routed" | "qualified" | "answered"
-type Lang = "HI" | "EN" | "TA" | "MR"
-
-type Lane = {
-  id: number
-  caller: string
-  city: string
-  lang: Lang
-  industry: string
-  industryIcon: React.ComponentType<{ className?: string }>
-  caption: string
-  captionTranslation?: string
-  outcome: Outcome
-  duration: string
-  highlighted?: boolean
+type Stage = {
+  id: string
+  label: string
+  meta: string
+  icon: React.ComponentType<{ className?: string }>
 }
 
-const LANES: Lane[] = [
-  {
-    id: 1,
-    caller: "··2140",
-    city: "Mumbai",
-    lang: "HI",
-    industry: "Dental",
-    industryIcon: CalendarCheck,
-    caption: "मुझे कल 11 बजे appointment book करनी है।",
-    captionTranslation: "Booking 11 AM with Dr. Sharma",
-    outcome: "booked",
-    duration: "0:23",
-    highlighted: true,
-  },
-  {
-    id: 2,
-    caller: "··8821",
-    city: "Bengaluru",
-    lang: "EN",
-    industry: "Real estate",
-    industryIcon: PhoneForwarded,
-    caption: "Looking for 3BHK in Whitefield, budget 2.5 cr.",
-    outcome: "routed",
-    duration: "0:11",
-  },
-  {
-    id: 3,
-    caller: "··4477",
-    city: "Chennai",
-    lang: "TA",
-    industry: "Salon",
-    industryIcon: UserRound,
-    caption: "நாளை மதியம் hair treatment slot இருக்கா?",
-    captionTranslation: "Asking about tomorrow afternoon slot",
-    outcome: "qualified",
-    duration: "0:16",
-  },
-  {
-    id: 4,
-    caller: "··0309",
-    city: "Pune",
-    lang: "MR",
-    industry: "D2C order",
-    industryIcon: HelpCircle,
-    caption: "Order #A92314 कुठे आहे?",
-    captionTranslation: "Order status question",
-    outcome: "answered",
-    duration: "0:09",
-  },
+const STAGES: Stage[] = [
+  { id: "pickup",    label: "Pickup",     meta: "<1s",          icon: Phone },
+  { id: "listen",    label: "Listen",     meta: "HI · auto",    icon: AudioLines },
+  { id: "understand",label: "Understand", meta: "Intent · 96%", icon: BrainCircuit },
+  { id: "decide",    label: "Decide",     meta: "Slot · 11 AM", icon: Calendar },
+  { id: "act",       label: "Act",        meta: "Booked",       icon: CheckCircle2 },
 ]
 
-const OUTCOME_LABEL: Record<Outcome, string> = {
-  booked: "Booked",
-  routed: "Routed → owner",
-  qualified: "Lead captured",
-  answered: "Answered",
-}
-
-const OUTCOME_DOT: Record<Outcome, string> = {
-  booked: "bg-emerald-500",
-  routed: "bg-amber-500",
-  qualified: "bg-fuchsia-500",
-  answered: "bg-violet-500",
-}
-
-const OUTCOME_TXT: Record<Outcome, string> = {
-  booked: "text-emerald-600",
-  routed: "text-amber-600",
-  qualified: "text-fuchsia-600",
-  answered: "text-violet-600",
+// Live caption rotates with the active stage so the diagram tells a story.
+const CAPTIONS: Record<string, { hi: string; en: string; meta: string }> = {
+  pickup: {
+    hi: "Sunshine Dental — Mumbai · inbound call ringing",
+    en: "Picked up in 0.4 s · greeted in caller's language",
+    meta: "Caller · Rahul Sharma · +91 98 ····2140",
+  },
+  listen: {
+    hi: "मुझे कल 11 बजे appointment book करनी है।",
+    en: "I want to book an appointment for tomorrow at 11.",
+    meta: "Language detected · Hindi (HI) ⇄ English",
+  },
+  understand: {
+    hi: "Detecting intent · book_appointment",
+    en: "Confidence 96% · entity: appointment, time: 11:00",
+    meta: "Routing · receptionist skill · Sunshine Dental",
+  },
+  decide: {
+    hi: "Calendar lookup · Dr. Sharma · 11:00 IST",
+    en: "Slot is open · no conflicts · within working hours",
+    meta: "Decision · confirm with caller before booking",
+  },
+  act: {
+    hi: "Booked · Tue 11:00 · Dr. Sharma",
+    en: "SMS + WhatsApp confirmation sent · CRM updated",
+    meta: "Resolved in 23 s · zero human handoff",
+  },
 }
 
 export function ReceptionistHero() {
   const [seconds, setSeconds] = useState(134)
-  const [bookings, setBookings] = useState(38)
-  const [activeLane, setActiveLane] = useState(0)
+  const [activeIdx, setActiveIdx] = useState(0)
 
   useEffect(() => {
     const t = setInterval(() => setSeconds((s) => s + 1), 1000)
     return () => clearInterval(t)
   }, [])
 
-  useEffect(() => {
-    const t = setInterval(() => setBookings((n) => n + 1), 6800)
-    return () => clearInterval(t)
-  }, [])
-
+  // Walk the pipeline
   useEffect(() => {
     const t = setInterval(() => {
-      setActiveLane((i) => (i + 1) % LANES.length)
-    }, 2800)
+      setActiveIdx((i) => (i + 1) % STAGES.length)
+    }, 2000)
     return () => clearInterval(t)
   }, [])
 
   const mm = String(Math.floor(seconds / 60)).padStart(2, "0")
   const ss = String(seconds % 60).padStart(2, "0")
+  const active = STAGES[activeIdx]
+  const caption = CAPTIONS[active.id]
 
   return (
     <section
@@ -159,7 +115,6 @@ export function ReceptionistHero() {
             "radial-gradient(ellipse 80% 70% at 50% 50%, black 25%, transparent 80%)",
         }}
       />
-      {/* Subtle horizon line */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-1/2 h-px"
@@ -226,72 +181,105 @@ export function ReceptionistHero() {
             </div>
           </div>
 
-          {/* ───────── RIGHT — Multi-call switchboard ───────── */}
+          {/* ───────── RIGHT — Pipeline diagram ───────── */}
           <div className="lg:col-span-6">
             <div className="relative mx-auto w-full max-w-[600px]">
-              {/* Soft glow backdrop */}
+              {/* Soft ambient glow */}
               <div
                 aria-hidden
                 className="pointer-events-none absolute -inset-x-6 -inset-y-10 -z-10"
                 style={{
                   background:
-                    "radial-gradient(ellipse 70% 60% at 50% 50%, oklch(0.85 0.12 295 / 0.35), transparent 70%)",
+                    "radial-gradient(ellipse 70% 60% at 50% 50%, oklch(0.85 0.12 295 / 0.32), transparent 70%)",
                 }}
               />
 
-              {/* Header — switchboard identity */}
-              <div className="flex items-end justify-between">
-                <div>
-                  <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-                    Switchboard · Live
-                  </div>
-                  <div className="mt-1 flex items-baseline gap-2">
-                    <span className="text-[28px] font-semibold leading-none tracking-tight text-foreground tabular-nums">
-                      4
-                    </span>
-                    <span className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-muted-foreground">
-                      calls active
-                    </span>
-                    <span className="text-border">·</span>
-                    <span className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-muted-foreground tabular-nums">
-                      {mm}:{ss}
-                    </span>
-                  </div>
+              {/* Live ticker */}
+              <div className="flex items-baseline justify-between border-b border-border pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  </span>
+                  <span className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.2em] text-emerald-600">
+                    Live
+                  </span>
+                  <span className="text-border">·</span>
+                  <span className="font-mono text-[12px] tabular-nums text-foreground">
+                    {mm}:{ss}
+                  </span>
                 </div>
-                <div className="text-right text-[10px] font-mono uppercase tracking-[0.18em] text-muted-foreground">
-                  <div className="text-emerald-600">All answered &lt;1s</div>
-                  <div className="mt-0.5">
-                    <span className="font-semibold tabular-nums text-foreground">{bookings}</span>{" "}
-                    booked today
-                  </div>
+                <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  Call #2,341 · Inbound
                 </div>
               </div>
 
-              {/* Switchboard lanes */}
-              <ol className="mt-7 space-y-4">
-                {LANES.map((lane, i) => (
-                  <li key={lane.id}>
-                    <Lane lane={lane} active={i === activeLane} index={i} />
-                  </li>
-                ))}
-              </ol>
+              {/* Diagram title */}
+              <div className="mt-5 flex items-baseline justify-between">
+                <div>
+                  <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-fuchsia-600">
+                    How the AI handles a call
+                  </div>
+                  <h3 className="mt-1 text-[20px] font-semibold leading-tight tracking-tight text-foreground sm:text-[22px]">
+                    Pickup &rarr; Listen &rarr; Decide &rarr; Act
+                  </h3>
+                </div>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-fuchsia-200 bg-fuchsia-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-fuchsia-700">
+                  <Globe2 className="h-3 w-3" />
+                  HI &harr; EN
+                </span>
+              </div>
 
-              {/* Footer — load + capacity bar */}
-              <div className="mt-8 border-t border-border pt-5">
-                <div className="flex items-baseline justify-between">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-                    Capacity · auto-scaling
-                  </span>
-                  <span className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-foreground tabular-nums">
-                    4 / 50 lines
-                  </span>
+              {/* ── Pipeline diagram ── */}
+              <Pipeline activeIdx={activeIdx} />
+
+              {/* Live caption tied to the active stage */}
+              <div
+                key={active.id}
+                className="mt-5 grid grid-cols-[auto_1fr] items-start gap-x-3 border-t border-border pt-4"
+                style={{ animation: "hero-fade-in 360ms ease-out both" }}
+              >
+                <span className="mt-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-fuchsia-600">
+                  {active.label}
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[15px] font-semibold leading-snug tracking-tight text-foreground">
+                    {caption.hi}
+                  </p>
+                  <p className="mt-0.5 text-[12px] italic leading-snug text-muted-foreground">
+                    {caption.en}
+                  </p>
+                  <p className="mt-1 font-mono text-[9.5px] uppercase tracking-[0.18em] text-muted-foreground/80">
+                    {caption.meta}
+                  </p>
                 </div>
-                <div className="mt-2 h-[3px] w-full overflow-hidden rounded-full bg-foreground/[0.08]">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-fuchsia-500 via-violet-500 to-fuchsia-500"
-                    style={{ width: "8%" }}
-                  />
-                </div>
+              </div>
+
+              {/* Secondary feature teasers */}
+              <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-border pt-5">
+                <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                  Also part of Kedeyo
+                </span>
+                <Link
+                  href="/features/outbound-voice"
+                  className="group inline-flex items-center gap-2 text-[12.5px] font-semibold text-foreground transition-colors hover:text-fuchsia-600"
+                >
+                  <PhoneOutgoing className="h-3.5 w-3.5 text-fuchsia-500" />
+                  Outbound Voice AI
+                  <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                </Link>
+                <Link
+                  href="/features/whatsapp-ai"
+                  className="group inline-flex items-center gap-2 text-[12.5px] font-semibold text-foreground transition-colors hover:text-fuchsia-600"
+                >
+                  <MessageSquare className="h-3.5 w-3.5 text-violet-500" />
+                  WhatsApp AI
+                  <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                </Link>
+                <span className="ml-auto inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                  <PhoneIncoming className="h-3 w-3" />
+                  39 booked today
+                </span>
               </div>
             </div>
           </div>
@@ -299,20 +287,219 @@ export function ReceptionistHero() {
       </div>
 
       <style>{`
-        @keyframes hero-bar {
+        @keyframes hero-fade-in {
+          from { opacity: 0; transform: translateY(6px) }
+          to   { opacity: 1; transform: translateY(0)   }
+        }
+        @keyframes pipe-flow {
+          to { stroke-dashoffset: -36 }
+        }
+        @keyframes pipe-pulse {
+          0%, 100% { transform: scale(1);    opacity: 0.55 }
+          50%      { transform: scale(1.18); opacity: 0    }
+        }
+        @keyframes pipe-bar {
           0%, 100% { transform: scaleY(0.35) }
           50%      { transform: scaleY(1)    }
         }
-        @keyframes hero-caret-blink {
-          0%, 50%   { opacity: 1 }
-          51%, 100% { opacity: 0 }
-        }
-        @keyframes hero-fade-in {
-          from { opacity: 0; transform: translateY(4px) }
-          to   { opacity: 1; transform: translateY(0)   }
-        }
       `}</style>
     </section>
+  )
+}
+
+/* ─────────── Pipeline diagram ─────────── */
+
+function Pipeline({ activeIdx }: { activeIdx: number }) {
+  // Layout maths — 5 nodes evenly distributed across a 560-unit-wide SVG
+  const W = 560
+  const H = 168
+  const nodeY = 72
+  const nodeR = 22
+  const positions = STAGES.map((_, i) => {
+    const pad = 36
+    const step = (W - pad * 2) / (STAGES.length - 1)
+    return { x: pad + step * i, y: nodeY }
+  })
+
+  return (
+    <div className="mt-6">
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        className="block w-full"
+        role="img"
+        aria-label="AI Receptionist call pipeline"
+      >
+        <defs>
+          <linearGradient id="pipe-grad" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%"   stopColor="#d946ef" />
+            <stop offset="50%"  stopColor="#a855f7" />
+            <stop offset="100%" stopColor="#ec4899" />
+          </linearGradient>
+          <linearGradient id="pipe-grad-active" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%"   stopColor="#a855f7" />
+            <stop offset="100%" stopColor="#d946ef" />
+          </linearGradient>
+        </defs>
+
+        {/* Connectors between consecutive nodes */}
+        {positions.slice(0, -1).map((p, i) => {
+          const next = positions[i + 1]
+          const completed = i < activeIdx
+          const isCurrent = i === activeIdx
+          // Curved path between nodes (slight S-curve for visual interest)
+          const midX = (p.x + next.x) / 2
+          const offsetY = i % 2 === 0 ? -10 : 10
+          const d = `M ${p.x + nodeR} ${p.y} C ${midX} ${p.y + offsetY}, ${midX} ${p.y + offsetY}, ${next.x - nodeR} ${p.y}`
+
+          return (
+            <g key={`c-${i}`}>
+              {/* Base connector */}
+              <path
+                d={d}
+                fill="none"
+                stroke={completed || isCurrent ? "url(#pipe-grad)" : "rgba(168,85,247,0.18)"}
+                strokeWidth={completed || isCurrent ? 1.6 : 1.2}
+                strokeLinecap="round"
+              />
+              {/* Animated pulse only on the active connector */}
+              {isCurrent && (
+                <path
+                  d={d}
+                  fill="none"
+                  stroke="url(#pipe-grad-active)"
+                  strokeWidth={2.4}
+                  strokeLinecap="round"
+                  strokeDasharray="5 7"
+                  style={{
+                    filter: "drop-shadow(0 0 5px rgba(217,70,239,0.55))",
+                    animation: "pipe-flow 1.1s linear infinite",
+                  }}
+                />
+              )}
+            </g>
+          )
+        })}
+
+        {/* Nodes */}
+        {STAGES.map((s, i) => {
+          const p = positions[i]
+          const completed = i < activeIdx
+          const active = i === activeIdx
+          return (
+            <g key={s.id}>
+              {/* Halo for active node */}
+              {active && (
+                <circle
+                  cx={p.x}
+                  cy={p.y}
+                  r={nodeR + 6}
+                  fill="none"
+                  stroke="rgba(217,70,239,0.35)"
+                  strokeWidth={1.5}
+                  style={{
+                    transformOrigin: `${p.x}px ${p.y}px`,
+                    animation: "pipe-pulse 1.6s ease-out infinite",
+                  }}
+                />
+              )}
+              {/* Outer ring */}
+              <circle
+                cx={p.x}
+                cy={p.y}
+                r={nodeR}
+                fill="white"
+                stroke={
+                  active
+                    ? "url(#pipe-grad)"
+                    : completed
+                      ? "rgba(217,70,239,0.55)"
+                      : "rgba(168,85,247,0.25)"
+                }
+                strokeWidth={active ? 2 : 1.4}
+                style={
+                  active
+                    ? { filter: "drop-shadow(0 6px 14px rgba(217,70,239,0.35))" }
+                    : undefined
+                }
+              />
+              {/* Inner dot for completed steps */}
+              {completed && (
+                <circle
+                  cx={p.x}
+                  cy={p.y}
+                  r={3}
+                  fill="url(#pipe-grad)"
+                  opacity={0.9}
+                />
+              )}
+            </g>
+          )
+        })}
+      </svg>
+
+      {/* Icon + label overlay (rendered as HTML so icons stay crisp) */}
+      <div className="relative -mt-[168px] flex h-[168px]">
+        {STAGES.map((s, i) => {
+          const Icon = s.icon
+          const completed = i < activeIdx
+          const active = i === activeIdx
+          const leftPct = (36 + (i * (560 - 72)) / (STAGES.length - 1)) / 5.6 // % of 560
+          return (
+            <div
+              key={s.id}
+              className="absolute flex -translate-x-1/2 flex-col items-center"
+              style={{ left: `${leftPct}%`, top: "50px" }}
+            >
+              {/* Icon centered in the SVG node */}
+              <div
+                className={`flex h-11 w-11 items-center justify-center rounded-full transition-all duration-300 ${
+                  active
+                    ? "text-fuchsia-600"
+                    : completed
+                      ? "text-fuchsia-500/80"
+                      : "text-muted-foreground/55"
+                }`}
+              >
+                {active && s.id === "listen" ? (
+                  <span className="flex h-5 items-end gap-[2.5px]" aria-hidden>
+                    {[0, 1, 2, 3, 4].map((b) => (
+                      <span
+                        key={b}
+                        className="block w-[2.5px] origin-bottom rounded-full bg-gradient-to-t from-fuchsia-500 to-violet-500"
+                        style={{
+                          height: "100%",
+                          animation: `pipe-bar ${0.55 + b * 0.06}s ease-in-out ${b * 0.06}s infinite`,
+                        }}
+                      />
+                    ))}
+                  </span>
+                ) : (
+                  <Icon className="h-[18px] w-[18px]" />
+                )}
+              </div>
+
+              {/* Label below the node */}
+              <div className="mt-3 text-center">
+                <div
+                  className={`text-[11.5px] font-semibold tracking-tight transition-colors ${
+                    active
+                      ? "text-foreground"
+                      : completed
+                        ? "text-foreground/85"
+                        : "text-muted-foreground"
+                  }`}
+                >
+                  {s.label}
+                </div>
+                <div className="mt-0.5 font-mono text-[9.5px] uppercase tracking-[0.18em] text-muted-foreground">
+                  {s.meta}
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
   )
 }
 
@@ -334,106 +521,6 @@ function Kpi({
         <span className="text-fuchsia-600">{icon}</span>
         {label}
       </span>
-    </div>
-  )
-}
-
-function Lane({ lane, active, index }: { lane: Lane; active: boolean; index: number }) {
-  const Icon = lane.industryIcon
-  return (
-    <div
-      className="group relative grid grid-cols-[auto_1fr_auto] items-start gap-x-4 transition-opacity duration-500"
-      style={{ opacity: active ? 1 : 0.55 }}
-    >
-      {/* Left rail — industry + caller meta */}
-      <div className="flex min-w-[112px] flex-col gap-1 pt-0.5">
-        <div className="flex items-center gap-2">
-          <span
-            className={`flex h-6 w-6 items-center justify-center rounded-full text-violet-600 transition-all ${
-              active
-                ? "bg-violet-500/15 ring-1 ring-violet-500/40"
-                : "bg-violet-500/8"
-            }`}
-            aria-hidden
-          >
-            <Icon className="h-3 w-3" />
-          </span>
-          <span className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-foreground">
-            {lane.industry}
-          </span>
-        </div>
-        <div className="flex items-center gap-2 pl-8 font-mono text-[9.5px] uppercase tracking-[0.16em] text-muted-foreground">
-          <span>{lane.city}</span>
-          <span>·</span>
-          <span className="text-foreground/65">{lane.caller}</span>
-        </div>
-      </div>
-
-      {/* Center — waveform + caption */}
-      <div className="min-w-0">
-        <div className="flex h-5 items-center gap-[3px]" aria-hidden>
-          {Array.from({ length: 28 }).map((_, b) => (
-            <span
-              key={b}
-              className={`block w-[2px] origin-center rounded-full ${
-                active
-                  ? "bg-gradient-to-t from-fuchsia-500 to-violet-500"
-                  : "bg-foreground/15"
-              }`}
-              style={{
-                height: `${10 + ((b * 7 + index * 13) % 9)}px`,
-                animation: active
-                  ? `hero-bar ${0.6 + ((b % 5) * 0.08)}s ease-in-out ${(b % 7) * 0.04}s infinite`
-                  : undefined,
-              }}
-            />
-          ))}
-        </div>
-        <p
-          key={`cap-${lane.id}-${active ? "a" : "i"}`}
-          className="mt-1.5 truncate text-[13px] font-medium leading-snug text-foreground"
-          style={{ animation: active ? "hero-fade-in 360ms ease-out both" : undefined }}
-        >
-          {lane.caption}
-          {active && (
-            <span
-              aria-hidden
-              className="ml-0.5 inline-block h-[0.95em] w-[2px] translate-y-[2px] bg-foreground align-baseline"
-              style={{ animation: "hero-caret-blink 0.9s steps(1) infinite" }}
-            />
-          )}
-        </p>
-        {lane.captionTranslation && (
-          <p className="truncate text-[10.5px] italic leading-snug text-muted-foreground">
-            {lane.captionTranslation}
-          </p>
-        )}
-      </div>
-
-      {/* Right — language + outcome */}
-      <div className="flex flex-col items-end gap-1.5 pt-0.5">
-        <div className="flex items-center gap-2">
-          <span className="rounded-full border border-border bg-foreground/[0.03] px-1.5 py-px font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-foreground/70">
-            {lane.lang}
-          </span>
-          <span className="font-mono text-[9.5px] tabular-nums text-muted-foreground">
-            {lane.duration}
-          </span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span
-            className={`h-1.5 w-1.5 rounded-full ${OUTCOME_DOT[lane.outcome]} ${
-              active ? "animate-pulse" : ""
-            }`}
-            aria-hidden
-          />
-          <span
-            className={`font-mono text-[10px] font-semibold uppercase tracking-[0.16em] ${OUTCOME_TXT[lane.outcome]}`}
-          >
-            {OUTCOME_LABEL[lane.outcome]}
-          </span>
-        </div>
-      </div>
     </div>
   )
 }

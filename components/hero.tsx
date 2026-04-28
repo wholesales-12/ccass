@@ -8,20 +8,21 @@ import {
   ShieldCheck,
   Activity,
   MapPin,
-  Ear,
-  Brain,
-  MessageSquareText,
-  CalendarCheck,
-  CheckCircle2,
+  PhoneOutgoing,
+  MessageSquare,
+  CalendarCheck2,
+  UserCheck,
+  Sparkles,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 /**
- * Dark hero — "Every Call Answered. By an AI Receptionist."
- * Right side: centered AI Receptionist "Stage" — a glowing pulsing orb
- * surrounded by 4 floating capability labels with animated beam lines.
- * Below: a single live caption that rotates through caller / AI turns.
- * No card chrome, no containers, no boxes.
+ * Hero — "Every Call Answered. By an AI Receptionist."
+ *
+ * Right side: a compact, diagrammatic flow showing how the AI
+ * Receptionist works.  Caller → AI Receptionist → branches to
+ * Booked / Routed.  Pure icons + labels + animated SVG connectors,
+ * no rectangular containers.
  */
 
 const STATS = [
@@ -150,36 +151,22 @@ export function Hero() {
             </div>
           </div>
 
-          {/* RIGHT — AI Receptionist Stage */}
+          {/* RIGHT — diagrammatic flow */}
           <div className="lg:col-span-5">
-            <ReceptionistStage />
+            <ReceptionistDiagram />
           </div>
         </div>
       </div>
 
       {/* Shared keyframes */}
       <style jsx global>{`
-        @keyframes hero-orb-pulse {
-          0%, 100% { transform: scale(1); filter: brightness(1) }
-          50%      { transform: scale(1.04); filter: brightness(1.15) }
+        @keyframes hero-flow-dash {
+          0%   { stroke-dashoffset: 0   }
+          100% { stroke-dashoffset: -48 }
         }
-        @keyframes hero-orb-ring {
-          0%   { transform: scale(0.55); opacity: 0.7 }
-          100% { transform: scale(2.3);  opacity: 0   }
-        }
-        @keyframes hero-eq-bar {
-          0%, 100% { transform: scaleY(0.35) }
-          50%      { transform: scaleY(1)    }
-        }
-        @keyframes hero-beam {
-          0%   { stroke-dashoffset: 80; opacity: 0   }
-          15%  {                        opacity: 1   }
-          85%  {                        opacity: 1   }
-          100% { stroke-dashoffset: 0;  opacity: 0.2 }
-        }
-        @keyframes hero-cap-glow {
-          0%, 100% { opacity: 0.55 }
-          50%      { opacity: 1    }
+        @keyframes hero-pulse-ring {
+          0%   { transform: scale(0.6); opacity: 0.55 }
+          100% { transform: scale(1.6); opacity: 0    }
         }
         @keyframes hero-caret {
           0%, 49%  { opacity: 1 }
@@ -189,385 +176,362 @@ export function Hero() {
           0%   { opacity: 0; transform: translateY(6px) }
           100% { opacity: 1; transform: translateY(0)   }
         }
-        @keyframes hero-msg-pop {
-          0%   { opacity: 0; transform: translateY(10px) scale(0.97) }
-          60%  { opacity: 1; transform: translateY(-2px) scale(1.015) }
-          100% { opacity: 1; transform: translateY(0) scale(1) }
+        @keyframes hero-node-glow {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(217,70,239,0.0), 0 0 28px 0 rgba(217,70,239,0.45) }
+          50%      { box-shadow: 0 0 0 3px rgba(217,70,239,0.08), 0 0 36px 4px rgba(217,70,239,0.55) }
         }
-        @keyframes hero-msg-sweep {
-          0%   { transform: translateX(-100%); opacity: 0   }
-          30%  {                                opacity: 0.9 }
-          100% { transform: translateX(100%);  opacity: 0   }
+        @keyframes hero-bar {
+          0%, 100% { transform: scaleY(0.4) }
+          50%      { transform: scaleY(1)   }
         }
       `}</style>
     </section>
   )
 }
 
-/* ─────────────  AI Receptionist Stage  ───────────── */
+/* ─────────────  Diagrammatic flow  ───────────── */
 
-type Turn = {
-  side: "caller" | "ai"
-  speaker: string
-  langTag: "HI" | "EN"
+type Scene = {
+  caller: string
+  city: string
+  langTag: string
   primary: string
   secondary: string
-  /** which capability is "lit up" during this turn */
-  cap: "listen" | "understand" | "speak" | "act"
+  outcome: "booked" | "routed"
+  outcomeText: string
 }
 
-const TURNS: Turn[] = [
+const SCENES: Scene[] = [
   {
-    side: "caller",
-    speaker: "Rahul",
+    caller: "Rahul",
+    city: "Mumbai",
     langTag: "HI",
     primary: "मुझे कल 11 बजे appointment book करनी है।",
-    secondary: "I want to book for tomorrow at 11.",
-    cap: "listen",
+    secondary: "Book me an appointment for 11 AM tomorrow.",
+    outcome: "booked",
+    outcomeText: "Booked · 11 AM · Dr. Sharma",
   },
   {
-    side: "ai",
-    speaker: "Kedeyo",
+    caller: "Priya",
+    city: "Bengaluru",
     langTag: "EN",
-    primary: "11 AM tomorrow with Dr. Sharma is open — confirm?",
-    secondary: "कल 11 बजे डॉ. शर्मा available है।",
-    cap: "understand",
+    primary: "Looking for a 2BHK in Whitefield, ready to move.",
+    secondary: "Hot lead — qualified and routed.",
+    outcome: "routed",
+    outcomeText: "Routed · Sales · 12s",
   },
   {
-    side: "caller",
-    speaker: "Rahul",
+    caller: "Aman",
+    city: "Delhi",
     langTag: "HI",
-    primary: "हाँ, confirm कर दीजिए।",
-    secondary: "Yes, please confirm.",
-    cap: "speak",
-  },
-  {
-    side: "ai",
-    speaker: "Kedeyo",
-    langTag: "EN",
-    primary: "Booked. SMS + WhatsApp sent.",
-    secondary: "Resolved in 23s.",
-    cap: "act",
+    primary: "Order #4821 का status क्या है?",
+    secondary: "What is the status of my order?",
+    outcome: "booked",
+    outcomeText: "Resolved · Order shipped",
   },
 ]
 
-type CapId = "listen" | "understand" | "speak" | "act"
-
-const CAPABILITIES: Array<{
-  id: CapId
-  label: string
-  sub: string
-  icon: typeof Ear
-  /** percent positions inside the stage box */
-  x: number
-  y: number
-  /** which side of the orb this capability sits, controls beam path */
-  anchor: "tl" | "tr" | "bl" | "br"
-}> = [
-  { id: "listen",     label: "Listens",        sub: "Hi · En · Ta",     icon: Ear,                x: 6,  y: 8,  anchor: "tl" },
-  { id: "understand", label: "Understands",    sub: "Intent · 98%",     icon: Brain,              x: 94, y: 8,  anchor: "tr" },
-  { id: "speak",      label: "Speaks back",    sub: "Natural voice",    icon: MessageSquareText,  x: 6,  y: 92, anchor: "bl" },
-  { id: "act",        label: "Books / Routes", sub: "Calendar · CRM",   icon: CalendarCheck,      x: 94, y: 92, anchor: "br" },
-]
-
-function ReceptionistStage() {
+function ReceptionistDiagram() {
   const [seconds, setSeconds] = useState(46)
-  const [turnIdx, setTurnIdx] = useState(0)
+  const [sceneIdx, setSceneIdx] = useState(0)
 
   useEffect(() => {
     const t = setInterval(() => setSeconds((s) => s + 1), 1000)
     return () => clearInterval(t)
   }, [])
-
   useEffect(() => {
-    const t = setInterval(() => setTurnIdx((i) => (i + 1) % TURNS.length), 3200)
+    const t = setInterval(() => setSceneIdx((i) => (i + 1) % SCENES.length), 4800)
     return () => clearInterval(t)
   }, [])
 
   const mm = String(Math.floor(seconds / 60)).padStart(2, "0")
   const ss = String(seconds % 60).padStart(2, "0")
-  const turn = TURNS[turnIdx]
-  const activeCap = turn.cap
-  const aiSpeaking = turn.side === "ai"
-  const callerSpeaking = turn.side === "caller"
-  const resolved = turnIdx === TURNS.length - 1
+  const scene = SCENES[sceneIdx]
+  const bookedActive = scene.outcome === "booked"
+  const routedActive = scene.outcome === "routed"
 
   return (
     <div className="relative mx-auto w-full max-w-[520px]">
-      {/* Top status row — pure typography */}
-      <div className="flex items-center justify-between text-[11px]">
-        <span className="inline-flex items-center gap-2 font-mono font-semibold uppercase tracking-[0.2em] text-emerald-300">
+      {/* TOP META */}
+      <div className="flex items-center justify-between font-mono text-[10.5px] uppercase tracking-[0.22em]">
+        <span className="inline-flex items-center gap-2 font-semibold text-emerald-300">
           <span className="relative flex h-1.5 w-1.5">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
           </span>
           Live · {mm}:{ss}
         </span>
-        <span className="font-mono uppercase tracking-[0.18em] text-white/40">
-          Hi <span className="text-white/30">⇄</span> En · Mumbai
-        </span>
+        <span className="text-white/40">How a call flows</span>
       </div>
 
-      {/* Identity wordmark */}
-      <div className="mt-3">
-        <h3
-          className="bg-gradient-to-r from-fuchsia-300 via-violet-300 to-pink-300 bg-clip-text text-transparent font-semibold leading-[1] tracking-tight"
-          style={{ fontSize: "clamp(1.85rem, 3.4vw, 2.4rem)" }}
-        >
-          AI Receptionist
-        </h3>
-        <p className="mt-1.5 max-w-[420px] text-[12.5px] leading-snug text-white/55">
-          Picks up, understands, qualifies and books — in your customer&apos;s language. Watch a live call.
-        </p>
-      </div>
-
-      {/* Stage: orb + capabilities + beams */}
-      <div className="relative mt-6 h-[300px] sm:h-[320px]">
-        {/* SVG beam lines (under everything) */}
+      {/* ─────────────  The diagram  ─────────────
+          Layout (relative, h-[260px]):
+          - Left node:  Caller   (left:0,  top:50%)
+          - Center node: AI      (left:50%, top:50%)
+          - Right top: Booked    (right:0, top:18%)
+          - Right bot: Routed    (right:0, top:82%)
+          - SVG draws curved animated paths between them
+      */}
+      <div className="relative mt-4 h-[260px]">
+        {/* SVG connector layer */}
         <svg
           aria-hidden
+          viewBox="0 0 520 260"
           className="absolute inset-0 h-full w-full"
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
         >
           <defs>
-            <linearGradient id="beam-fuchsia" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="rgba(236,72,153,0)" />
-              <stop offset="100%" stopColor="rgba(236,72,153,0.9)" />
-            </linearGradient>
-            <linearGradient id="beam-violet" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="rgba(167,139,250,0)" />
+            <linearGradient id="hero-conn-in" x1="0" x2="1" y1="0" y2="0">
+              <stop offset="0%"  stopColor="rgba(244,114,182,0)" />
+              <stop offset="20%" stopColor="rgba(244,114,182,0.9)" />
               <stop offset="100%" stopColor="rgba(167,139,250,0.9)" />
+            </linearGradient>
+            <linearGradient id="hero-conn-booked" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%"  stopColor="rgba(167,139,250,0.9)" />
+              <stop offset="100%" stopColor="rgba(52,211,153,0.9)" />
+            </linearGradient>
+            <linearGradient id="hero-conn-routed" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%"  stopColor="rgba(167,139,250,0.9)" />
+              <stop offset="100%" stopColor="rgba(244,114,182,0.9)" />
             </linearGradient>
           </defs>
 
-          {CAPABILITIES.map((c) => {
-            const isActive = c.id === activeCap
-            const grad = c.anchor === "tl" || c.anchor === "bl" ? "url(#beam-fuchsia)" : "url(#beam-violet)"
-            return (
-              <line
-                key={c.id}
-                x1={c.x}
-                y1={c.y}
-                x2={50}
-                y2={50}
-                stroke={grad}
-                strokeWidth={isActive ? 0.5 : 0.25}
-                strokeLinecap="round"
-                strokeDasharray="2 1.5"
-                vectorEffect="non-scaling-stroke"
-                style={{
-                  opacity: isActive ? 1 : 0.18,
-                  transition: "opacity 400ms ease, stroke-width 400ms ease",
-                }}
-              />
-            )
-          })}
-        </svg>
-
-        {/* Capability labels — positioned at corners, no box */}
-        {CAPABILITIES.map((c) => {
-          const isActive = c.id === activeCap
-          const Icon = c.icon
-          const align =
-            c.anchor === "tl"
-              ? "items-start text-left"
-              : c.anchor === "tr"
-                ? "items-end text-right"
-                : c.anchor === "bl"
-                  ? "items-start text-left"
-                  : "items-end text-right"
-          return (
-            <div
-              key={c.id}
-              className={`absolute flex w-[140px] flex-col gap-1 ${align}`}
-              style={{
-                left: c.x <= 50 ? 0 : "auto",
-                right: c.x > 50 ? 0 : "auto",
-                top: c.y <= 50 ? 0 : "auto",
-                bottom: c.y > 50 ? 0 : "auto",
-                transition: "all 400ms ease",
-              }}
-            >
-              <div
-                className="flex h-9 w-9 items-center justify-center rounded-full transition-all duration-500"
-                style={{
-                  background: isActive
-                    ? "radial-gradient(circle, rgba(236,72,153,0.35), rgba(167,139,250,0.18) 70%, transparent)"
-                    : "rgba(255,255,255,0.04)",
-                  boxShadow: isActive
-                    ? "0 0 24px 6px rgba(217,70,239,0.45), inset 0 0 0 1px rgba(244,114,182,0.55)"
-                    : "inset 0 0 0 1px rgba(255,255,255,0.10)",
-                }}
-              >
-                <Icon
-                  className={`h-4 w-4 transition-colors duration-500 ${
-                    isActive ? "text-fuchsia-200" : "text-white/55"
-                  }`}
-                  strokeWidth={2}
-                />
-              </div>
-              <div className={`text-[12px] font-semibold leading-tight transition-colors duration-500 ${isActive ? "text-white" : "text-white/70"}`}>
-                {c.label}
-              </div>
-              <div className="font-mono text-[9.5px] uppercase tracking-[0.16em] text-white/40">
-                {c.sub}
-              </div>
-            </div>
-          )
-        })}
-
-        {/* Center orb */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          <div className="relative h-[150px] w-[150px]">
-            {/* Expanding rings */}
-            {[0, 1, 2].map((i) => (
-              <span
-                key={i}
-                aria-hidden
-                className="absolute inset-0 rounded-full border border-fuchsia-400/40"
-                style={{ animation: `hero-orb-ring 2.6s ease-out ${i * 0.7}s infinite` }}
-              />
-            ))}
-
-            {/* Radial waveform halo (24 bars in a circle) */}
-            <div className="absolute inset-0">
-              {Array.from({ length: 24 }).map((_, i) => {
-                const angle = (i / 24) * 360
-                const active = aiSpeaking || callerSpeaking
-                return (
-                  <span
-                    key={i}
-                    aria-hidden
-                    className="absolute left-1/2 top-1/2 block w-[2.5px] origin-bottom rounded-full"
-                    style={{
-                      height: `${10 + (active ? (i * 7) % 14 : 4)}px`,
-                      background: aiSpeaking
-                        ? "linear-gradient(to top, rgba(167,139,250,0.2), rgba(196,181,253,1))"
-                        : "linear-gradient(to top, rgba(232,121,249,0.2), rgba(244,114,182,1))",
-                      transform: `translate(-50%, -100%) rotate(${angle}deg) translateY(-66px)`,
-                      transformOrigin: "bottom center",
-                      animation: active
-                        ? `hero-eq-bar ${680 + (i % 5) * 90}ms ease-in-out ${i * 30}ms infinite`
-                        : undefined,
-                      opacity: active ? 1 : 0.45,
-                    }}
-                  />
-                )
-              })}
-            </div>
-
-            {/* Inner orb */}
-            <div
-              className="absolute left-1/2 top-1/2 h-[88px] w-[88px] -translate-x-1/2 -translate-y-1/2 rounded-full"
-              style={{
-                background:
-                  "radial-gradient(circle at 35% 30%, oklch(0.86 0.16 320), oklch(0.55 0.25 295) 55%, oklch(0.30 0.18 290) 100%)",
-                boxShadow:
-                  "0 0 70px 14px rgba(217,70,239,0.40), inset 0 0 30px rgba(255,255,255,0.18)",
-                animation: "hero-orb-pulse 2.6s ease-in-out infinite",
-              }}
-            />
-
-            {/* Orb label */}
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-              <div className="font-mono text-[8.5px] font-bold uppercase tracking-[0.22em] text-white/85">
-                Kedeyo
-              </div>
-              <div className="mt-0.5 text-[10px] font-semibold text-white/65">
-                {callerSpeaking ? "Listening" : aiSpeaking ? "Replying" : "Resolved"}
-              </div>
-              {/* Mini eq when speaking */}
-              <div className="mt-1.5 flex items-end justify-center gap-[2px]">
-                {Array.from({ length: 5 }).map((_, k) => (
-                  <span
-                    key={k}
-                    className="block w-[2px] rounded-full bg-white/85"
-                    style={{
-                      height: "8px",
-                      animation: callerSpeaking || aiSpeaking
-                        ? `hero-eq-bar 700ms ease-in-out ${k * 80}ms infinite`
-                        : undefined,
-                      transformOrigin: "bottom",
-                      opacity: callerSpeaking || aiSpeaking ? 1 : 0.3,
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Live caption — inverts to white when a new message arrives */}
-      <div className="mt-3 min-h-[120px]">
-        {/* Header (stays on dark background) */}
-        <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em]">
-          <span
-            className={`inline-block h-1.5 w-1.5 rounded-full ${
-              callerSpeaking ? "bg-fuchsia-400" : "bg-violet-400"
-            } animate-pulse`}
+          {/* Caller → AI (curved horizontal) */}
+          <path
+            d="M 56 130 C 130 130, 170 130, 240 130"
+            fill="none"
+            stroke="url(#hero-conn-in)"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeDasharray="6 6"
+            style={{ animation: "hero-flow-dash 1.4s linear infinite" }}
           />
-          <span className={callerSpeaking ? "text-fuchsia-300" : "text-violet-300"}>
-            {turn.speaker}
-          </span>
-          <span className="text-white/30">·</span>
-          <span className="text-white/45">{turn.langTag}</span>
-          <span className="text-white/30">·</span>
-          <span className="font-semibold text-white/60">
-            {callerSpeaking ? "Speaking" : aiSpeaking ? "Replying" : "Resolved"}
-          </span>
-        </div>
 
-        {/* White inverted message — re-flashes on every turn change */}
-        <div
-          key={turnIdx}
-          className="relative mt-2 overflow-hidden rounded-2xl bg-white px-5 py-4 text-[#0a0612] shadow-[0_18px_40px_-12px_rgba(217,70,239,0.45)]"
-          style={{ animation: "hero-msg-pop 520ms cubic-bezier(.22,.9,.28,1.2) both" }}
-        >
-          {/* Reveal sweep — fuchsia flash that wipes across when message lands */}
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-y-0 left-0 w-full"
+          {/* AI → Booked (curve up) */}
+          <path
+            d="M 296 130 C 360 130, 400 80, 470 50"
+            fill="none"
+            stroke="url(#hero-conn-booked)"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeDasharray="6 6"
             style={{
-              background:
-                "linear-gradient(90deg, transparent 0%, rgba(244,114,182,0.45) 45%, rgba(167,139,250,0.45) 55%, transparent 100%)",
-              animation: "hero-msg-sweep 720ms ease-out both",
+              animation: "hero-flow-dash 1.4s linear infinite",
+              opacity: bookedActive ? 1 : 0.18,
+              transition: "opacity 400ms",
             }}
           />
-          {/* Accent bar on the left edge */}
+
+          {/* AI → Routed (curve down) */}
+          <path
+            d="M 296 130 C 360 130, 400 180, 470 210"
+            fill="none"
+            stroke="url(#hero-conn-routed)"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeDasharray="6 6"
+            style={{
+              animation: "hero-flow-dash 1.4s linear infinite",
+              opacity: routedActive ? 1 : 0.18,
+              transition: "opacity 400ms",
+            }}
+          />
+        </svg>
+
+        {/* Caller node */}
+        <Node
+          className="absolute left-0 top-1/2 -translate-y-1/2"
+          color="fuchsia"
+          icon={<Phone className="h-4 w-4" />}
+          title={scene.caller}
+          meta={`${scene.city} · ${scene.langTag}`}
+          tag="Caller"
+          align="right"
+          ping
+        />
+
+        {/* AI Receptionist (center) — pulsing primary node */}
+        <CenterNode />
+
+        {/* Booked node */}
+        <Node
+          className="absolute right-0 top-[18%]"
+          color="emerald"
+          icon={<CalendarCheck2 className="h-4 w-4" />}
+          title="Calendar"
+          meta="Booked"
+          tag="Outcome"
+          align="left"
+          dim={!bookedActive}
+        />
+
+        {/* Routed node */}
+        <Node
+          className="absolute right-0 top-[82%] -translate-y-full"
+          color="pink"
+          icon={<UserCheck className="h-4 w-4" />}
+          title="Owner"
+          meta="Routed"
+          tag="Outcome"
+          align="left"
+          dim={!routedActive}
+        />
+      </div>
+
+      {/* TRANSCRIPT — small line under the diagram */}
+      <div
+        key={sceneIdx}
+        className="mt-2"
+        style={{ animation: "hero-caption-in 460ms ease-out both" }}
+      >
+        <p className="text-[14px] font-semibold leading-snug text-white">
+          <span className="bg-gradient-to-br from-fuchsia-400 to-violet-400 bg-clip-text text-transparent">
+            &ldquo;
+          </span>
+          {scene.primary}
           <span
             aria-hidden
-            className={`absolute inset-y-0 left-0 w-1 ${
-              callerSpeaking
-                ? "bg-gradient-to-b from-fuchsia-500 to-pink-500"
-                : "bg-gradient-to-b from-violet-500 to-fuchsia-500"
-            }`}
+            className="ml-0.5 inline-block h-[1em] w-[2px] translate-y-[2px] bg-white/85 align-baseline"
+            style={{ animation: "hero-caret 0.9s steps(1) infinite" }}
           />
-
-          <p className="relative text-[15.5px] font-semibold leading-snug">
-            {turn.primary}
-            <span
-              aria-hidden
-              className="ml-0.5 inline-block h-[1em] w-[2px] translate-y-[2px] bg-[#0a0612] align-baseline"
-              style={{ animation: "hero-caret 0.9s steps(1) infinite" }}
-            />
-          </p>
-          <p className="relative mt-1 text-[12px] italic leading-snug text-[#0a0612]/55">
-            {turn.secondary}
-          </p>
+        </p>
+        <p className="mt-0.5 text-[11px] italic leading-snug text-white/45">
+          {scene.secondary}
+        </p>
+        <div className="mt-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em]">
+          <span className={`h-px w-5 ${bookedActive ? "bg-emerald-400/70" : "bg-fuchsia-400/70"}`} />
+          <span className={bookedActive ? "font-semibold text-emerald-300" : "font-semibold text-fuchsia-300"}>
+            {scene.outcomeText}
+          </span>
+          <span className="h-px flex-1 bg-white/10" />
+          <span className="text-white/40">23s</span>
         </div>
       </div>
 
-      {/* Resolution ribbon */}
+      {/* SECONDARY FEATURE TEASER */}
+      <div className="mt-5 flex flex-col gap-2 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
+        <span className="font-mono text-[9.5px] font-bold uppercase tracking-[0.22em] text-white/45">
+          Also part of Kedeyo
+        </span>
+        <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-[12px] text-white/75">
+          <Link
+            href="/features/voice-bot"
+            className="group inline-flex items-center gap-1.5 transition-colors hover:text-white"
+          >
+            <PhoneOutgoing className="h-3.5 w-3.5 text-violet-300" />
+            <span className="font-semibold">Outbound Voice AI</span>
+            <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+          </Link>
+          <Link
+            href="/features/whatsapp"
+            className="group inline-flex items-center gap-1.5 transition-colors hover:text-white"
+          >
+            <MessageSquare className="h-3.5 w-3.5 text-emerald-300" />
+            <span className="font-semibold">WhatsApp AI</span>
+            <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ─────────────  Diagram primitives  ───────────── */
+
+function Node({
+  className,
+  color,
+  icon,
+  title,
+  meta,
+  tag,
+  align = "right",
+  ping = false,
+  dim = false,
+}: {
+  className?: string
+  color: "fuchsia" | "emerald" | "pink"
+  icon: React.ReactNode
+  title: string
+  meta: string
+  tag: string
+  align?: "left" | "right"
+  ping?: boolean
+  dim?: boolean
+}) {
+  const colorMap = {
+    fuchsia: { ring: "border-fuchsia-400/60", glow: "bg-fuchsia-500/15", text: "text-fuchsia-200", tag: "text-fuchsia-300" },
+    emerald: { ring: "border-emerald-400/60", glow: "bg-emerald-500/15", text: "text-emerald-200", tag: "text-emerald-300" },
+    pink:    { ring: "border-pink-400/60",    glow: "bg-pink-500/15",    text: "text-pink-200",    tag: "text-pink-300"    },
+  }[color]
+
+  return (
+    <div
+      className={`flex items-center gap-3 transition-opacity duration-500 ${className ?? ""}`}
+      style={{
+        opacity: dim ? 0.35 : 1,
+        flexDirection: align === "left" ? "row" : "row-reverse",
+      }}
+    >
+      {/* Label stack */}
       <div
-        className="mt-4 flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.18em] transition-opacity duration-500"
-        style={{ opacity: resolved ? 1 : 0.35 }}
+        className={`flex flex-col leading-tight ${
+          align === "left" ? "items-start" : "items-end text-right"
+        }`}
       >
-        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
-        <span className="text-emerald-300">Booked</span>
-        <span className="h-px flex-1 bg-gradient-to-r from-emerald-400/60 to-transparent" />
-        <span className="text-white/55">11 AM · Conf. sent</span>
+        <span className={`font-mono text-[9px] font-bold uppercase tracking-[0.22em] ${colorMap.tag}`}>
+          {tag}
+        </span>
+        <span className="text-[13px] font-semibold text-white">{title}</span>
+        <span className="text-[10.5px] text-white/50">{meta}</span>
+      </div>
+
+      {/* Icon glyph — circular ring, no filled card */}
+      <div className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border ${colorMap.ring} ${colorMap.glow} ${colorMap.text}`}>
+        {ping && (
+          <>
+            <span
+              aria-hidden
+              className={`absolute inset-0 rounded-full border ${colorMap.ring}`}
+              style={{ animation: "hero-pulse-ring 2s ease-out infinite" }}
+            />
+            <span
+              aria-hidden
+              className={`absolute inset-0 rounded-full border ${colorMap.ring}`}
+              style={{ animation: "hero-pulse-ring 2s ease-out 1s infinite" }}
+            />
+          </>
+        )}
+        {icon}
+      </div>
+    </div>
+  )
+}
+
+function CenterNode() {
+  return (
+    <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center">
+      <div
+        className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-fuchsia-500 via-violet-500 to-pink-500 text-white"
+        style={{ animation: "hero-node-glow 2.4s ease-in-out infinite" }}
+      >
+        <Sparkles className="h-6 w-6" />
+        {/* Inner equalizer along the bottom edge */}
+        <div className="absolute -bottom-1 left-1/2 flex -translate-x-1/2 items-end gap-[3px]">
+          {[0, 1, 2, 3].map((i) => (
+            <span
+              key={i}
+              className="h-2 w-[3px] origin-bottom rounded-full bg-white/90"
+              style={{ animation: `hero-bar 900ms ease-in-out ${i * 110}ms infinite` }}
+            />
+          ))}
+        </div>
+      </div>
+      <div className="mt-2 text-center">
+        <div className="font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-violet-200">
+          Kedeyo
+        </div>
+        <div className="text-[12.5px] font-semibold text-white">AI Receptionist</div>
+        <div className="text-[10px] text-white/50">Listens · Decides · Acts</div>
       </div>
     </div>
   )
